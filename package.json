@@ -1,0 +1,24 @@
+{
+  "name": "phaser3-typescript-webpack",
+  "version": "1.0.0",
+  "description": "",
+  "author": "troyedwardsjr",
+  "main": "index.js",
+  "scripts": {
+    "dev": "webpack --mode development && webpack-dev-server --mode development",
+    "build": "webpack --mode production && webpack-dev-server --mode production"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "expose-loader": "^0.7.5",
+    "ts-loader": "^8.0.4",
+    "typescript": "^4.0.3",
+    "webpack": "^4.41.2",
+    "webpack-bundle-analyzer": "^3.9.0",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
+  },
+  "dependencies": {
+    "phaser": "3.11.0"
+  }
+}
