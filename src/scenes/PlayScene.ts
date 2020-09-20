@@ -4,12 +4,44 @@ import { Game } from '@lux-ai/2020-challenge/lib/Game';
 import { Resource } from '@lux-ai/2020-challenge/lib/Resource';
 import { Unit as LUnit } from '@lux-ai/2020-challenge/lib/Unit/index';
 import replayData from './replay.json';
-import { mapCoordsToPixels, mapPosToPixels } from './utils';
+import { mapCoordsToPixels, mapPosToPixels, memorySizeOf } from './utils';
+import { Cell, Position } from '@lux-ai/2020-challenge';
 
 interface Frame {
-  visibleUnits: Set<string>;
-  visibleCityTiles: Set<string>;
+  resourceData: Array<{
+    type: Resource.Types;
+    amt: number;
+    pos: Position;
+  }>;
+  unitData: FrameUnitData;
+  cityData: FrameCityData;
+  cityTileData: FrameCityTileData;
 }
+type FrameUnitData = Array<{
+  pos: Position;
+  team: LUnit.TEAM;
+  cargo: LUnit.Cargo;
+  type: LUnit.Type;
+  cooldown: number;
+  id: string;
+}>;
+
+type FrameCityTileData = Array<{
+  pos: Position;
+  team: LUnit.TEAM;
+  cityid: string;
+  tileid: string;
+  cooldown: number;
+}>;
+
+type FrameCityData = Map<
+  string,
+  {
+    cityTilePositions: Array<Position>;
+    fuel: number;
+    team: LUnit.TEAM;
+  }
+>;
 
 class TestScene extends Phaser.Scene {
   player: Phaser.GameObjects.Sprite;
@@ -58,24 +90,60 @@ class TestScene extends Phaser.Scene {
     this.load.image('player', '/assets/sprites/mushroom.png');
   }
 
+  /**
+   * Creates a snapshot of the game state
+   * @param game
+   */
   createFrame(game: Game): Frame {
-    const unitsVisible: Set<string> = new Set();
+    const unitData: FrameUnitData = [];
     [
       ...Array.from(game.getTeamsUnits(LUnit.TEAM.A).values()),
       ...Array.from(game.getTeamsUnits(LUnit.TEAM.B).values()),
     ].forEach((unit) => {
-      unitsVisible.add(unit.id);
+      unitData.push({
+        team: unit.team,
+        type: unit.type,
+        cooldown: unit.cooldown,
+        cargo: unit.cargo,
+        id: unit.id,
+        pos: unit.pos,
+      });
     });
-    const cityTilesVisible: Set<string> = new Set();
+
+    const cityData: FrameCityData = new Map();
+    const cityTileData: FrameCityTileData = [];
     game.cities.forEach((city) => {
+      cityData.set(city.id, {
+        cityTilePositions: city.citycells.map((cell) => cell.pos),
+        fuel: city.fuel,
+        team: city.team,
+      });
       city.citycells.forEach((cell) => {
         const ct = cell.citytile;
-        cityTilesVisible.add(ct.getTileID());
+        cityTileData.push({
+          pos: ct.pos,
+          team: ct.team,
+          cityid: ct.cityid,
+          tileid: ct.getTileID(),
+          cooldown: ct.cooldown,
+        });
+      });
+    });
+    const resourceData: Array<any> = [];
+
+    game.map.resourcesMap.forEach((cell) => {
+      // resourceMap
+      resourceData.push({
+        type: cell.resource.type,
+        amt: cell.resource.amount,
+        pos: cell.pos,
       });
     });
     return {
-      visibleUnits: unitsVisible,
-      visibleCityTiles: cityTilesVisible,
+      resourceData,
+      unitData,
+      cityData,
+      cityTileData,
     };
   }
 
@@ -88,6 +156,11 @@ class TestScene extends Phaser.Scene {
     const COLOR_LIGHT = 0x7b5e57;
     const COLOR_DARK = 0x260e04;
     var turnDisplay = this.add.text(20, 600 - 26 / 2, '').setFontSize(26);
+    const valuechangeCallback = (value: number) => {
+      this.turn = Math.floor(value * 200);
+      turnDisplay.text = 'Turn: ' + this.turn;
+      // this.renderFrame(this.turn);
+    };
     this.rexUI.add
       .slider({
         x: 340,
@@ -97,10 +170,7 @@ class TestScene extends Phaser.Scene {
         orientation: 'x',
         track: this.rexUI.add.roundRectangle(0, 0, 0, 0, 8, COLOR_DARK),
         thumb: this.rexUI.add.roundRectangle(0, 0, 0, 0, 16, COLOR_LIGHT),
-        valuechangeCallback: function (value: number) {
-          this.turn = Math.floor(value * 200);
-          turnDisplay.text = 'Turn: ' + this.turn;
-        },
+        valuechangeCallback: valuechangeCallback,
         space: {
           top: 4,
           bottom: 4,
@@ -140,13 +210,6 @@ class TestScene extends Phaser.Scene {
             let p = Math.random();
             switch (data.resource) {
               case Resource.Types.WOOD:
-                let n = 4;
-                if (p > 0.67) {
-                  n = 5;
-                } else if (p > 0.34) {
-                  n = 6;
-                }
-                this.dynamicLayer.putTileAt(n, x, y, true);
                 this.luxgame.map.addResource(
                   x,
                   y,
@@ -155,7 +218,6 @@ class TestScene extends Phaser.Scene {
                 );
                 break;
               case Resource.Types.COAL:
-                this.dynamicLayer.putTileAt(202, x, y, true);
                 this.luxgame.map.addResource(
                   x,
                   y,
@@ -164,7 +226,6 @@ class TestScene extends Phaser.Scene {
                 );
                 break;
               case Resource.Types.URANIUM:
-                this.dynamicLayer.putTileAt(216, x, y, true);
                 this.luxgame.map.addResource(
                   x,
                   y,
@@ -187,8 +248,8 @@ class TestScene extends Phaser.Scene {
         n = 9;
       }
       const citytile = this.luxgame.spawnCityTile(ct.team, ct.x, ct.y);
-      const citytileData = this.dynamicLayer.putTileAt(n, ct.x, ct.y, true);
-      this.cityTilemapTiles.set(citytile.getTileID(), citytileData);
+      // const citytileData = this.dynamicLayer.putTileAt(n, ct.x, ct.y, true);
+      // this.cityTilemapTiles.set(citytile.getTileID(), citytileData);
     });
 
     replayData.initialUnits.forEach((unit) => {
@@ -199,10 +260,10 @@ class TestScene extends Phaser.Scene {
           unit.y,
           unit.id
         );
-        this.addWorkerSprite(unit.x, unit.y, unit.team, worker.id);
+        // this.addWorkerSprite(unit.x, unit.y, unit.team, worker.id);
       } else {
         const cart = this.luxgame.spawnCart(unit.team, unit.x, unit.y, unit.id);
-        this.addCartSprite(unit.x, unit.y, unit.team, cart.id);
+        // this.addCartSprite(unit.x, unit.y, unit.team, cart.id);
       }
     });
 
@@ -214,58 +275,108 @@ class TestScene extends Phaser.Scene {
     this.pseudomatch.configs.preLoadedGame = this.luxgame;
     LuxDesignLogic.initialize(this.pseudomatch);
 
-    // create initial frame
-    const frame = this.createFrame(this.luxgame);
-    this.frames.push(frame);
+    // create all frames
+    this.generateGameFrames();
+  }
+
+  addResourceTile(type: Resource.Types, x: number, y: number, amt: number) {
+    const p = Math.random();
+    switch (type) {
+      case Resource.Types.WOOD:
+        let n = 4;
+        if (p > 0.67) {
+          n = 5;
+        } else if (p > 0.34) {
+          n = 6;
+        }
+        this.dynamicLayer.putTileAt(n, x, y, true);
+        break;
+      case Resource.Types.COAL:
+        this.dynamicLayer.putTileAt(202, x, y, true);
+        break;
+      case Resource.Types.URANIUM:
+        this.dynamicLayer.putTileAt(216, x, y, true);
+        break;
+    }
   }
 
   addWorkerSprite(x: number, y: number, team: LUnit.TEAM, id: string) {
     const p = mapCoordsToPixels(x, y);
     const sprite = this.add.sprite(p[0], p[1], 'worker' + team).setScale(1.5);
     this.unitSprites.set(id, sprite);
+    return sprite;
   }
 
   addCartSprite(x: number, y: number, team: LUnit.TEAM, id: string) {
     const p = mapCoordsToPixels(x, y);
     const sprite = this.add.sprite(p[0], p[1], 'cart' + team).setScale(1.5);
     this.unitSprites.set(id, sprite);
+    return sprite;
   }
 
-  update(time: number, delta: number) {
-    if (this.currentTurn >= 100) {
+  renderFrame(turn: number) {
+    const f = this.frames[turn];
+    if (!f) {
       return;
     }
-    if (time > (this.currentTurn - 1) * 250 + 200) {
-      const frame = this.frames[this.frames.length - 1];
-      this.unitSprites.forEach((_, key) => {
-        if (
-          !frame.visibleUnits.has(key) &&
-          this.unitSprites.get(key).alpha > 0
-        ) {
-          console.log('gone', key);
-          this.tweens.add({
-            targets: this.unitSprites.get(key),
-            alpha: 0,
-            ease: 'Easeout',
-            duration: 300,
-            repeat: 0,
-            yoyo: false,
-          });
-        }
-      });
+    console.log(f);
+    this.frames[0].resourceData.forEach((data) => {
+      this.dynamicLayer.removeTileAt(data.pos.x, data.pos.y);
+    });
+    f.resourceData.forEach((data) => {
+      this.addResourceTile(data.type, data.pos.x, data.pos.y, data.amt);
+    });
+    let visibleUnits: Set<string> = new Set();
+    let visibleCityTiles: Set<string> = new Set();
+    f.unitData.forEach((data) => {
+      const id = data.id;
+      const sprite = this.unitSprites.get(id);
+      sprite.setVisible(true);
+      const p = mapPosToPixels(data.pos);
+      sprite.x = p[0];
+      sprite.y = p[1];
+      visibleUnits.add(id);
+    });
+    f.cityTileData.forEach((data) => {
+      const citytileData = this.dynamicLayer.putTileAt(
+        7,
+        data.pos.x,
+        data.pos.y,
+        true
+      );
+      this.cityTilemapTiles.set(data.tileid, citytileData);
+      // this.cityTilemapTiles.get()
+      visibleCityTiles.add(data.tileid);
+    });
+    this.unitSprites.forEach((sprite, key) => {
+      if (!visibleUnits.has(key)) {
+        sprite.setVisible(false);
+      }
+    });
+    this.cityTilemapTiles.forEach((tile, key) => {
+      if (!visibleCityTiles.has(key)) {
+        this.dynamicLayer.removeTileAt(tile.x, tile.y);
+        // tile.setVisible(false);
+      }
+    });
+    console.log({
+      sprites: this.unitSprites.size,
+      citytiles: this.cityTilemapTiles.size,
+    });
+  }
 
-      this.cityTilemapTiles.forEach((tile, key) => {
-        if (!frame.visibleCityTiles.has(key)) {
-          tile.setVisible(false);
-        }
-      });
-    }
-    if (time > this.currentTurn * 250) {
-      // console.log(time);
+  private generateGameFramePromises: Array<{
+    promise: Promise<void>;
+    resolve: () => {};
+  }> = [];
+
+  async generateGameFrames() {
+    while (this.currentTurn <= this.luxgame.configs.parameters.MAX_DAYS) {
       const commands = replayData.allCommands[this.currentTurn];
       const state: LuxMatchState = this.pseudomatch.state;
       const game = state.game;
-      console.log(this.currentTurn);
+      // console.log(this.currentTurn);
+
       LuxDesignLogic.update(this.pseudomatch, commands);
 
       // render units
@@ -276,22 +387,32 @@ class TestScene extends Phaser.Scene {
       ].forEach((unit) => {
         // unitsVisible.add(unit.id);
         if (this.unitSprites.has(unit.id)) {
-          const sprite = this.unitSprites.get(unit.id);
-          const p = mapPosToPixels(unit.pos);
-          this.tweens.add({
-            targets: sprite,
-            x: p[0],
-            y: p[1],
-            ease: 'Linear',
-            duration: 100,
-            repeat: 0,
-            yoyo: false,
-          });
+          // const sprite = this.unitSprites.get(unit.id);
+          // const p = mapPosToPixels(unit.pos);
+          // this.tweens.add({
+          //   targets: sprite,
+          //   x: p[0],
+          //   y: p[1],
+          //   ease: 'Linear',
+          //   duration: 100,
+          //   repeat: 0,
+          //   yoyo: false,
+          // });
         } else {
           if (unit.type === LUnit.Type.WORKER) {
-            this.addWorkerSprite(unit.pos.x, unit.pos.y, unit.team, unit.id);
+            this.addWorkerSprite(
+              unit.pos.x,
+              unit.pos.y,
+              unit.team,
+              unit.id
+            ).setVisible(false);
           } else {
-            this.addCartSprite(unit.pos.x, unit.pos.y, unit.team, unit.id);
+            this.addCartSprite(
+              unit.pos.x,
+              unit.pos.y,
+              unit.team,
+              unit.id
+            ).setVisible(false);
           }
         }
       });
@@ -299,34 +420,22 @@ class TestScene extends Phaser.Scene {
       // render cities
       const cityTilesVisible: Set<string> = new Set();
       game.cities.forEach((city) => {
-        city.citycells.forEach((cell) => {
-          const ct = cell.citytile;
-          // cityTilesVisible.add(ct.getTileID());
-          if (this.cityTilemapTiles.has(ct.getTileID())) {
-          } else {
-            let p = Math.random();
-            let n = 7;
-            if (p > 0.67) {
-              n = 8;
-            } else if (p > 0.34) {
-              n = 9;
-            }
-            const citytileData = this.dynamicLayer.putTileAt(
-              n,
-              ct.pos.x,
-              ct.pos.y,
-              true
-            );
-            this.cityTilemapTiles.set(ct.getTileID(), citytileData);
-          }
-        });
+        city.citycells.forEach((cell) => {});
+        console.log(city.citycells.length);
       });
 
       const frame = this.createFrame(this.pseudomatch.state.game);
+      console.log(
+        { turn: this.currentTurn },
+        'frame size',
+        memorySizeOf(frame)
+      );
       this.frames.push(frame);
       this.currentTurn++;
+      // console.log(this.frames);
     }
   }
+  update(time: number, delta: number) {}
 }
 
 export default TestScene;
