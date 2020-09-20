@@ -12,28 +12,25 @@ import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 // }
 
 const config: Phaser.Types.Core.GameConfig = {
-    type: Phaser.AUTO,
-    parent: 'content',
-    width: 320,
-    height: 320,
-    zoom: 2,
-    render: {
-      pixelArt: true,
-    },
-    backgroundColor: "#EDEEC9",
+  type: Phaser.AUTO,
+  parent: 'content',
+  width: 320,
+  height: 320,
+  zoom: 2,
+  render: {
+    pixelArt: true,
+  },
+  backgroundColor: '#EDEEC9',
+  scene: [TestScene],
+  plugins: {
     scene: [
-      TestScene
+      {
+        key: 'rexUI',
+        plugin: RexUIPlugin,
+        mapping: 'rexUI',
+      },
     ],
-    plugins: {
-      scene: [
-          {
-              key: 'rexUI',
-              plugin: RexUIPlugin,
-              mapping: 'rexUI'
-          }
-      ]
-  }
+  },
 };
 
 const game = new Phaser.Game(config);
-
