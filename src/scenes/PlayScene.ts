@@ -1,9 +1,13 @@
+import { Game } from '@lux-ai/2020-challenge/lib/Game';
+import { Resource } from '@lux-ai/2020-challenge/lib/Resource';
+import { Unit } from '../Lux/Units';
 import replayData from './replay.json';
 class TestScene extends Phaser.Scene {
 	player: Phaser.GameObjects.Sprite;
 	cursors: any;
 
 	workers: Array<Phaser.GameObjects.Sprite>= [];
+	luxgame: Game;
 
 	constructor() {
     super({
@@ -23,7 +27,7 @@ class TestScene extends Phaser.Scene {
 		let width = replayData.map[0].length;
 		let height = replayData.map.length;
 		const level = [];
-
+		this.luxgame = new Game();
 		for (let y = 0; y < height; y++) {
 			level.push(replayData.map[y].map((data) => {
 				if (data.resource == null) {
@@ -48,7 +52,7 @@ class TestScene extends Phaser.Scene {
 				if (data.resource !== null) {
 					let p = Math.random();
 					switch(data.resource) {
-						case "wood":
+						case Resource.Types.WOOD:
 							let n = 4;
 							if (p > 0.67) {
 								n = 5;
@@ -56,17 +60,22 @@ class TestScene extends Phaser.Scene {
 								n = 6;
 							}
 							dynamicLayer.putTileAt(n, x, y, true);
+							this.luxgame.map.addResource(x, y, Resource.Types.WOOD, data.amt);
 							break;
-						case "coal":
+						case Resource.Types.COAL:
 							dynamicLayer.putTileAt(202, x, y, true);
+							this.luxgame.map.addResource(x, y, Resource.Types.COAL, data.amt);
 							break;
-						case "uranium":
+						case Resource.Types.URANIUM:
 							dynamicLayer.putTileAt(216, x, y, true);
+							this.luxgame.map.addResource(x, y, Resource.Types.URANIUM, data.amt);
 							break;
 					}
 				}
 			}));
 		}
+		
+		
 		replayData.initialCityTiles.forEach((ct) => {
 			let p = Math.random();
 			let n = 7;
@@ -78,6 +87,9 @@ class TestScene extends Phaser.Scene {
 			dynamicLayer.putTileAt(n, ct.x, ct.y, true);
 		});
 
+		replayData.initialUnits.forEach((unit) => {
+			new Unit(unit.x, unit.y, unit.team, unit.type);
+		});
 		
 
 		// this.player = this.add.sprite(100, 100, 'player');
