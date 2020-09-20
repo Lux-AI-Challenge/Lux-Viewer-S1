@@ -1,5 +1,6 @@
 import { Game } from '@lux-ai/2020-challenge/lib/Game';
 import { Resource } from '@lux-ai/2020-challenge/lib/Resource';
+import { Unit as LUnit } from '@lux-ai/2020-challenge/lib/Unit/index';
 import { Unit } from '../Lux/Units';
 import replayData from './replay.json';
 class TestScene extends Phaser.Scene {
@@ -41,10 +42,8 @@ class TestScene extends Phaser.Scene {
 		}
 		let map = this.make.tilemap({ data: level, tileWidth: 16, tileHeight: 16 });
 		
-		// let worker:Phaser.Tilemaps.Tileset = this.make.tilemap({ key: 'map' });
 		var tileset: Phaser.Tilemaps.Tileset = map.addTilesetImage('Grass');
-		// var tileset2: Phaser.Tilemaps.Tileset = map.addTilesetImage('Desert');
-		const staticLayer = map.createStaticLayer(0, tileset, 0, 0);
+		map.createStaticLayer(0, tileset, 0, 0);
 		const dynamicLayer = map.createBlankDynamicLayer("resources", tileset);
 
 		for (let y = 0; y < height; y++) {
@@ -88,7 +87,14 @@ class TestScene extends Phaser.Scene {
 		});
 
 		replayData.initialUnits.forEach((unit) => {
-			new Unit(unit.x, unit.y, unit.team, unit.type);
+			// new Unit(unit.x, unit.y, unit.team, unit.type);
+			if (unit.type === LUnit.Type.WORKER) {
+				const worker = this.luxgame.spawnWorker(unit.team, unit.x, unit.y);
+				worker.id = unit.id;
+			} else {
+				const cart = this.luxgame.spawnCart(unit.team, unit.x, unit.y);
+				cart.id = unit.id;
+			}
 		});
 		
 
