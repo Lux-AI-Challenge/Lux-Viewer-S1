@@ -14,9 +14,9 @@ import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: 'content',
-  width: 320,
-  height: 320,
-  zoom: 2,
+  width: 560,
+  height: 640,
+  zoom: 1,
   render: {
     pixelArt: true,
   },

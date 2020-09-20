@@ -4,7 +4,7 @@ import { Game } from '@lux-ai/2020-challenge/lib/Game';
 import { Resource } from '@lux-ai/2020-challenge/lib/Resource';
 import { Unit as LUnit } from '@lux-ai/2020-challenge/lib/Unit/index';
 import replayData from './replay.json';
-import { Slider } from 'phaser3-rex-plugins/templates/ui/ui-components.js';
+import { mapCoordsToPixels, mapPosToPixels } from './utils';
 
 interface Frame {
   visibleUnits: Set<string>;
@@ -81,24 +81,25 @@ class TestScene extends Phaser.Scene {
 
   rexUI: any;
 
+  public turn = 0;
+
   create() {
     const COLOR_PRIMARY = 0x4e342e;
     const COLOR_LIGHT = 0x7b5e57;
     const COLOR_DARK = 0x260e04;
-    var print0 = this.add.text(0, 0, '');
+    var turnDisplay = this.add.text(20, 600 - 26 / 2, '').setFontSize(26);
     this.rexUI.add
       .slider({
-        x: 200,
-        y: 300,
-        width: 200,
+        x: 340,
+        y: 600,
+        width: 300,
         height: 20,
         orientation: 'x',
-
-        track: this.rexUI.add.roundRectangle(0, 0, 0, 0, 6, COLOR_DARK),
-        thumb: this.rexUI.add.roundRectangle(0, 0, 0, 0, 10, COLOR_LIGHT),
-
-        valuechangeCallback: function (value) {
-          print0.text = value;
+        track: this.rexUI.add.roundRectangle(0, 0, 0, 0, 8, COLOR_DARK),
+        thumb: this.rexUI.add.roundRectangle(0, 0, 0, 0, 16, COLOR_LIGHT),
+        valuechangeCallback: function (value: number) {
+          this.turn = Math.floor(value * 200);
+          turnDisplay.text = 'Turn: ' + this.turn;
         },
         space: {
           top: 4,
@@ -127,8 +128,10 @@ class TestScene extends Phaser.Scene {
     }
     let map = this.make.tilemap({ data: level, tileWidth: 16, tileHeight: 16 });
     var tileset: Phaser.Tilemaps.Tileset = map.addTilesetImage('Grass');
-    map.createStaticLayer(0, tileset, 0, 0);
-    this.dynamicLayer = map.createBlankDynamicLayer('resources', tileset);
+    map.createStaticLayer(0, tileset, 0, 0).setScale(2);
+    this.dynamicLayer = map
+      .createBlankDynamicLayer('resources', tileset)
+      .setScale(2);
 
     for (let y = 0; y < height; y++) {
       level.push(
@@ -196,20 +199,10 @@ class TestScene extends Phaser.Scene {
           unit.y,
           unit.id
         );
-        const sprite = this.add.sprite(
-          unit.x * 16 + 8,
-          unit.y * 16 + 8,
-          'worker' + unit.team
-        );
-        this.unitSprites.set(worker.id, sprite);
+        this.addWorkerSprite(unit.x, unit.y, unit.team, worker.id);
       } else {
         const cart = this.luxgame.spawnCart(unit.team, unit.x, unit.y, unit.id);
-        const sprite = this.add.sprite(
-          unit.x * 16 + 8,
-          unit.y * 16 + 8,
-          'cart' + unit.team
-        );
-        this.unitSprites.set(cart.id, sprite);
+        this.addCartSprite(unit.x, unit.y, unit.team, cart.id);
       }
     });
 
@@ -224,6 +217,18 @@ class TestScene extends Phaser.Scene {
     // create initial frame
     const frame = this.createFrame(this.luxgame);
     this.frames.push(frame);
+  }
+
+  addWorkerSprite(x: number, y: number, team: LUnit.TEAM, id: string) {
+    const p = mapCoordsToPixels(x, y);
+    const sprite = this.add.sprite(p[0], p[1], 'worker' + team).setScale(1.5);
+    this.unitSprites.set(id, sprite);
+  }
+
+  addCartSprite(x: number, y: number, team: LUnit.TEAM, id: string) {
+    const p = mapCoordsToPixels(x, y);
+    const sprite = this.add.sprite(p[0], p[1], 'cart' + team).setScale(1.5);
+    this.unitSprites.set(id, sprite);
   }
 
   update(time: number, delta: number) {
@@ -272,10 +277,11 @@ class TestScene extends Phaser.Scene {
         // unitsVisible.add(unit.id);
         if (this.unitSprites.has(unit.id)) {
           const sprite = this.unitSprites.get(unit.id);
+          const p = mapPosToPixels(unit.pos);
           this.tweens.add({
             targets: sprite,
-            x: unit.pos.x * 16 + 8,
-            y: unit.pos.y * 16 + 8,
+            x: p[0],
+            y: p[1],
             ease: 'Linear',
             duration: 100,
             repeat: 0,
@@ -283,19 +289,9 @@ class TestScene extends Phaser.Scene {
           });
         } else {
           if (unit.type === LUnit.Type.WORKER) {
-            const sprite = this.add.sprite(
-              unit.pos.x * 16 + 8,
-              unit.pos.y * 16 + 8,
-              'worker' + unit.team
-            );
-            this.unitSprites.set(unit.id, sprite);
+            this.addWorkerSprite(unit.pos.x, unit.pos.y, unit.team, unit.id);
           } else {
-            const sprite = this.add.sprite(
-              unit.pos.x * 16 + 8,
-              unit.pos.y * 16 + 8,
-              'cart' + unit.team
-            );
-            this.unitSprites.set(unit.id, sprite);
+            this.addCartSprite(unit.pos.x, unit.pos.y, unit.team, unit.id);
           }
         }
       });
