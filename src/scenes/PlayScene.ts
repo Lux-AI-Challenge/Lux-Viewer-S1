@@ -2,7 +2,7 @@ import { LuxMatchState } from '@lux-ai/2020-challenge/lib/types';
 import { LuxDesignLogic } from '@lux-ai/2020-challenge/lib/logic';
 import { Game } from '@lux-ai/2020-challenge/lib/Game';
 import { Resource } from '@lux-ai/2020-challenge/lib/Resource';
-import { Unit as LUnit } from '@lux-ai/2020-challenge/lib/Unit/index';
+import { Unit as LUnit, Worker } from '@lux-ai/2020-challenge/lib/Unit/index';
 import replayData from './replay.json';
 import { mapCoordsToPixels, mapPosToPixels, memorySizeOf } from './utils';
 import { Cell, Position } from '@lux-ai/2020-challenge';
@@ -63,6 +63,7 @@ class TestScene extends Phaser.Scene {
     state: {},
     configs: {
       storeReplay: false,
+      debug: false,
     },
     throw: () => {},
     sendAll: () => {},
@@ -131,7 +132,7 @@ class TestScene extends Phaser.Scene {
     });
     const resourceData: Array<any> = [];
 
-    game.map.resourcesMap.forEach((cell) => {
+    game.map.resources.forEach((cell) => {
       // resourceMap
       resourceData.push({
         type: cell.resource.type,
@@ -159,7 +160,7 @@ class TestScene extends Phaser.Scene {
     const valuechangeCallback = (value: number) => {
       this.turn = Math.floor(value * 200);
       turnDisplay.text = 'Turn: ' + this.turn;
-      // this.renderFrame(this.turn);
+      this.renderFrame(this.turn);
     };
     this.rexUI.add
       .slider({
@@ -260,9 +261,11 @@ class TestScene extends Phaser.Scene {
           unit.y,
           unit.id
         );
+        Worker.globalIdCount++;
         // this.addWorkerSprite(unit.x, unit.y, unit.team, worker.id);
       } else {
         const cart = this.luxgame.spawnCart(unit.team, unit.x, unit.y, unit.id);
+        Worker.globalIdCount++;
         // this.addCartSprite(unit.x, unit.y, unit.team, cart.id);
       }
     });
@@ -273,10 +276,13 @@ class TestScene extends Phaser.Scene {
 
     // load the initial state from replay
     this.pseudomatch.configs.preLoadedGame = this.luxgame;
-    LuxDesignLogic.initialize(this.pseudomatch);
+    LuxDesignLogic.initialize(this.pseudomatch).then(() => {
+      this.generateGameFrames();
+    })
+    console.log('start turn', this.pseudomatch.state.game.state);
 
     // create all frames
-    this.generateGameFrames();
+    
   }
 
   addResourceTile(type: Resource.Types, x: number, y: number, amt: number) {
@@ -319,7 +325,7 @@ class TestScene extends Phaser.Scene {
     if (!f) {
       return;
     }
-    console.log(f);
+    // console.log(f);
     this.frames[0].resourceData.forEach((data) => {
       this.dynamicLayer.removeTileAt(data.pos.x, data.pos.y);
     });
@@ -363,12 +369,12 @@ class TestScene extends Phaser.Scene {
       sprites: this.unitSprites.size,
       citytiles: this.cityTilemapTiles.size,
     });
+    console.log({turn});
+    console.log('frame', f);
+    // cmds that caused units to move there
+    console.log('cmds', replayData.allCommands[turn]);
   }
 
-  private generateGameFramePromises: Array<{
-    promise: Promise<void>;
-    resolve: () => {};
-  }> = [];
 
   async generateGameFrames() {
     while (this.currentTurn <= this.luxgame.configs.parameters.MAX_DAYS) {
@@ -376,10 +382,8 @@ class TestScene extends Phaser.Scene {
       const state: LuxMatchState = this.pseudomatch.state;
       const game = state.game;
       // console.log(this.currentTurn);
+      await LuxDesignLogic.update(this.pseudomatch, commands);
 
-      LuxDesignLogic.update(this.pseudomatch, commands);
-
-      // render units
       const unitsVisible: Set<string> = new Set();
       [
         ...Array.from(game.getTeamsUnits(LUnit.TEAM.A).values()),
