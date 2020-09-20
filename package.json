@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@lux-ai/2020-challenge": "^1.1.11",
-    "phaser": "3.11.0"
+    "phaser": "^3.24.1",
+    "phaser3-rex-plugins": "^1.1.28"
   }
 }

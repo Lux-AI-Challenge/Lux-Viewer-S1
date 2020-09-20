@@ -1,8 +1,9 @@
 import 'phaser';
 
 import TestScene from './scenes/PlayScene';
+// import Demo from './scenes/slider';
 
-
+import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 //@ts-ignore
 // window.dimensions_ai = {
 //   MatchWarn: () => {
@@ -22,7 +23,17 @@ const config: Phaser.Types.Core.GameConfig = {
     backgroundColor: "#EDEEC9",
     scene: [
       TestScene
-    ]
+    ],
+    plugins: {
+      scene: [
+          {
+              key: 'rexUI',
+              plugin: RexUIPlugin,
+              mapping: 'rexUI'
+          }
+      ]
+  }
 };
 
-new Phaser.Game(config);
+const game = new Phaser.Game(config);
+
