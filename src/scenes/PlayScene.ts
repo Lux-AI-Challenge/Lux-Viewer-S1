@@ -4,6 +4,12 @@ import { Game } from '@lux-ai/2020-challenge/lib/Game';
 import { Resource } from '@lux-ai/2020-challenge/lib/Resource';
 import { Unit as LUnit } from '@lux-ai/2020-challenge/lib/Unit/index';
 import replayData from './replay.json';
+
+interface Frame {
+	visibleUnits: Set<string>;
+	visibleCityTiles: Set<string>;
+}
+
 class TestScene extends Phaser.Scene {
 	player: Phaser.GameObjects.Sprite;
 	cursors: any;
@@ -18,9 +24,7 @@ class TestScene extends Phaser.Scene {
 
 	dynamicLayer: Phaser.Tilemaps.DynamicTilemapLayer;
 
-	game_frames: Array<{
-
-	}>;
+	frames: Array<Frame> = [];
 
 	pseudomatch: any = {
 		state: {},
@@ -35,6 +39,7 @@ class TestScene extends Phaser.Scene {
 		},
 		agents: [],
 	}
+	
 
 	constructor() {
     super({
@@ -53,11 +58,34 @@ class TestScene extends Phaser.Scene {
 		this.load.image('player', '/assets/sprites/mushroom.png');
 	}
 
+	createFrame(game: Game): Frame {
+		const unitsVisible: Set<string> = new Set();
+			[
+				...Array.from(game.getTeamsUnits(LUnit.TEAM.A).values()),
+				...Array.from(game.getTeamsUnits(LUnit.TEAM.B).values())
+			]
+			.forEach((unit) => {
+				unitsVisible.add(unit.id);
+			});
+		const cityTilesVisible: Set<string> = new Set();
+		game.cities.forEach((city) => {
+			city.citycells.forEach((cell) => {
+				const ct = cell.citytile;
+				cityTilesVisible.add(ct.getTileID());
+			});
+		});
+		return {
+			visibleUnits: unitsVisible,
+			visibleCityTiles: cityTilesVisible,
+		}
+	}
+
 	create() {
 		this.luxgame = new Game();
 		let width = replayData.map[0].length;
 		let height = replayData.map.length;
 		const level = [];
+		// generate the ground
 		for (let y = 0; y < height; y++) {
 			level.push(replayData.map[y].map((data) => {
 				if (data.resource == null) {
@@ -102,7 +130,6 @@ class TestScene extends Phaser.Scene {
 			}));
 		}
 		
-		
 		replayData.initialCityTiles.forEach((ct) => {
 			let p = Math.random();
 			let n = 7;
@@ -132,13 +159,43 @@ class TestScene extends Phaser.Scene {
 
 		this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
 
+		// load the initial state from replay
 		this.pseudomatch.configs.preLoadedGame = this.luxgame;
 		LuxDesignLogic.initialize(this.pseudomatch);
-		console.log(this.pseudomatch.state.game);
+
+		// create initial frame
+		const frame = this.createFrame(this.luxgame);
+		this.frames.push(frame);
 	}
 
 	update(time: number, delta:number) {
-		if (time > this.currentTurn * 250 && this.currentTurn < 100) {
+		if (this.currentTurn >= 100) {
+			return;
+		}
+		if (time > (this.currentTurn - 1) * 250 + 200) {
+			const frame = this.frames[this.frames.length - 1];
+			this.unitSprites.forEach((_, key) => {
+				if (!frame.visibleUnits.has(key) && this.unitSprites.get(key).alpha > 0) {
+					console.log("gone", key);
+					this.tweens.add({
+						targets: this.unitSprites.get(key),
+						alpha: 0,
+						ease: 'Easeout',
+						duration: 300,
+						repeat: 0,
+						yoyo: false
+					});
+				}
+			});
+
+			this.cityTilemapTiles.forEach((tile, key) => {
+				if (!frame.visibleCityTiles.has(key)) {
+					tile.setVisible(false);
+				}
+			});
+		}
+		if (time > this.currentTurn * 250) {
+			// console.log(time);
 			const commands = replayData.allCommands[this.currentTurn];
 			const state: LuxMatchState = this.pseudomatch.state;
 			const game = state.game;
@@ -153,11 +210,9 @@ class TestScene extends Phaser.Scene {
 				...Array.from(game.getTeamsUnits(LUnit.TEAM.B).values())
 			]
 			.forEach((unit) => {
-				unitsVisible.add(unit.id);
+				// unitsVisible.add(unit.id);
 				if (this.unitSprites.has(unit.id)) {
 					const sprite = this.unitSprites.get(unit.id)
-					// sprite.x = unit.pos.x * 16 + 8;
-					// sprite.y = unit.pos.y * 16 + 8;
 					this.tweens.add({
 						targets: sprite,
 						x: unit.pos.x * 16 + 8,
@@ -177,28 +232,13 @@ class TestScene extends Phaser.Scene {
 					}
 				}
 			});
-			this.unitSprites.forEach((unit, key) => {
-				if (!unitsVisible.has(key)) {
-					console.log(`Unit ${key} died`);
-					if (parseInt(key.split("_")[1]) > 3) {
-						this.currentTurn = 1000;
-					}
-					this.tweens.add({
-						targets: this.unitSprites.get(key),
-						alpha: 0,
-						ease: 'Easeout',
-						duration: 300,
-						repeat: 0,
-						yoyo: false
-					});
-				}
-			});
+			
 			// render cities
 			const cityTilesVisible: Set<string> = new Set();
 			game.cities.forEach((city) => {
 				city.citycells.forEach((cell) => {
 					const ct = cell.citytile;
-					cityTilesVisible.add(ct.getTileID());
+					// cityTilesVisible.add(ct.getTileID());
 					if (this.cityTilemapTiles.has(ct.getTileID())) {
 
 					} else {
@@ -214,12 +254,9 @@ class TestScene extends Phaser.Scene {
 					}
 				});
 			});
-			this.cityTilemapTiles.forEach((tile, key) => {
-				if (!cityTilesVisible.has(key)) {
-					tile.setVisible(false);
-				}
-			});
-			console.log(this.pseudomatch.state.game);
+			
+			const frame = this.createFrame(this.pseudomatch.state.game);
+			this.frames.push(frame);
 			this.currentTurn++;
 		}		
 	}
