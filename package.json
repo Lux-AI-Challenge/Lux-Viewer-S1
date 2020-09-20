@@ -22,7 +22,7 @@
     "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
-    "@lux-ai/2020-challenge": "^1.1.3",
+    "@lux-ai/2020-challenge": "^1.1.6",
     "phaser": "3.11.0"
   }
 }
