@@ -47,9 +47,9 @@ module.exports = {
       // issue: If not excluded, it will require all packages such as mongoose, google cloud storage, express etc.
       // used for other features of dimensions-ai, but not used by the lux design package. need to look at why
       // importing anything from dimensions makes webpack think EVERYTHING is being used and needs to be bundled
-      "dimensions-ai": {}
+      "dimensions-ai": "dimensions_ai"
     },
-    // plugins: [
-    //   new BundleAnalyzerPlugin()
-    // ]
+    plugins: [
+      // new BundleAnalyzerPlugin()
+    ]
   };

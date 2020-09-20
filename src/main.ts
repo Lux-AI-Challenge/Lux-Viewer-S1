@@ -2,6 +2,14 @@ import 'phaser';
 
 import TestScene from './scenes/PlayScene';
 
+
+//@ts-ignore
+// window.dimensions_ai = {
+//   MatchWarn: () => {
+//     console.error("WARNIING");
+//   }
+// }
+
 const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     parent: 'content',
