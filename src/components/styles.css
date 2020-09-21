@@ -6,6 +6,6 @@
   /* height: 640px; */
 }
 
-.Game .gameContainer .Loading #content {
-  /* display: none; */
+.Game .gameContainer .phaser-wrapper.Loading #content {
+  display: none;
 }

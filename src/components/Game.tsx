@@ -1,5 +1,6 @@
 import 'phaser';
 import React, { useEffect, useState } from 'react';
+import classnames from 'classnames';
 import MainScene, { Frame } from '../scenes/MainScene';
 import { createGame } from '../game';
 import PlayerStats from './PlayerStats';
@@ -18,9 +19,6 @@ import { Unit } from '@lux-ai/2020-challenge/lib/Unit';
 export const GameComponent = () => {
   const [isReady, setReady] = useState(false);
   const [game, setGame] = useState<Phaser.Game>(null);
-  const [scene, setScene] = useState({
-    scenes: [],
-  });
   const [main, setMain] = useState<MainScene>(null);
   const [configs, setConfigs] = useState<LuxMatchConfigs>(null);
   const [sliderConfigs, setSliderConfigs] = useState({
@@ -29,35 +27,22 @@ export const GameComponent = () => {
     max: 1000,
   });
   useEffect(() => {
-    // const game = createGame(replayData);
-    // setGame(game);
-  }, []);
-  useEffect(() => {
     if (game) {
-      setScene(game.scene);
-    }
-  }, [game]);
-  useEffect(() => {
-    if (scene) {
-      if (scene.scenes.length) {
+      game.events.on('setup', () => {
         const main: MainScene = game.scene.scenes[0];
         setMain(main);
-        main.events.on('setup', () => {
-          console.log(main);
-          const configs = main.luxgame.configs;
-          setConfigs(configs);
+        const configs = main.luxgame.configs;
+        setConfigs(configs);
 
-          setSliderConfigs({
-            min: 0,
-            max: configs.parameters.MAX_DAYS,
-            step: 1,
-          });
-
-          setReady(true);
+        setSliderConfigs({
+          min: 0,
+          max: configs.parameters.MAX_DAYS,
+          step: 1,
         });
-      }
+        setReady(true);
+      });
     }
-  }, [scene.scenes]);
+  }, [game]);
   useEffect(() => {
     if (isReady) {
       moveToTurn(0);
@@ -81,6 +66,7 @@ export const GameComponent = () => {
       const file = fileInput.current.files[0];
       const name = file.name;
       const meta = name.split('.');
+
       if (meta[meta.length - 1] === 'json') {
         file
           .text()
@@ -89,6 +75,7 @@ export const GameComponent = () => {
             if (game) {
               game.destroy(true, false);
             }
+            setReady(false);
             const newgame = createGame(data);
             setGame(newgame);
             setUploading(false);
@@ -111,16 +98,23 @@ export const GameComponent = () => {
     );
   };
   const noUpload = !uploading && game === null;
+  const gameLoading =
+    (uploading && game === null) || (!isReady && game !== null);
   return (
     <div className="Game">
       <div className="gameContainer">
         <h1>Lux AI Challenge</h1>
         <Grid container spacing={3}>
           <Grid item xs={6}>
-            <Card className={'phaser-wrapper'}>
+            <Card
+              className={classnames({
+                'phaser-wrapper': true,
+                Loading: gameLoading,
+              })}
+            >
               <CardContent>
                 {noUpload && renderUploadButton()}
-                {uploading && game === null && <CircularProgress />}
+                {gameLoading && <CircularProgress />}
                 <div id="content"></div>
                 <Slider
                   value={turn}

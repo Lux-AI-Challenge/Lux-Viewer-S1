@@ -192,12 +192,15 @@ class MainScene extends Phaser.Scene {
 
     // load the initial state from replay
     this.pseudomatch.configs.preLoadedGame = this.luxgame;
-    LuxDesignLogic.initialize(this.pseudomatch).then(() => {
-      this.generateGameFrames(replayData).then(() => {
-        this.renderFrame(0);
-        this.events.emit('setup');
+    setTimeout(() => {
+      LuxDesignLogic.initialize(this.pseudomatch).then(() => {
+        this.generateGameFrames(replayData).then(() => {
+          this.renderFrame(0);
+          // this.events.emit('setup');
+          this.game.events.emit('setup');
+        });
       });
-    });
+    }, 1000);
   }
 
   /**
