@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "webpack --mode development && webpack-dev-server --mode development --devtool source-map",
-    "build": "webpack --mode production",
+    "build": "rm -rf dist && webpack --mode production && cp -r assets dist/assets",
     "serve": "serve dist",
     "prettier": "prettier --write 'src/**/*.ts' 'src/**/*.tsx'"
   },
