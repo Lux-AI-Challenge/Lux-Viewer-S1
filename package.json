@@ -10,7 +10,9 @@
     "serve": "serve dist",
     "prettier": "prettier --write 'src/**/*.ts' 'src/**/*.tsx'"
   },
-  "sideEffects": false,
+  "sideEffects": [
+    "**/*.css"
+  ],
   "license": "MIT",
   "devDependencies": {
     "@types/react": "^16.8.24",
