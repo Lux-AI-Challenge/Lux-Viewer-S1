@@ -26,7 +26,7 @@ const PlayerStats = ({
       <Grid className={`Cities team_${team}`}>
         {cities.map((city) => {
           return (
-            <Grid xs={3}>
+            <Grid item xs={3} key={city.cityid}>
               <Card className="card">
                 <div className="accent"></div>
                 <CardContent>

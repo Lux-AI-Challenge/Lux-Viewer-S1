@@ -12,7 +12,7 @@ export const config: Phaser.Types.Core.GameConfig = {
     pixelArt: true,
   },
   backgroundColor: '#EDEEC9',
-  scene: [MainScene],
+  scene: [],
   // scale: {
   //   mode: Phaser.Scale.ENVELOP,
   //   parent: 'content',
@@ -22,7 +22,8 @@ export const config: Phaser.Types.Core.GameConfig = {
   // },
 };
 
-export const createGame = (replayFileURL: string): Phaser.Game => {
+export const createGame = (replayData: Object): Phaser.Game => {
   const game = new Phaser.Game(config);
+  game.scene.add('MainScene', MainScene, true, { replayData });
   return game;
 };

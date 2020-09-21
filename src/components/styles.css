@@ -2,7 +2,9 @@
   padding: 4rem;
 }
 
-.Game .gameContainer .phaser-wrapper {}
+.Game .gameContainer .phaser-wrapper {
+  /* height: 640px; */
+}
 
 .Game .gameContainer .Loading #content {
   display: none;

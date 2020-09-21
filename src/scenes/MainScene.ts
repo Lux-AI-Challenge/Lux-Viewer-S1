@@ -3,7 +3,7 @@ import { LuxDesignLogic } from '@lux-ai/2020-challenge/lib/logic';
 import { Game } from '@lux-ai/2020-challenge/lib/Game';
 import { Resource } from '@lux-ai/2020-challenge/lib/Resource';
 import { Unit as LUnit, Worker } from '@lux-ai/2020-challenge/lib/Unit/index';
-import replayData from './replay.json';
+
 import { mapCoordsToPixels, mapPosToPixels, memorySizeOf } from './utils';
 import { Position } from '@lux-ai/2020-challenge/lib/GameMap/position';
 
@@ -100,6 +100,104 @@ class MainScene extends Phaser.Scene {
     this.load.image('cart0', 'assets/sprites/cart0.png');
     this.load.image('cart1', 'assets/sprites/cart1.png');
     this.load.image('player', 'assets/sprites/mushroom.png');
+    console.log('{PRE');
+  }
+
+  loadReplayData(replayData: any): void {
+    this.luxgame = new Game();
+    let width = replayData.map[0].length;
+    let height = replayData.map.length;
+    const level = [];
+    // generate the ground
+    for (let y = 0; y < height; y++) {
+      level.push(
+        replayData.map[y].map((data) => {
+          if (data.resource == null) {
+            let p = Math.random();
+            if (p > 0.7) return 2;
+            else return 3;
+          } else {
+            return 3;
+          }
+        })
+      );
+    }
+    let map = this.make.tilemap({ data: level, tileWidth: 16, tileHeight: 16 });
+    var tileset: Phaser.Tilemaps.Tileset = map.addTilesetImage('Grass');
+    map.createStaticLayer(0, tileset, 0, 0).setScale(2);
+    this.dynamicLayer = map
+      .createBlankDynamicLayer('resources', tileset)
+      .setScale(2);
+
+    for (let y = 0; y < height; y++) {
+      level.push(
+        replayData.map[y].map((data, x) => {
+          if (data.resource !== null) {
+            let p = Math.random();
+            switch (data.resource) {
+              case Resource.Types.WOOD:
+                this.luxgame.map.addResource(
+                  x,
+                  y,
+                  Resource.Types.WOOD,
+                  data.amt
+                );
+                break;
+              case Resource.Types.COAL:
+                this.luxgame.map.addResource(
+                  x,
+                  y,
+                  Resource.Types.COAL,
+                  data.amt
+                );
+                break;
+              case Resource.Types.URANIUM:
+                this.luxgame.map.addResource(
+                  x,
+                  y,
+                  Resource.Types.URANIUM,
+                  data.amt
+                );
+                break;
+            }
+          }
+        })
+      );
+    }
+
+    replayData.initialCityTiles.forEach((ct) => {
+      let p = Math.random();
+      let n = 7;
+      if (p > 0.67) {
+        n = 8;
+      } else if (p > 0.34) {
+        n = 9;
+      }
+      this.luxgame.spawnCityTile(ct.team, ct.x, ct.y);
+    });
+    replayData.initialUnits.forEach((unit) => {
+      if (unit.type === LUnit.Type.WORKER) {
+        const worker = this.luxgame.spawnWorker(
+          unit.team,
+          unit.x,
+          unit.y,
+          unit.id
+        );
+      } else {
+        this.luxgame.spawnCart(unit.team, unit.x, unit.y, unit.id);
+      }
+    });
+
+    this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+
+    // load the initial state from replay
+    this.pseudomatch.configs.preLoadedGame = this.luxgame;
+    LuxDesignLogic.initialize(this.pseudomatch).then(() => {
+      this.generateGameFrames(replayData).then(() => {
+        this.renderFrame(0);
+        this.events.emit('setup');
+      });
+    });
   }
 
   /**
@@ -189,106 +287,10 @@ class MainScene extends Phaser.Scene {
 
   public turn = 0;
 
-  create() {
-    this.luxgame = new Game();
-    let width = replayData.map[0].length;
-    let height = replayData.map.length;
-    const level = [];
-    // generate the ground
-    for (let y = 0; y < height; y++) {
-      level.push(
-        replayData.map[y].map((data) => {
-          if (data.resource == null) {
-            let p = Math.random();
-            if (p > 0.7) return 2;
-            else return 3;
-          } else {
-            return 3;
-          }
-        })
-      );
-    }
-    let map = this.make.tilemap({ data: level, tileWidth: 16, tileHeight: 16 });
-    var tileset: Phaser.Tilemaps.Tileset = map.addTilesetImage('Grass');
-    map.createStaticLayer(0, tileset, 0, 0).setScale(2);
-    this.dynamicLayer = map
-      .createBlankDynamicLayer('resources', tileset)
-      .setScale(2);
-
-    for (let y = 0; y < height; y++) {
-      level.push(
-        replayData.map[y].map((data, x) => {
-          if (data.resource !== null) {
-            let p = Math.random();
-            switch (data.resource) {
-              case Resource.Types.WOOD:
-                this.luxgame.map.addResource(
-                  x,
-                  y,
-                  Resource.Types.WOOD,
-                  data.amt
-                );
-                break;
-              case Resource.Types.COAL:
-                this.luxgame.map.addResource(
-                  x,
-                  y,
-                  Resource.Types.COAL,
-                  data.amt
-                );
-                break;
-              case Resource.Types.URANIUM:
-                this.luxgame.map.addResource(
-                  x,
-                  y,
-                  Resource.Types.URANIUM,
-                  data.amt
-                );
-                break;
-            }
-          }
-        })
-      );
-    }
-
-    replayData.initialCityTiles.forEach((ct) => {
-      let p = Math.random();
-      let n = 7;
-      if (p > 0.67) {
-        n = 8;
-      } else if (p > 0.34) {
-        n = 9;
-      }
-      const citytile = this.luxgame.spawnCityTile(ct.team, ct.x, ct.y);
-    });
-
-    replayData.initialUnits.forEach((unit) => {
-      if (unit.type === LUnit.Type.WORKER) {
-        const worker = this.luxgame.spawnWorker(
-          unit.team,
-          unit.x,
-          unit.y,
-          unit.id
-        );
-        Worker.globalIdCount++;
-      } else {
-        const cart = this.luxgame.spawnCart(unit.team, unit.x, unit.y, unit.id);
-        Worker.globalIdCount++;
-      }
-    });
-
-    this.cursors = this.input.keyboard.createCursorKeys();
-
-    this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-
-    // load the initial state from replay
-    this.pseudomatch.configs.preLoadedGame = this.luxgame;
-    LuxDesignLogic.initialize(this.pseudomatch).then(() => {
-      this.generateGameFrames().then(() => {
-        this.renderFrame(0);
-        this.events.emit('setup');
-      });
-    });
+  create(data: { replayData: object }) {
+    console.log(data);
+    this.loadReplayData(data.replayData);
+    this.events.emit('created');
   }
 
   addResourceTile(type: Resource.Types, x: number, y: number, amt: number) {
@@ -365,7 +367,7 @@ class MainScene extends Phaser.Scene {
     });
   }
 
-  async generateGameFrames() {
+  async generateGameFrames(replayData) {
     while (this.currentTurn <= this.luxgame.configs.parameters.MAX_DAYS) {
       const commands = replayData.allCommands[this.currentTurn];
       const state: LuxMatchState = this.pseudomatch.state;

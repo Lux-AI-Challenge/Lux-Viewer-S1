@@ -1,5 +1,5 @@
 import 'phaser';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import MainScene, { Frame } from '../scenes/MainScene';
 import { createGame } from '../game';
 import PlayerStats from './PlayerStats';
@@ -16,21 +16,21 @@ import { LuxMatchConfigs } from '@lux-ai/2020-challenge/lib/types';
 import { Unit } from '@lux-ai/2020-challenge/lib/Unit';
 
 export const GameComponent = () => {
-  const [isReady, setReady] = React.useState(false);
-  const [game, setGame] = React.useState(null);
-  const [scene, setScene] = React.useState({
+  const [isReady, setReady] = useState(false);
+  const [game, setGame] = useState<Phaser.Game>(null);
+  const [scene, setScene] = useState({
     scenes: [],
   });
-  const [main, setMain] = React.useState<MainScene>(null);
-  const [configs, setConfigs] = React.useState<LuxMatchConfigs>(null);
-  const [sliderConfigs, setSliderConfigs] = React.useState({
+  const [main, setMain] = useState<MainScene>(null);
+  const [configs, setConfigs] = useState<LuxMatchConfigs>(null);
+  const [sliderConfigs, setSliderConfigs] = useState({
     step: 1,
     min: 0,
     max: 1000,
   });
   useEffect(() => {
-    const game = createGame('');
-    setGame(game);
+    // const game = createGame(replayData);
+    // setGame(game);
   }, []);
   useEffect(() => {
     if (game) {
@@ -63,18 +63,54 @@ export const GameComponent = () => {
       moveToTurn(0);
     }
   }, [isReady]);
-  const [turn, setTurn] = React.useState(0);
-  const [currentFrame, setFrame] = React.useState<Frame>(null);
-  const handleChange = (event: any, newValue: number) => {
+  const [turn, setTurn] = useState(0);
+  const [currentFrame, setFrame] = useState<Frame>(null);
+  const [uploading, setUploading] = useState(false);
+  const handleChange = (_event: any, newValue: number) => {
     moveToTurn(newValue);
   };
+  const fileInput = React.createRef<HTMLInputElement>();
   const moveToTurn = (turn: number) => {
     setTurn(turn);
     main.renderFrame(turn);
     setFrame(main.frames[turn]);
   };
-  if (isReady) {
-  }
+  const handleUpload = () => {
+    setUploading(true);
+    if (fileInput.current.files.length) {
+      const file = fileInput.current.files[0];
+      const name = file.name;
+      const meta = name.split('.');
+      if (meta[meta.length - 1] === 'json') {
+        file
+          .text()
+          .then(JSON.parse)
+          .then((data) => {
+            if (game) {
+              game.destroy(true, false);
+            }
+            const newgame = createGame(data);
+            setGame(newgame);
+            setUploading(false);
+          });
+      }
+    }
+  };
+  const renderUploadButton = () => {
+    return (
+      <Button variant="contained" component="label">
+        Upload Replay{' '}
+        <input
+          accept=".json, .luxr"
+          type="file"
+          style={{ display: 'none' }}
+          onChange={handleUpload}
+          ref={fileInput}
+        />
+      </Button>
+    );
+  };
+  const noUpload = !uploading && game === null;
   return (
     <div className="Game">
       <div className="gameContainer">
@@ -85,10 +121,12 @@ export const GameComponent = () => {
               className={!isReady ? 'Loading phaser-wrapper' : 'phaser-wrapper'}
             >
               <CardContent>
-                {!isReady && <CircularProgress />}
+                {noUpload && renderUploadButton()}
+                {uploading && game === null && <CircularProgress />}
                 <div id="content"></div>
                 <Slider
                   value={turn}
+                  disabled={!isReady}
                   onChange={handleChange}
                   aria-labelledby="continuous-slider"
                   min={sliderConfigs.min}
@@ -97,6 +135,7 @@ export const GameComponent = () => {
                 />
                 <ButtonGroup color="primary">
                   <Button
+                    disabled={!isReady}
                     onClick={() => {
                       moveToTurn(turn - 1);
                     }}
@@ -104,6 +143,7 @@ export const GameComponent = () => {
                     {'<'}
                   </Button>
                   <Button
+                    disabled={!isReady}
                     onClick={() => {
                       moveToTurn(turn + 1);
                     }}
@@ -142,7 +182,9 @@ export const GameComponent = () => {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12}></Grid>
+          <Grid item xs={12}>
+            {!noUpload && renderUploadButton()}
+          </Grid>
         </Grid>
       </div>
     </div>
