@@ -1,6 +1,6 @@
 import 'phaser';
 
-import TestScene from './scenes/PlayScene';
+import MainScene from './scenes/MainScene';
 // import Demo from './scenes/slider';
 
 import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
@@ -11,7 +11,7 @@ import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
 //   }
 // }
 
-const config: Phaser.Types.Core.GameConfig = {
+export const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: 'content',
   width: 1280,
@@ -21,7 +21,7 @@ const config: Phaser.Types.Core.GameConfig = {
     pixelArt: true,
   },
   backgroundColor: '#EDEEC9',
-  scene: [TestScene],
+  scene: [MainScene],
   plugins: {
     scene: [
       {
@@ -32,5 +32,3 @@ const config: Phaser.Types.Core.GameConfig = {
     ],
   },
 };
-
-const game = new Phaser.Game(config);

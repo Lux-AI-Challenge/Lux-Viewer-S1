@@ -76,19 +76,19 @@ class TestScene extends Phaser.Scene {
 
   constructor() {
     super({
-      key: 'TestScene',
+      key: 'MainScene',
     });
   }
 
   preload() {
-    this.load.tilemapTiledJSON('map', '/assets/tilemaps/desert.json');
-    this.load.image('Desert', '/assets/tilemaps/tmw_desert_spacing.png');
-    this.load.image('Grass', '/assets/tilemaps/ground_tileset.png');
-    this.load.image('worker0', '/assets/sprites/worker0.png');
-    this.load.image('worker1', '/assets/sprites/worker1.png');
-    this.load.image('cart0', '/assets/sprites/cart0.png');
-    this.load.image('cart1', '/assets/sprites/cart1.png');
-    this.load.image('player', '/assets/sprites/mushroom.png');
+    this.load.tilemapTiledJSON('map', 'assets/tilemaps/desert.json');
+    this.load.image('Desert', 'assets/tilemaps/tmw_desert_spacing.png');
+    this.load.image('Grass', 'assets/tilemaps/ground_tileset.png');
+    this.load.image('worker0', 'assets/sprites/worker0.png');
+    this.load.image('worker1', 'assets/sprites/worker1.png');
+    this.load.image('cart0', 'assets/sprites/cart0.png');
+    this.load.image('cart1', 'assets/sprites/cart1.png');
+    this.load.image('player', 'assets/sprites/mushroom.png');
   }
 
   /**
@@ -294,7 +294,7 @@ class TestScene extends Phaser.Scene {
         } else if (p > 0.34) {
           n = 6;
         }
-        console.log('add', { x, y });
+
         this.dynamicLayer.putTileAt(n, x, y, true);
         break;
       case Resource.Types.COAL:
@@ -409,11 +409,11 @@ class TestScene extends Phaser.Scene {
       });
 
       const frame = this.createFrame(this.pseudomatch.state.game);
-      console.log(
-        { turn: this.currentTurn },
-        'frame size',
-        memorySizeOf(frame)
-      );
+      // console.log(
+      //   { turn: this.currentTurn },
+      //   'frame size',
+      //   memorySizeOf(frame)
+      // );
       this.frames.push(frame);
       this.currentTurn++;
     }
