@@ -5,7 +5,7 @@
   "author": "troyedwardsjr",
   "main": "index.js",
   "scripts": {
-    "dev": "webpack --mode development && webpack-dev-server --mode development",
+    "dev": "webpack --mode development && webpack-dev-server --mode development --devtool source-map",
     "build": "webpack --config webpack.config.js",
     "build-prod": "webpack --mode production && webpack-dev-server --mode production",
     "stats": "webpack --profile --json > webpack-stats.json",
@@ -16,10 +16,12 @@
     "@types/react": "^16.8.24",
     "@types/react-dom": "^16.0.5",
     "@types/webpack": "4.1.4",
+    "css-loader": "^4.3.0",
     "expose-loader": "^0.7.5",
     "file-loader": "^6.1.0",
     "html-webpack-plugin": "^4.4.1",
     "prettier": "^2.1.2",
+    "style-loader": "^1.2.1",
     "ts-loader": "^8.0.4",
     "typescript": "^4.0.3",
     "webpack": "^4.41.2",
@@ -31,7 +33,6 @@
     "@lux-ai/2020-challenge": "^1.1.14",
     "@material-ui/core": "^4.11.0",
     "phaser": "^3.24.1",
-    "phaser3-rex-plugins": "^1.1.28",
     "react": "^16.12.0",
     "react-dom": "^16.12.0"
   }

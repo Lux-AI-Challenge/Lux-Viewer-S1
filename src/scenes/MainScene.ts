@@ -43,7 +43,7 @@ type FrameCityData = Map<
   }
 >;
 
-class TestScene extends Phaser.Scene {
+class MainScene extends Phaser.Scene {
   player: Phaser.GameObjects.Sprite;
   cursors: any;
 
@@ -148,42 +148,9 @@ class TestScene extends Phaser.Scene {
     };
   }
 
-  rexUI: any;
-
   public turn = 0;
 
   create() {
-    const COLOR_PRIMARY = 0x4e342e;
-    const COLOR_LIGHT = 0x7b5e57;
-    const COLOR_DARK = 0x260e04;
-    var turnDisplay = this.add
-      .text(20, 600 - 26 / 2, '')
-      .setFontSize(26)
-      .setColor('#333')
-      .setFontFamily('Verdana');
-
-    const valuechangeCallback = (value: number) => {
-      this.turn = Math.floor(value * 200);
-      turnDisplay.text = 'Turn: ' + this.turn;
-      this.renderFrame(this.turn);
-    };
-    this.rexUI.add
-      .slider({
-        x: 420,
-        y: 605,
-        width: 500,
-        height: 20,
-        orientation: 'x',
-        track: this.rexUI.add.roundRectangle(0, 0, 0, 0, 8, COLOR_DARK),
-        thumb: this.rexUI.add.roundRectangle(0, 0, 0, 0, 16, COLOR_LIGHT),
-        valuechangeCallback: valuechangeCallback,
-        space: {
-          top: 4,
-          bottom: 4,
-        },
-        input: 'drag', // 'drag'|'click'
-      })
-      .layout();
     this.luxgame = new Game();
     let width = replayData.map[0].length;
     let height = replayData.map.length;
@@ -280,22 +247,15 @@ class TestScene extends Phaser.Scene {
     LuxDesignLogic.initialize(this.pseudomatch).then(() => {
       this.generateGameFrames().then(() => {
         this.renderFrame(0);
+        this.events.emit('setup');
       });
     });
   }
 
   addResourceTile(type: Resource.Types, x: number, y: number, amt: number) {
-    const p = Math.random();
     switch (type) {
       case Resource.Types.WOOD:
-        let n = 4;
-        if (p > 0.67) {
-          n = 5;
-        } else if (p > 0.34) {
-          n = 6;
-        }
-
-        this.dynamicLayer.putTileAt(n, x, y, true);
+        this.dynamicLayer.putTileAt(5, x, y, true);
         break;
       case Resource.Types.COAL:
         this.dynamicLayer.putTileAt(202, x, y, true);
@@ -325,6 +285,7 @@ class TestScene extends Phaser.Scene {
     if (!f) {
       return;
     }
+
     let visibleUnits: Set<string> = new Set();
     let visibleCityTiles: Set<string> = new Set();
     f.unitData.forEach((data) => {
@@ -421,4 +382,4 @@ class TestScene extends Phaser.Scene {
   update(time: number, delta: number) {}
 }
 
-export default TestScene;
+export default MainScene;

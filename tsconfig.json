@@ -8,9 +8,7 @@
 		"allowSyntheticDefaultImports": true,
 		"resolveJsonModule": true
 	},
-
-	"files": [
-		"src/custom.d.ts",
-		"src/main.ts"
-	]
+	"include": [
+		"src/**/*"
+	],
 }

@@ -20,7 +20,7 @@ module.exports = {
   },
   entry: {
     app: path.join(__dirname, 'src', 'index.tsx'),
-    bundle: path.join(__dirname, 'src', 'main.ts'),
+    // bundle: path.join(__dirname, 'src', 'game', 'index.ts'),
   },
   target: 'web',
   module: {
@@ -41,6 +41,10 @@ module.exports = {
       {
         test: /\.(png|svg|jpg|gif)$/,
         use: ['file-loader'],
+      },
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader'],
       },
       // { test: /lux\.js$/, loader: "expose-loader?Lux" }
     ],

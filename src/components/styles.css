@@ -1,0 +1,9 @@
+.Game .gameContainer {
+  padding: 4rem;
+}
+
+.Game .gameContainer .phaser-wrapper {}
+
+.Game .gameContainer .Loading #content {
+  display: none;
+}
