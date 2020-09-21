@@ -117,9 +117,7 @@ export const GameComponent = () => {
         <h1>Lux AI Challenge</h1>
         <Grid container spacing={3}>
           <Grid item xs={6}>
-            <Card
-              className={!isReady ? 'Loading phaser-wrapper' : 'phaser-wrapper'}
-            >
+            <Card className={'phaser-wrapper'}>
               <CardContent>
                 {noUpload && renderUploadButton()}
                 {uploading && game === null && <CircularProgress />}

@@ -7,5 +7,5 @@
 }
 
 .Game .gameContainer .Loading #content {
-  display: none;
+  /* display: none; */
 }
