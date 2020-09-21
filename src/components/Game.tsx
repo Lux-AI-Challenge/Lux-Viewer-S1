@@ -5,18 +5,17 @@ import MainScene, { Frame } from '../scenes/MainScene';
 import { createGame } from '../game';
 import PlayerStats from './PlayerStats';
 import GameStats from './GameStats';
-import {Button} from '@material-ui/core';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
-import Card from '@material-ui/core/Card';
-import CardContent from '@material-ui/core/CardContent';
-
-import Paper from '@material-ui/core/Paper';
-import Slider from '@material-ui/core/Slider';
-import Grid from '@material-ui/core/Grid';
+import {
+  Button,
+  CircularProgress,
+  ButtonGroup,
+  Card,
+  CardContent,
+  Slider,
+  Grid,
+} from '@material-ui/core';
 import './styles.css';
-import { LuxMatchConfigs } from '@lux-ai/2020-challenge/lib/types';
-import { Unit } from '@lux-ai/2020-challenge/lib/Unit';
+import { LuxMatchConfigs, Unit } from '@lux-ai/2020-challenge';
 
 export const GameComponent = () => {
   const [isReady, setReady] = useState(false);
