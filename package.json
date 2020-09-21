@@ -6,10 +6,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "webpack --mode development && webpack-dev-server --mode development --devtool source-map",
-    "build": "webpack --config webpack.config.js",
-    "build-prod": "webpack --mode production && webpack-dev-server --mode production",
-    "stats": "webpack --profile --json > webpack-stats.json",
-    "prettier": "prettier --write 'src/**/*.ts'"
+    "build": "webpack --mode production",
+    "serve": "serve dist",
+    "prettier": "prettier --write 'src/**/*.ts' 'src/**/*.tsx'"
   },
   "license": "MIT",
   "devDependencies": {
@@ -21,6 +20,7 @@
     "file-loader": "^6.1.0",
     "html-webpack-plugin": "^4.4.1",
     "prettier": "^2.1.2",
+    "serve": "^11.3.2",
     "style-loader": "^1.2.1",
     "ts-loader": "^8.0.4",
     "typescript": "^4.0.3",
