@@ -1,5 +1,8 @@
 import { Unit } from '@lux-ai/2020-challenge/lib/Unit';
-import { Card, CardContent, Divider, Grid } from '@material-ui/core';
+import Divider from '@material-ui/core/Divider'
+import Grid from '@material-ui/core/Grid'
+import CardContent from '@material-ui/core/CardContent'
+import Card from '@material-ui/core/Card';
 import React from 'react';
 import './styles.css';
 export type PlayerStatsProps = {

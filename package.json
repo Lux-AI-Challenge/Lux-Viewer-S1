@@ -10,6 +10,7 @@
     "serve": "serve dist",
     "prettier": "prettier --write 'src/**/*.ts' 'src/**/*.tsx'"
   },
+  "sideEffects": false,
   "license": "MIT",
   "devDependencies": {
     "@types/react": "^16.8.24",
@@ -30,7 +31,7 @@
     "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
-    "@lux-ai/2020-challenge": "^1.1.15",
+    "@lux-ai/2020-challenge": "^1.1.17",
     "@material-ui/core": "^4.11.0",
     "@types/classnames": "^2.2.10",
     "classnames": "^2.2.6",

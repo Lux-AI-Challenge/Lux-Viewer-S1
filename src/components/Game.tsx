@@ -5,7 +5,9 @@ import MainScene, { Frame } from '../scenes/MainScene';
 import { createGame } from '../game';
 import PlayerStats from './PlayerStats';
 import GameStats from './GameStats';
-import { Button, CircularProgress, ButtonGroup } from '@material-ui/core';
+import {Button} from '@material-ui/core';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import ButtonGroup from '@material-ui/core/ButtonGroup';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 
