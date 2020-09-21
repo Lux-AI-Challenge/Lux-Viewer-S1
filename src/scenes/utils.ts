@@ -1,4 +1,4 @@
-import { Position } from '@lux-ai/2020-challenge';
+import { Position } from '@lux-ai/2020-challenge/lib/GameMap/position';
 
 export const mapPosToPixels = (pos: Position): [number, number] => {
   return mapCoordsToPixels(pos.x, pos.y);

@@ -5,7 +5,7 @@ import { Resource } from '@lux-ai/2020-challenge/lib/Resource';
 import { Unit as LUnit, Worker } from '@lux-ai/2020-challenge/lib/Unit/index';
 import replayData from './replay.json';
 import { mapCoordsToPixels, mapPosToPixels, memorySizeOf } from './utils';
-import { Cell, Position } from '@lux-ai/2020-challenge';
+import { Position } from '@lux-ai/2020-challenge/lib/GameMap/position';
 
 interface Frame {
   resourceData: Array<{
@@ -156,8 +156,12 @@ class TestScene extends Phaser.Scene {
     const COLOR_PRIMARY = 0x4e342e;
     const COLOR_LIGHT = 0x7b5e57;
     const COLOR_DARK = 0x260e04;
-    var turnDisplay = this.add.text(20, 600 - 26 / 2, '').setFontSize(26).setColor('#333').setFontFamily('Verdana');
-    
+    var turnDisplay = this.add
+      .text(20, 600 - 26 / 2, '')
+      .setFontSize(26)
+      .setColor('#333')
+      .setFontFamily('Verdana');
+
     const valuechangeCallback = (value: number) => {
       this.turn = Math.floor(value * 200);
       turnDisplay.text = 'Turn: ' + this.turn;
@@ -277,7 +281,7 @@ class TestScene extends Phaser.Scene {
       this.generateGameFrames().then(() => {
         this.renderFrame(0);
       });
-    })
+    });
   }
 
   addResourceTile(type: Resource.Types, x: number, y: number, amt: number) {
@@ -290,7 +294,7 @@ class TestScene extends Phaser.Scene {
         } else if (p > 0.34) {
           n = 6;
         }
-        console.log('add', {x, y});
+        console.log('add', { x, y });
         this.dynamicLayer.putTileAt(n, x, y, true);
         break;
       case Resource.Types.COAL:
@@ -355,12 +359,11 @@ class TestScene extends Phaser.Scene {
 
     this.frames[0].resourceData.forEach((data) => {
       this.dynamicLayer.removeTileAt(data.pos.x, data.pos.y);
-    })
+    });
     f.resourceData.forEach((data) => {
       this.addResourceTile(data.type, data.pos.x, data.pos.y, data.amt);
     });
   }
-
 
   async generateGameFrames() {
     while (this.currentTurn <= this.luxgame.configs.parameters.MAX_DAYS) {
