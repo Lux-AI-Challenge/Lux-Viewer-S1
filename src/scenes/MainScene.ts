@@ -7,16 +7,27 @@ import replayData from './replay.json';
 import { mapCoordsToPixels, mapPosToPixels, memorySizeOf } from './utils';
 import { Position } from '@lux-ai/2020-challenge/lib/GameMap/position';
 
-interface Frame {
+export interface Frame {
   resourceData: Array<{
     type: Resource.Types;
     amt: number;
     pos: Position;
   }>;
+  teamStates: FrameTeamStateData;
   unitData: FrameUnitData;
   cityData: FrameCityData;
   cityTileData: FrameCityTileData;
 }
+
+type FrameTeamStateData = {
+  [x in LUnit.TEAM]: {
+    workers: number;
+    carts: number;
+    /** array of city ids this team owns */
+    citiesOwned: Array<string>;
+    researchPoints: number;
+  };
+};
 type FrameUnitData = Array<{
   pos: Position;
   team: LUnit.TEAM;
@@ -96,6 +107,31 @@ class MainScene extends Phaser.Scene {
    * @param game
    */
   createFrame(game: Game): Frame {
+    const teamStates: FrameTeamStateData = {
+      [LUnit.TEAM.A]: {
+        workers: 0,
+        carts: 0,
+        citiesOwned: [],
+        researchPoints: game.state.teamStates[0].researchPoints,
+      },
+      [LUnit.TEAM.B]: {
+        workers: 0,
+        carts: 0,
+        citiesOwned: [],
+        researchPoints: game.state.teamStates[1].researchPoints,
+      },
+    };
+    const teams = [LUnit.TEAM.A, LUnit.TEAM.B];
+    for (const team of teams) {
+      game.getTeamsUnits(team).forEach((unit) => {
+        if (unit.type === LUnit.Type.WORKER) {
+          teamStates[team].workers++;
+        } else {
+          teamStates[team].carts++;
+        }
+      });
+    }
+
     const unitData: FrameUnitData = [];
     [
       ...Array.from(game.getTeamsUnits(LUnit.TEAM.A).values()),
@@ -114,6 +150,7 @@ class MainScene extends Phaser.Scene {
     const cityData: FrameCityData = new Map();
     const cityTileData: FrameCityTileData = [];
     game.cities.forEach((city) => {
+      teamStates[city.team].citiesOwned.push(city.id);
       cityData.set(city.id, {
         cityTilePositions: city.citycells.map((cell) => cell.pos),
         fuel: city.fuel,
@@ -140,11 +177,13 @@ class MainScene extends Phaser.Scene {
         pos: cell.pos,
       });
     });
+
     return {
       resourceData,
       unitData,
       cityData,
       cityTileData,
+      teamStates,
     };
   }
 

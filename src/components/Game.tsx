@@ -1,7 +1,9 @@
 import 'phaser';
 import React, { useEffect } from 'react';
-import MainScene from '../scenes/MainScene';
+import MainScene, { Frame } from '../scenes/MainScene';
 import { createGame } from '../game';
+import PlayerStats from './PlayerStats';
+import GameStats from './GameStats';
 import { Button, CircularProgress, ButtonGroup } from '@material-ui/core';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
@@ -11,6 +13,7 @@ import Slider from '@material-ui/core/Slider';
 import Grid from '@material-ui/core/Grid';
 import './styles.css';
 import { LuxMatchConfigs } from '@lux-ai/2020-challenge/lib/types';
+import { Unit } from '@lux-ai/2020-challenge/lib/Unit';
 
 export const GameComponent = () => {
   const [isReady, setReady] = React.useState(false);
@@ -55,14 +58,23 @@ export const GameComponent = () => {
       }
     }
   }, [scene.scenes]);
+  useEffect(() => {
+    if (isReady) {
+      moveToTurn(0);
+    }
+  }, [isReady]);
   const [turn, setTurn] = React.useState(0);
-  const handleChange = (event, newValue) => {
+  const [currentFrame, setFrame] = React.useState<Frame>(null);
+  const handleChange = (event: any, newValue: number) => {
     moveToTurn(newValue);
   };
-  const moveToTurn = (turn) => {
+  const moveToTurn = (turn: number) => {
     setTurn(turn);
     main.renderFrame(turn);
+    setFrame(main.frames[turn]);
   };
+  if (isReady) {
+  }
   return (
     <div className="Game">
       <div className="gameContainer">
@@ -103,7 +115,32 @@ export const GameComponent = () => {
             </Card>
           </Grid>
           <Grid item xs={6}>
-            Turn: {turn}
+            <Card className="stats">
+              <CardContent>
+                <GameStats turn={turn} />
+                {currentFrame !== null &&
+                  [0, 1].map((team: Unit.TEAM) => {
+                    return (
+                      <PlayerStats
+                        key={team}
+                        workerUnits={currentFrame.teamStates[team].workers}
+                        cartUnits={currentFrame.teamStates[team].carts}
+                        cities={currentFrame.teamStates[team].citiesOwned.map(
+                          (id) => {
+                            const city = currentFrame.cityData.get(id);
+                            return {
+                              fuel: city.fuel,
+                              cells: city.cityTilePositions.length,
+                              cityid: id,
+                            };
+                          }
+                        )}
+                        team={team}
+                      />
+                    );
+                  })}
+              </CardContent>
+            </Card>
           </Grid>
           <Grid item xs={12}></Grid>
         </Grid>

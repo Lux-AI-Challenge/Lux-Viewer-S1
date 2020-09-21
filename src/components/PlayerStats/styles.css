@@ -1,0 +1,13 @@
+.PlayerStats .Cities {
+  margin-bottom: 2rem;
+}
+
+.PlayerStats .Cities.team_0 .card .accent {
+  background-color: #03a9f4;
+  height: 1rem;
+}
+
+.PlayerStats .Cities.team_1 .card .accent {
+  background-color: #f44336;
+  height: 1rem;
+}
