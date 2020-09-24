@@ -73,6 +73,8 @@ module.exports = {
       chunks: 'all',
     },
     usedExports: true,
+    providedExports: true,
+    sideEffects: true,
   },
   mode: 'production',
   plugins: [
