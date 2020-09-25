@@ -1,6 +1,6 @@
 import 'phaser';
 
-import MainScene from '../scenes/MainScene';
+import MainScene, { GameCreationConfigs } from '../scenes/MainScene';
 
 export const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -22,8 +22,8 @@ export const config: Phaser.Types.Core.GameConfig = {
   // },
 };
 
-export const createGame = (replayData: Object): Phaser.Game => {
+export const createGame = (configs: GameCreationConfigs): Phaser.Game => {
   const game = new Phaser.Game(config);
-  game.scene.add('MainScene', MainScene, true, { replayData });
+  game.scene.add('MainScene', MainScene, true, configs);
   return game;
 };

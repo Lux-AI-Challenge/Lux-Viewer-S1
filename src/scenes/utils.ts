@@ -1,3 +1,4 @@
+import { GameMap } from '@lux-ai/2020-challenge';
 import { Position } from '@lux-ai/2020-challenge/lib/GameMap/position';
 
 export const mapPosToPixels = (pos: Position): [number, number] => {
@@ -7,6 +8,15 @@ export const mapPosToPixels = (pos: Position): [number, number] => {
 export const mapCoordsToPixels = (x: number, y: number): [number, number] => {
   return [x * 32 + 16, y * 32 + 16];
 };
+
+export const hashMapCoords = (pos: Position, map: GameMap): number => {
+  // return pos.x * Math.max(map.width, map.height) + pos.y;
+  if (map.width > map.height) {
+    return pos.x * map.width + pos.y;
+  } else {
+    return pos.y * map.height + pos.x;
+  }
+}
 
 export const memorySizeOf = (obj: any) => {
   var bytes = 0;

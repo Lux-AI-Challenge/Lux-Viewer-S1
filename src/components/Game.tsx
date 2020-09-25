@@ -77,7 +77,11 @@ export const GameComponent = () => {
               game.destroy(true, false);
             }
             setReady(false);
-            const newgame = createGame(data);
+            const newgame = createGame({
+              replayData: data,
+              handleUnitClicked,
+              handleTileClicked,
+            });
             setGame(newgame);
             setUploading(false);
           });
@@ -101,6 +105,13 @@ export const GameComponent = () => {
   const noUpload = !uploading && game === null;
   const gameLoading =
     (uploading && game === null) || (!isReady && game !== null);
+
+  const handleUnitClicked = (data) => {
+    console.log(data);
+  }
+  const handleTileClicked = (data)=> {
+    console.log(data);
+  }
   return (
     <div className="Game">
       <div className="gameContainer">
