@@ -1,7 +1,7 @@
 import 'phaser';
 import React, { useEffect, useState } from 'react';
 import classnames from 'classnames';
-import MainScene, { Frame } from '../scenes/MainScene';
+import MainScene, { Frame, FrameTileData } from '../scenes/MainScene';
 import { createGame } from '../game';
 import PlayerStats from './PlayerStats';
 import GameStats from './GameStats';
@@ -16,9 +16,11 @@ import {
 } from '@material-ui/core';
 import './styles.css';
 import { LuxMatchConfigs, Unit } from '@lux-ai/2020-challenge';
+import TileStats from './TileStats';
 
 export const GameComponent = () => {
   const [isReady, setReady] = useState(false);
+  const [selectedTileData, setTileData] = useState<FrameTileData>(null);
   const [game, setGame] = useState<Phaser.Game>(null);
   const [main, setMain] = useState<MainScene>(null);
   const [configs, setConfigs] = useState<LuxMatchConfigs>(null);
@@ -108,10 +110,10 @@ export const GameComponent = () => {
 
   const handleUnitClicked = (data) => {
     console.log(data);
-  }
-  const handleTileClicked = (data)=> {
-    console.log(data);
-  }
+  };
+  const handleTileClicked = (data) => {
+    setTileData(data);
+  };
   return (
     <div className="Game">
       <div className="gameContainer">
@@ -161,6 +163,12 @@ export const GameComponent = () => {
           <Grid item xs={6}>
             <Card className="stats">
               <CardContent>
+                {selectedTileData && (
+                  <TileStats
+                    {...selectedTileData}
+                    cities={currentFrame.cityData}
+                  />
+                )}
                 <GameStats turn={turn} />
                 {currentFrame !== null &&
                   [0, 1].map((team: Unit.TEAM) => {

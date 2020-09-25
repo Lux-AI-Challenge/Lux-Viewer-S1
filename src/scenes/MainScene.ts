@@ -4,7 +4,12 @@ import { Game } from '@lux-ai/2020-challenge/lib/Game';
 import { Resource } from '@lux-ai/2020-challenge/lib/Resource';
 import { Unit as LUnit, Worker } from '@lux-ai/2020-challenge/lib/Unit/index';
 
-import { hashMapCoords, mapCoordsToPixels, mapPosToPixels, memorySizeOf } from './utils';
+import {
+  hashMapCoords,
+  mapCoordsToPixels,
+  mapPosToPixels,
+  memorySizeOf,
+} from './utils';
 import { Position } from '@lux-ai/2020-challenge/lib/GameMap/position';
 
 export interface Frame {
@@ -29,7 +34,7 @@ type FrameTeamStateData = {
   };
 };
 type FrameUnitData = Map<string, FrameSingleUnitData>;
-interface FrameSingleUnitData {
+export interface FrameSingleUnitData {
   pos: Position;
   team: LUnit.TEAM;
   cargo: LUnit.Cargo;
@@ -46,7 +51,7 @@ type FrameCityTileData = Array<{
   cooldown: number;
 }>;
 
-type FrameCityData = Map<
+export type FrameCityData = Map<
   string,
   {
     cityTilePositions: Array<Position>;
@@ -58,15 +63,16 @@ type FrameCityData = Map<
 export type GameCreationConfigs = {
   replayData: object;
   handleUnitClicked: HandleUnitClicked;
-  handleTileClicked: HandleTileClicked
-}
+  handleTileClicked: HandleTileClicked;
+};
 
-type HandleUnitClicked = (unit: FrameSingleUnitData) => void
-type HandleTileClicked = (data: {
-  pos: Position,
-  units: Map<string, FrameSingleUnitData>,
-  cityTile: FrameCityTileData
-}) => void;
+type HandleUnitClicked = (unit: FrameSingleUnitData) => void;
+export type FrameTileData = {
+  pos: Position;
+  units: Map<string, FrameSingleUnitData>;
+  cityTile: FrameCityTileData;
+};
+type HandleTileClicked = (data: FrameTileData) => void;
 
 class MainScene extends Phaser.Scene {
   player: Phaser.GameObjects.Sprite;
@@ -99,6 +105,8 @@ class MainScene extends Phaser.Scene {
     agents: [],
   };
 
+  map: Phaser.Tilemaps.Tilemap;
+
   constructor() {
     super({
       key: 'MainScene',
@@ -115,6 +123,29 @@ class MainScene extends Phaser.Scene {
     this.load.image('cart1', 'assets/sprites/cart1.png');
     this.load.image('player', 'assets/sprites/mushroom.png');
     console.log('{PRE');
+  }
+
+  private onTileClicked(v: Position) {
+    const f = this.frames[this.turn];
+    const unitDataAtXY: FrameUnitData = new Map();
+    const cityTile: FrameCityTileData = [];
+    f.unitData.forEach((unit) => {
+      if (unit.pos.x === v.x && unit.pos.y === v.y) {
+        unitDataAtXY.set(unit.id, unit);
+      }
+    });
+    f.cityTileData.forEach((ct) => {
+      if (ct.pos.x === v.x && ct.pos.y === v.y) {
+        cityTile.push(ct);
+      }
+    });
+    const clickedPos = new Position(v.x, v.y);
+    this.handleTileClicked({
+      pos: clickedPos,
+      units: unitDataAtXY,
+      cityTile: cityTile,
+    });
+    this.currentSelectedTilePos = clickedPos;
   }
 
   loadReplayData(replayData: any): void {
@@ -136,31 +167,21 @@ class MainScene extends Phaser.Scene {
         })
       );
     }
-    let map = this.make.tilemap({ data: level, tileWidth: 16, tileHeight: 16 });
-    var tileset: Phaser.Tilemaps.Tileset = map.addTilesetImage('Grass');
-    map.createStaticLayer(0, tileset, 0, 0).setScale(2);
-    this.input.on(Phaser.Input.Events.POINTER_DOWN, (d: {worldX: number, worldY: number}) => {
-      const v = map.worldToTileXY(d.worldX, d.worldY);
-      const f = this.frames[this.turn];
-      const unitDataAtXY: FrameUnitData = new Map();
-      const cityTile: FrameCityTileData = [];
-      f.unitData.forEach((unit) => {
-        if (unit.pos.x === v.x && unit.pos.y === v.y) {
-          unitDataAtXY.set(unit.id, unit);
-        }
-      });
-      f.cityTileData.forEach(ct => {
-        if (ct.pos.x === v.x && ct.pos.y === v.y) {
-          cityTile.push(ct);
-        }
-      });
-      this.handleTileClicked({
-        pos: new Position(v.x, v.y),
-        units: unitDataAtXY,
-        cityTile: cityTile,
-      })
-    })
-    this.dynamicLayer = map
+    this.map = this.make.tilemap({
+      data: level,
+      tileWidth: 16,
+      tileHeight: 16,
+    });
+    const tileset: Phaser.Tilemaps.Tileset = this.map.addTilesetImage('Grass');
+    this.map.createStaticLayer(0, tileset, 0, 0).setScale(2);
+    this.input.on(
+      Phaser.Input.Events.POINTER_DOWN,
+      (d: { worldX: number; worldY: number }) => {
+        const v = this.map.worldToTileXY(d.worldX, d.worldY);
+        this.onTileClicked(new Position(v.x, v.y));
+      }
+    );
+    this.dynamicLayer = this.map
       .createBlankDynamicLayer('resources', tileset)
       .setScale(2);
 
@@ -223,7 +244,12 @@ class MainScene extends Phaser.Scene {
       }
     });
 
-    this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+    this.cameras.main.setBounds(
+      0,
+      0,
+      this.map.widthInPixels,
+      this.map.heightInPixels
+    );
 
     // load the initial state from replay
     this.pseudomatch.configs.preLoadedGame = this.luxgame;
@@ -277,7 +303,7 @@ class MainScene extends Phaser.Scene {
         team: unit.team,
         type: unit.type,
         cooldown: unit.cooldown,
-        cargo: {...unit.cargo},
+        cargo: { ...unit.cargo },
         id: unit.id,
         pos: unit.pos,
       });
@@ -328,6 +354,8 @@ class MainScene extends Phaser.Scene {
   public handleUnitClicked: HandleUnitClicked;
   public handleTileClicked: HandleTileClicked;
 
+  public currentSelectedTilePos: Position = null;
+
   create(configs: GameCreationConfigs) {
     this.loadReplayData(configs.replayData);
     this.handleUnitClicked = configs.handleUnitClicked;
@@ -352,9 +380,6 @@ class MainScene extends Phaser.Scene {
   addWorkerSprite(x: number, y: number, team: LUnit.TEAM, id: string) {
     const p = mapCoordsToPixels(x, y);
     const sprite = this.add.sprite(p[0], p[1], 'worker' + team).setScale(1.5);
-    sprite.on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () => {
-      // this.handleUnitClicked(this.frames[this.turn].unitData.get(id));
-    });
     this.unitSprites.set(id, sprite);
     return sprite;
   }
@@ -392,7 +417,9 @@ class MainScene extends Phaser.Scene {
         true
       );
       this.cityTilemapTiles.set(data.tileid, citytileData);
-      visibleCityTiles.add(hashMapCoords(data.pos, this.pseudomatch.state.game.map));
+      visibleCityTiles.add(
+        hashMapCoords(data.pos, this.pseudomatch.state.game.map)
+      );
     });
     this.unitSprites.forEach((sprite, key) => {
       if (!visibleUnits.has(key)) {
@@ -400,13 +427,24 @@ class MainScene extends Phaser.Scene {
       }
     });
     this.cityTilemapTiles.forEach((tile, key) => {
-      if (!visibleCityTiles.has(hashMapCoords(new Position(tile.x, tile.y), this.pseudomatch.state.game.map))) {
+      if (
+        !visibleCityTiles.has(
+          hashMapCoords(
+            new Position(tile.x, tile.y),
+            this.pseudomatch.state.game.map
+          )
+        )
+      ) {
         this.dynamicLayer.removeTileAt(tile.x, tile.y);
       }
     });
 
     this.frames[0].resourceData.forEach((data) => {
-      if (visibleCityTiles.has(hashMapCoords(data.pos, this.pseudomatch.state.game.map))) {
+      if (
+        visibleCityTiles.has(
+          hashMapCoords(data.pos, this.pseudomatch.state.game.map)
+        )
+      ) {
         return;
       }
       this.dynamicLayer.removeTileAt(data.pos.x, data.pos.y);
@@ -414,6 +452,10 @@ class MainScene extends Phaser.Scene {
     f.resourceData.forEach((data) => {
       this.addResourceTile(data.type, data.pos.x, data.pos.y, data.amt);
     });
+
+    if (this.currentSelectedTilePos !== null) {
+      this.onTileClicked(this.currentSelectedTilePos);
+    }
   }
 
   async generateGameFrames(replayData) {
