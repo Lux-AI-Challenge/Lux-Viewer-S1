@@ -9,13 +9,34 @@ export const mapCoordsToPixels = (x: number, y: number): [number, number] => {
   return [x * 32 + 16, y * 32 + 16];
 };
 
-export const hashMapCoords = (pos: Position, map: GameMap): number => {
+export const mapCoordsToIsometricPixels = (
+  x: number,
+  y: number
+): [number, number] => {
+  const f = 26;
+  return [600 + x * f - f * y, 150 + y * f + f * x - ((x + y) * f) / 2];
+};
+export const mapPosToIsometricPixels = (pos: Position): [number, number] => {
+  return mapCoordsToIsometricPixels(pos.x, pos.y);
+};
+
+export const mapIsometricPixelsToPosition = (
+  px: number,
+  py: number
+): Position => {
+  px -= 600;
+  py -= 150;
+  const f = 26;
+
+  // TODO, why are these backward??
+  let _x = (px - 2 * py) / (-2 * f);
+  let _y = (2 * (py - (f * _x) / 2)) / f;
+  return new Position(Math.ceil(_y), Math.ceil(_x));
+};
+
+export const hashMapCoords = (pos: Position): number => {
   // return pos.x * Math.max(map.width, map.height) + pos.y;
-  if (map.width > map.height) {
-    return pos.x * map.width + pos.y;
-  } else {
-    return pos.y * map.height + pos.x;
-  }
+  return pos.x * 10e5 + pos.y;
 };
 
 export const memorySizeOf = (obj: any) => {

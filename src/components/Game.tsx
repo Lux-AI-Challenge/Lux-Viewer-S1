@@ -17,6 +17,7 @@ import {
 import './styles.css';
 import { LuxMatchConfigs, Unit } from '@lux-ai/2020-challenge/lib/es6';
 import TileStats from './TileStats';
+import debug_replay from '../scenes/replay.json';
 
 export const GameComponent = () => {
   const [isReady, setReady] = useState(false);
@@ -90,6 +91,15 @@ export const GameComponent = () => {
       }
     }
   };
+  useEffect(() => {
+    const newgame = createGame({
+      replayData: debug_replay,
+      handleUnitClicked,
+      handleTileClicked,
+    });
+    setGame(newgame);
+    setUploading(false);
+  }, []);
   const renderUploadButton = () => {
     return (
       <Button variant="contained" component="label">
@@ -119,7 +129,7 @@ export const GameComponent = () => {
       <div className="gameContainer">
         <h1>Lux AI Challenge</h1>
         <Grid container spacing={3}>
-          <Grid item xs={6}>
+          <Grid item xs={9}>
             <Card
               className={classnames({
                 'phaser-wrapper': true,
@@ -160,7 +170,7 @@ export const GameComponent = () => {
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={3}>
             <Card className="stats">
               <CardContent>
                 {selectedTileData && (
