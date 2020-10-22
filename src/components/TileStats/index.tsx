@@ -1,4 +1,4 @@
-import { Unit } from '@lux-ai/2020-challenge/lib/Unit';
+import { Unit } from '@lux-ai/2020-challenge/lib/es6/Unit';
 import Divider from '@material-ui/core/Divider';
 import Grid from '@material-ui/core/Grid';
 import CardContent from '@material-ui/core/CardContent';

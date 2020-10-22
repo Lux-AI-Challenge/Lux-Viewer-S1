@@ -15,7 +15,7 @@ import {
   Grid,
 } from '@material-ui/core';
 import './styles.css';
-import { LuxMatchConfigs, Unit } from '@lux-ai/2020-challenge';
+import { LuxMatchConfigs, Unit } from '@lux-ai/2020-challenge/lib/es6';
 import TileStats from './TileStats';
 
 export const GameComponent = () => {
@@ -35,7 +35,7 @@ export const GameComponent = () => {
         const main: MainScene = game.scene.scenes[0];
         setMain(main);
         const configs = main.luxgame.configs;
-        setConfigs(configs);
+        setConfigs(configs as LuxMatchConfigs);
 
         setSliderConfigs({
           min: 0,

@@ -67,6 +67,7 @@ module.exports = {
     net: 'empty',
     fs: 'empty',
     dns: 'empty',
+    '@firebase/app': 'empty',
   },
   optimization: {
     splitChunks: {

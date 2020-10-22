@@ -1,8 +1,11 @@
-import { LuxMatchState } from '@lux-ai/2020-challenge/lib/types';
-import { LuxDesignLogic } from '@lux-ai/2020-challenge/lib/logic';
-import { Game } from '@lux-ai/2020-challenge/lib/Game';
-import { Resource } from '@lux-ai/2020-challenge/lib/Resource';
-import { Unit as LUnit, Worker } from '@lux-ai/2020-challenge/lib/Unit/index';
+import { LuxMatchState } from '@lux-ai/2020-challenge/lib/es6/types';
+import { LuxDesignLogic } from '@lux-ai/2020-challenge/lib/es6/logic';
+import { Game } from '@lux-ai/2020-challenge/lib/es6/Game';
+import { Resource } from '@lux-ai/2020-challenge/lib/es6/Resource';
+import {
+  Unit as LUnit,
+  Worker,
+} from '@lux-ai/2020-challenge/lib/es6/Unit/index';
 
 import {
   hashMapCoords,
@@ -10,7 +13,7 @@ import {
   mapPosToPixels,
   memorySizeOf,
 } from './utils';
-import { Position } from '@lux-ai/2020-challenge/lib/GameMap/position';
+import { Position } from '@lux-ai/2020-challenge/lib/es6/GameMap/position';
 
 export interface Frame {
   resourceData: Array<{
@@ -114,8 +117,6 @@ class MainScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.tilemapTiledJSON('map', 'assets/tilemaps/desert.json');
-    this.load.image('Desert', 'assets/tilemaps/tmw_desert_spacing.png');
     this.load.image('Grass', 'assets/tilemaps/ground_tileset.png');
     this.load.image('worker0', 'assets/sprites/worker0.png');
     this.load.image('worker1', 'assets/sprites/worker1.png');
