@@ -8,16 +8,19 @@ import './styles.css';
 import { FrameTileData, FrameCityData } from '../../scenes/MainScene';
 import UnitCard from '../UnitCard';
 export type TileStatsProps = FrameTileData & { cities: FrameCityData };
-const TileStats = ({ pos, units, cityTile, cities }: TileStatsProps) => {
+const TileStats = ({ pos, units, cityTile, cities, resources }: TileStatsProps) => {
   return (
     <div className="TileStats">
       <p>
         Tile at ({pos.x}, {pos.y})
       </p>
+      <div>
+        {resources && `Resources: ${resources.amt} ${resources.type}`}
+      </div>
       <Grid container className="UnitStats">
         {Array.from(units.values()).map((v) => {
           return (
-            <Grid item className="UnitData" xs={3}>
+            <Grid item className="UnitData" xs={6} key={v.id}>
               <UnitCard {...v} />
             </Grid>
           );
@@ -25,7 +28,7 @@ const TileStats = ({ pos, units, cityTile, cities }: TileStatsProps) => {
       </Grid>
       <Grid container className="CityStats">
         {cityTile.length > 0 && (
-          <Grid item xs={4}>
+          <Grid item xs={12}>
             <p>City ID: {cityTile[0].cityid}</p>
             <p>Light: {cities.get(cityTile[0].cityid).fuel}</p>
             <p>Team: {cities.get(cityTile[0].cityid).team}</p>
@@ -34,7 +37,7 @@ const TileStats = ({ pos, units, cityTile, cities }: TileStatsProps) => {
       </Grid>
       <Grid container className="CityTileStats">
         {cityTile.length > 0 && (
-          <Grid item xs={4}>
+          <Grid item xs={12}>
             <p>City ID: {cityTile[0].cityid}</p>
             <p>Cooldown: {cityTile[0].cooldown}</p>
             <p>Team: {cityTile[0].team}</p>

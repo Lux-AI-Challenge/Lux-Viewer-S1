@@ -20,11 +20,15 @@ import { Position } from '@lux-ai/2020-challenge/lib/es6/GameMap/position';
 import { GameObjects } from 'phaser';
 
 export interface Frame {
-  resourceData: Array<{
-    type: Resource.Types;
-    amt: number;
-    pos: Position;
-  }>;
+  // map from hashed position to resource data
+  resourceData: Map<
+    number,
+    {
+      type: Resource.Types;
+      amt: number;
+      pos: Position;
+    }
+  >;
   teamStates: FrameTeamStateData;
   unitData: FrameUnitData;
   cityData: FrameCityData;
@@ -78,6 +82,10 @@ export type FrameTileData = {
   pos: Position;
   units: Map<string, FrameSingleUnitData>;
   cityTile: FrameCityTileData;
+  resources: {
+    type: Resource.Types;
+    amt: number;
+  };
 };
 type HandleTileClicked = (data: FrameTileData) => void;
 
@@ -88,7 +96,12 @@ class MainScene extends Phaser.Scene {
   workers: Array<Phaser.GameObjects.Sprite> = [];
   luxgame: Game;
 
-  unitSprites: Map<string, Phaser.GameObjects.Sprite> = new Map();
+  // All unit sprites rendered throughout match
+  unitSprites: Map<
+    string,
+    { sprite: Phaser.GameObjects.Sprite; originalPosition: Position }
+  > = new Map();
+
   cityTilemapTiles: Map<string, Phaser.Tilemaps.Tile> = new Map();
 
   currentTurn = 0;
@@ -145,6 +158,8 @@ class MainScene extends Phaser.Scene {
     const f = this.frames[this.turn];
     const unitDataAtXY: FrameUnitData = new Map();
     const cityTile: FrameCityTileData = [];
+
+    // TODO: can be slow if we iterate entire unit list
     f.unitData.forEach((unit) => {
       if (unit.pos.x === v.x && unit.pos.y === v.y) {
         unitDataAtXY.set(unit.id, unit);
@@ -155,11 +170,13 @@ class MainScene extends Phaser.Scene {
         cityTile.push(ct);
       }
     });
+    const resourceAtXY = f.resourceData.get(hashMapCoords(v));
     const clickedPos = new Position(v.x, v.y);
     this.handleTileClicked({
       pos: clickedPos,
       units: unitDataAtXY,
       cityTile: cityTile,
+      resources: resourceAtXY,
     });
     this.currentSelectedTilePos = clickedPos;
   }
@@ -168,20 +185,8 @@ class MainScene extends Phaser.Scene {
     this.luxgame = new Game();
     let width = replayData.map[0].length;
     let height = replayData.map.length;
-    const level = [];
     // generate the ground
     for (let y = 0; y < height; y++) {
-      level.push(
-        replayData.map[y].map((data) => {
-          if (data.resource == null) {
-            let p = Math.random();
-            if (p > 0.7) return 2;
-            else return 3;
-          } else {
-            return 3;
-          }
-        })
-      );
       replayData.map[y].forEach((data, x) => {
         const f = 34;
         const ps = mapCoordsToIsometricPixels(x, y);
@@ -191,20 +196,11 @@ class MainScene extends Phaser.Scene {
         this.floorImageTiles.set(hashMapCoords(new Position(x, y)), img);
       });
     }
-    this.map = this.make.tilemap({
-      data: level,
-      tileWidth: 16,
-      tileHeight: 16,
-    });
-    const tileset: Phaser.Tilemaps.Tileset = this.map.addTilesetImage('Grass');
-    this.map.createStaticLayer(0, tileset, 0, 0).setScale(2);
 
     // add handler for clicking tiles
     this.input.on(
       Phaser.Input.Events.POINTER_DOWN,
       (d: { worldX: number; worldY: number }) => {
-        // const v = this.map.worldToTileXY(d.worldX, d.worldY);
-
         const pos = mapIsometricPixelsToPosition(d.worldX, d.worldY);
         const imageTile = this.floorImageTiles.get(hashMapCoords(pos));
         if (imageTile) {
@@ -234,8 +230,8 @@ class MainScene extends Phaser.Scene {
 
     // add handler for moving cursor around isometric map
     this.input.on(Phaser.Input.Events.POINTER_MOVE, (pointer) => {
-      let px = pointer.position.x;
-      let py = pointer.position.y;
+      let px = pointer.worldX;
+      let py = pointer.worldY;
       const pos = mapIsometricPixelsToPosition(px, py);
       const imageTile = this.floorImageTiles.get(hashMapCoords(pos));
       if (imageTile) {
@@ -260,44 +256,40 @@ class MainScene extends Phaser.Scene {
       }
     });
 
-    this.dynamicLayer = this.map
-      .createBlankDynamicLayer('resources', tileset)
-      .setScale(2);
+    // this.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer) => {
+    //   // console.log(drag);
+    //   // this.cameras.main.centerOnX(drag.dragX);
+    //   console.log('down,', pointer);
+    // });
+    // this.input.on(Phaser.Input.Events.Poin)
+    // this.input.on(Phaser.Input.Events.POINTER_UP, (pointer) => {
+    //   // console.log(drag);
+    //   // this.cameras.main.centerOnX(drag.dragX);
+    //   console.log('out,', pointer);
+    // });
 
     for (let y = 0; y < height; y++) {
-      level.push(
-        replayData.map[y].map((data, x) => {
-          if (data.resource !== null) {
-            let p = Math.random();
-            switch (data.resource) {
-              case Resource.Types.WOOD:
-                this.luxgame.map.addResource(
-                  x,
-                  y,
-                  Resource.Types.WOOD,
-                  data.amt
-                );
-                break;
-              case Resource.Types.COAL:
-                this.luxgame.map.addResource(
-                  x,
-                  y,
-                  Resource.Types.COAL,
-                  data.amt
-                );
-                break;
-              case Resource.Types.URANIUM:
-                this.luxgame.map.addResource(
-                  x,
-                  y,
-                  Resource.Types.URANIUM,
-                  data.amt
-                );
-                break;
-            }
+      replayData.map[y].map((data, x) => {
+        if (data.resource !== null) {
+          let p = Math.random();
+          switch (data.resource) {
+            case Resource.Types.WOOD:
+              this.luxgame.map.addResource(x, y, Resource.Types.WOOD, data.amt);
+              break;
+            case Resource.Types.COAL:
+              this.luxgame.map.addResource(x, y, Resource.Types.COAL, data.amt);
+              break;
+            case Resource.Types.URANIUM:
+              this.luxgame.map.addResource(
+                x,
+                y,
+                Resource.Types.URANIUM,
+                data.amt
+              );
+              break;
           }
-        })
-      );
+        }
+      });
     }
 
     replayData.initialCityTiles.forEach((ct) => {
@@ -323,20 +315,15 @@ class MainScene extends Phaser.Scene {
       }
     });
 
-    this.cameras.main.setBounds(
-      0,
-      0,
-      this.map.widthInPixels,
-      this.map.heightInPixels
-    );
-
     // load the initial state from replay
     this.pseudomatch.configs.preLoadedGame = this.luxgame;
     setTimeout(() => {
       LuxDesignLogic.initialize(this.pseudomatch).then(() => {
         this.generateGameFrames(replayData).then(() => {
+          // TODO: fix these harcodes of initial camera position
+          this.cameras.main.scrollX = 115;
+          this.cameras.main.scrollY = 25;
           this.renderFrame(0);
-          // this.events.emit('setup');
           this.game.events.emit('setup');
         });
       });
@@ -408,11 +395,11 @@ class MainScene extends Phaser.Scene {
         });
       });
     });
-    const resourceData: Array<any> = [];
+    const resourceData: Map<number, any> = new Map();
 
     game.map.resources.forEach((cell) => {
       // resourceMap
-      resourceData.push({
+      resourceData.set(hashMapCoords(cell.pos), {
         type: cell.resource.type,
         amt: cell.resource.amount,
         pos: cell.pos,
@@ -476,7 +463,7 @@ class MainScene extends Phaser.Scene {
     const p = mapCoordsToIsometricPixels(x, y);
     const sprite = this.add.sprite(p[0], p[1], 'worker' + team).setScale(1.5);
     sprite.setDepth(5);
-    this.unitSprites.set(id, sprite);
+    this.unitSprites.set(id, { sprite, originalPosition: new Position(x, y) });
     return sprite;
   }
 
@@ -484,7 +471,7 @@ class MainScene extends Phaser.Scene {
     const p = mapCoordsToIsometricPixels(x, y);
     const sprite = this.add.sprite(p[0], p[1], 'cart' + team).setScale(1.5);
     sprite.setDepth(5);
-    this.unitSprites.set(id, sprite);
+    this.unitSprites.set(id, { sprite, originalPosition: new Position(x, y) });
     return sprite;
   }
 
@@ -495,51 +482,49 @@ class MainScene extends Phaser.Scene {
     if (!f) {
       return;
     }
+    // destroy any old rendered images
     this.currentRenderedFramesImgs.forEach((img) => {
       img.destroy();
     });
 
     let visibleUnits: Set<string> = new Set();
     let visibleCityTiles: Set<number> = new Set();
+
+    // iterate over all units in this frame / turn
     f.unitData.forEach((data) => {
       const id = data.id;
-      const sprite = this.unitSprites.get(id);
+      const { sprite } = this.unitSprites.get(id);
+
       sprite.setVisible(true);
       const p = mapPosToIsometricPixels(data.pos);
-      sprite.x = p[0];
-      sprite.y = p[1] - 20;
+      // when animating, make smooth movement
+      this.tweens.add({
+        targets: sprite,
+        x: p[0],
+        y: p[1] - 18,
+        ease: 'Linear',
+        duration: 100,
+        repeat: 0,
+        yoyo: false,
+      });
       visibleUnits.add(id);
     });
+
+    // iterate over all live city tiles
     f.cityTileData.forEach((data) => {
-      const citytileData = this.dynamicLayer.putTileAt(
-        7,
-        data.pos.x,
-        data.pos.y,
-        true
-      );
       const p = mapPosToIsometricPixels(data.pos);
       const img = this.add.image(p[0], p[1], 'city1').setScale(1.5).setDepth(4);
       img.setY(img.y - 18);
       this.currentRenderedFramesImgs.push(img);
-      this.cityTilemapTiles.set(data.tileid, citytileData);
       visibleCityTiles.add(hashMapCoords(data.pos));
     });
-    this.unitSprites.forEach((sprite, key) => {
+    this.unitSprites.forEach(({ sprite, originalPosition }, key) => {
       if (!visibleUnits.has(key)) {
         sprite.setVisible(false);
+        const p = mapPosToIsometricPixels(originalPosition);
+        sprite.x = p[0];
+        sprite.y = p[1] - 18;
       }
-    });
-    this.cityTilemapTiles.forEach((tile, key) => {
-      if (!visibleCityTiles.has(hashMapCoords(new Position(tile.x, tile.y)))) {
-        this.dynamicLayer.removeTileAt(tile.x, tile.y);
-      }
-    });
-
-    this.frames[0].resourceData.forEach((data) => {
-      if (visibleCityTiles.has(hashMapCoords(data.pos))) {
-        return;
-      }
-      this.dynamicLayer.removeTileAt(data.pos.x, data.pos.y);
     });
 
     // paint in all resource tiles
@@ -611,7 +596,57 @@ class MainScene extends Phaser.Scene {
       this.currentTurn++;
     }
   }
-  update(time: number, delta: number) {}
+
+  lastPointerPosition = null;
+  yBounds = [-100, 440];
+  xBounds = [-100, 640];
+  update(time: number, delta: number) {
+    if (this.game.input.activePointer.isDown) {
+      // this.game.input.mousePointer.worldX
+      if (this.lastPointerPosition != null) {
+        let dx = this.lastPointerPosition.x - this.game.input.activePointer.x;
+        let dy = this.lastPointerPosition.y - this.game.input.activePointer.y;
+
+        if (
+          this.cameras.main.scrollX <= this.xBounds[1] &&
+          this.cameras.main.scrollX >= this.xBounds[0]
+        ) {
+          this.cameras.main.scrollX += dx;
+        } else if (this.cameras.main.scrollX < this.xBounds[0] && dx > 0) {
+          this.cameras.main.scrollX += dx;
+        } else if (this.cameras.main.scrollX > this.xBounds[1] && dx < 0) {
+          this.cameras.main.scrollX += dx;
+        }
+
+        if (
+          this.cameras.main.scrollY <= this.yBounds[1] &&
+          this.cameras.main.scrollY >= this.yBounds[0]
+        ) {
+          this.cameras.main.scrollY += dy;
+        } else if (this.cameras.main.scrollY < this.yBounds[0] && dy > 0) {
+          this.cameras.main.scrollY += dy;
+        } else if (this.cameras.main.scrollY > this.yBounds[1] && dy < 0) {
+          this.cameras.main.scrollY += dy;
+        }
+
+        if (this.cameras.main.scrollX < this.xBounds[0]) {
+          this.cameras.main.scrollX = this.xBounds[0];
+        }
+        if (this.cameras.main.scrollY < this.yBounds[0]) {
+          this.cameras.main.scrollY = this.yBounds[0];
+        }
+        if (this.cameras.main.scrollY > this.yBounds[1]) {
+          this.cameras.main.scrollY = this.yBounds[1];
+        }
+      }
+      this.lastPointerPosition = {
+        x: this.game.input.activePointer.x,
+        y: this.game.input.activePointer.y,
+      };
+    } else {
+      this.lastPointerPosition = null;
+    }
+  }
 }
 
 export default MainScene;

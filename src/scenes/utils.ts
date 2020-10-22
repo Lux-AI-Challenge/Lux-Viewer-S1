@@ -14,7 +14,7 @@ export const mapCoordsToIsometricPixels = (
   y: number
 ): [number, number] => {
   const f = 26;
-  return [600 + x * f - f * y, 150 + y * f + f * x - ((x + y) * f) / 2];
+  return [450 + x * f - f * y, 150 + y * f + f * x - ((x + y) * f) / 2];
 };
 export const mapPosToIsometricPixels = (pos: Position): [number, number] => {
   return mapCoordsToIsometricPixels(pos.x, pos.y);
@@ -24,7 +24,8 @@ export const mapIsometricPixelsToPosition = (
   px: number,
   py: number
 ): Position => {
-  px -= 600;
+  //TODO 450 and 150 are hardcoded, hard to make responsive
+  px -= 450;
   py -= 150;
   const f = 26;
 

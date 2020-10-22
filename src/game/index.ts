@@ -5,7 +5,7 @@ import MainScene, { GameCreationConfigs } from '../scenes/MainScene';
 export const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: 'content',
-  width: 1200,
+  width: 640,
   height: 640,
   zoom: 1,
   render: {
