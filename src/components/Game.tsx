@@ -18,8 +18,14 @@ import './styles.css';
 import { LuxMatchConfigs, Unit } from '@lux-ai/2020-challenge/lib/es6';
 import TileStats from './TileStats';
 import debug_replay from '../scenes/replay.json';
+import { hashToMapPosition, mapCoordsToIsometricPixels } from '../scenes/utils';
 
 export const GameComponent = () => {
+  const [notifWindowOpen, setNotifWindowOpen] = useState(false);
+  const [notifMsg, setNotifMsg] = useState("");
+  const [running, setRunning] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [visualScale, setVisualScale] = useState(1);
   const [isReady, setReady] = useState(false);
   const [selectedTileData, setTileData] = useState<FrameTileData>(null);
   const [game, setGame] = useState<Phaser.Game>(null);
@@ -47,11 +53,43 @@ export const GameComponent = () => {
       });
     }
   }, [game]);
+
+  useEffect(() => {
+    if (running && configs) {
+      let currTurn = turn;
+      const interval = setInterval(() => {
+        if (currTurn >= configs.parameters.MAX_DAYS) {
+          setRunning(false);
+          return;
+        }
+        moveToTurn(currTurn);
+        currTurn += 1;
+        setTurn(currTurn);
+        
+      }, 1000 / playbackSpeed);
+      return () => clearInterval(interval);
+    }
+  }, [running, playbackSpeed]);
+
   useEffect(() => {
     if (isReady) {
       moveToTurn(0);
     }
   }, [isReady]);
+  useEffect(() => {
+    if (main && visualScale) {
+      main.overallScale = visualScale;
+      moveToTurn(turn);
+      // TODO: do a on scale change instead inside main
+      main.floorImageTiles.forEach((tileImage, hash) => {
+        const pos = hashToMapPosition(hash)
+        const ps = mapCoordsToIsometricPixels(pos.x, pos.y, main.overallScale);
+        tileImage.setScale(main.defaultScales.block * main.overallScale)
+        tileImage.setX(ps[0])
+        tileImage.setY(ps[1])
+      });
+    }
+  }, [main, visualScale])
   const [turn, setTurn] = useState(0);
   const [currentFrame, setFrame] = useState<Frame>(null);
   const [uploading, setUploading] = useState(false);
@@ -140,6 +178,33 @@ export const GameComponent = () => {
                 {noUpload && renderUploadButton()}
                 {gameLoading && <CircularProgress />}
                 <div id="content"></div>
+                <div className="play-buttons">
+                  <Button className="play" color="primary" variant="contained" disabled={!isReady} onClick={() => {
+                    setRunning(!running)
+                  }}>
+                    {running ? 'Pause' : 'Play'}
+                  </Button>
+                  <ButtonGroup disabled={!isReady}>
+                    {[1, 2, 4, 8, 16].map((speed) => {
+                      const variant = playbackSpeed === speed ? "contained" : "outlined";
+                      return <Button color="primary" variant={variant} onClick={() => {
+                        setPlaybackSpeed(speed);
+                      }}>
+                      {speed}x
+                      </Button>
+                    })}
+                  </ButtonGroup>
+                  <ButtonGroup disabled={!isReady}>
+                    {[0.75, 1, 1.25, 1.5].map((s) => {
+                      const variant = visualScale === s ? "contained" : "outlined";
+                      return <Button color="primary" variant={variant} onClick={() => {
+                        setVisualScale(s);
+                      }}>
+                      {s}x Scale
+                      </Button>
+                    })}
+                  </ButtonGroup>
+                </div>
                 <Slider
                   value={turn}
                   disabled={!isReady}

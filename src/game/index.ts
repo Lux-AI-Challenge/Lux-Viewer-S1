@@ -9,9 +9,9 @@ export const config: Phaser.Types.Core.GameConfig = {
   height: 640,
   zoom: 1,
   render: {
-    pixelArt: true,
+    pixelArt: false,
   },
-  backgroundColor: '#EDEEC9',
+  backgroundColor: '#00AFBD',
   scene: [],
   // scale: {
   //   mode: Phaser.Scale.ENVELOP,

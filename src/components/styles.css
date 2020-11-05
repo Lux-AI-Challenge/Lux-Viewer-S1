@@ -9,3 +9,11 @@
 .Game .gameContainer .phaser-wrapper.Loading #content {
   display: none;
 }
+
+.Game .play-buttons {
+  margin-top: 1rem;
+}
+.Game .play-buttons .play {
+  margin-right: 1rem;
+  vertical-align: top;
+}

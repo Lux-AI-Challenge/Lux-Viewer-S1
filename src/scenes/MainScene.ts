@@ -134,6 +134,15 @@ class MainScene extends Phaser.Scene {
   hoverImageTile: GameObjects.Image = null;
   originalHoverImageTileY = 0;
 
+  overallScale = 1.5;
+  defaultScales = {
+    city: 0.15,
+    tree: 0.15,
+    worker: 0.09,
+    cart: 0.15,
+    block: 0.11,
+  };
+
   constructor() {
     super({
       key: 'MainScene',
@@ -142,14 +151,16 @@ class MainScene extends Phaser.Scene {
 
   preload() {
     this.load.image('Grass', 'assets/tilemaps/ground_tileset.png');
-    this.load.image('worker0', 'assets/sprites/worker0.png');
-    this.load.image('worker1', 'assets/sprites/worker1.png');
-    this.load.image('cart0', 'assets/sprites/cart0.png');
-    this.load.image('cart1', 'assets/sprites/cart1.png');
+    this.load.image('worker0', 'assets/sprites/worker0.svg');
+    this.load.image('worker1', 'assets/sprites/worker1.svg');
+    this.load.image('cart0', 'assets/sprites/cart0.svg');
+    this.load.image('cart1', 'assets/sprites/cart1.svg');
     this.load.image('player', 'assets/sprites/mushroom.png');
-    this.load.image('block1', 'assets/blocks_1.png');
-    this.load.image('tree1', 'assets/sprites/tree.png');
-    this.load.image('city1', 'assets/sprites/city.png');
+    this.load.svg('block1', 'assets/ground.svg');
+    this.load.svg('tree1', 'assets/sprites/tree1.svg');
+    this.load.svg('tree0', 'assets/sprites/tree0.svg');
+    this.load.svg('city0', 'assets/sprites/city0.svg');
+    this.load.svg('city1', 'assets/sprites/city1.svg');
     this.load.image('coal', 'assets/sprites/coal.png');
     this.load.image('uranium', 'assets/sprites/uranium.png');
   }
@@ -188,10 +199,11 @@ class MainScene extends Phaser.Scene {
     // generate the ground
     for (let y = 0; y < height; y++) {
       replayData.map[y].forEach((data, x) => {
-        const f = 34;
-        const ps = mapCoordsToIsometricPixels(x, y);
+        const ps = mapCoordsToIsometricPixels(x, y, this.overallScale);
 
-        const img = this.add.image(ps[0], ps[1], 'block1').setScale(0.75);
+        const img = this.add
+          .image(ps[0], ps[1], 'block1')
+          .setScale(this.defaultScales.block * this.overallScale);
         img.setDepth(2);
         this.floorImageTiles.set(hashMapCoords(new Position(x, y)), img);
       });
@@ -201,7 +213,11 @@ class MainScene extends Phaser.Scene {
     this.input.on(
       Phaser.Input.Events.POINTER_DOWN,
       (d: { worldX: number; worldY: number }) => {
-        const pos = mapIsometricPixelsToPosition(d.worldX, d.worldY);
+        const pos = mapIsometricPixelsToPosition(
+          d.worldX,
+          d.worldY,
+          this.overallScale
+        );
         const imageTile = this.floorImageTiles.get(hashMapCoords(pos));
         if (imageTile) {
           if (this.activeImageTile == null) {
@@ -232,7 +248,7 @@ class MainScene extends Phaser.Scene {
     this.input.on(Phaser.Input.Events.POINTER_MOVE, (pointer) => {
       let px = pointer.worldX;
       let py = pointer.worldY;
-      const pos = mapIsometricPixelsToPosition(px, py);
+      const pos = mapIsometricPixelsToPosition(px, py, this.overallScale);
       const imageTile = this.floorImageTiles.get(hashMapCoords(pos));
       if (imageTile) {
         if (this.hoverImageTile == null) {
@@ -430,13 +446,19 @@ class MainScene extends Phaser.Scene {
   }
 
   addResourceTile(type: Resource.Types, x: number, y: number, amt: number) {
-    const p = mapCoordsToIsometricPixels(x, y);
+    const p = mapCoordsToIsometricPixels(x, y, this.overallScale);
     switch (type) {
       case Resource.Types.WOOD: {
+        let treeType = 0;
+        if (Math.random() < 0.5) {
+          treeType = 1;
+        }
         const img = this.add
-          .image(p[0], p[1], 'tree1')
+          .image(p[0], p[1], 'tree' + treeType)
           .setDepth(3)
-          .setScale(1.5);
+          .setScale(this.defaultScales.tree * this.overallScale);
+        // img.displayHeight = 42;
+        // img.displayWidth = 42;
         img.setY(img.y - 18);
         return img;
       }
@@ -460,16 +482,20 @@ class MainScene extends Phaser.Scene {
   }
 
   addWorkerSprite(x: number, y: number, team: LUnit.TEAM, id: string) {
-    const p = mapCoordsToIsometricPixels(x, y);
-    const sprite = this.add.sprite(p[0], p[1], 'worker' + team).setScale(1.5);
+    const p = mapCoordsToIsometricPixels(x, y, this.overallScale);
+    const sprite = this.add
+      .sprite(p[0], p[1], 'worker' + team)
+      .setScale(this.defaultScales.worker * this.overallScale);
     sprite.setDepth(5);
     this.unitSprites.set(id, { sprite, originalPosition: new Position(x, y) });
     return sprite;
   }
 
   addCartSprite(x: number, y: number, team: LUnit.TEAM, id: string) {
-    const p = mapCoordsToIsometricPixels(x, y);
-    const sprite = this.add.sprite(p[0], p[1], 'cart' + team).setScale(1.5);
+    const p = mapCoordsToIsometricPixels(x, y, this.overallScale);
+    const sprite = this.add
+      .sprite(p[0], p[1], 'cart' + team)
+      .setScale(this.defaultScales.cart * this.overallScale);
     sprite.setDepth(5);
     this.unitSprites.set(id, { sprite, originalPosition: new Position(x, y) });
     return sprite;
@@ -496,7 +522,7 @@ class MainScene extends Phaser.Scene {
       const { sprite } = this.unitSprites.get(id);
 
       sprite.setVisible(true);
-      const p = mapPosToIsometricPixels(data.pos);
+      const p = mapPosToIsometricPixels(data.pos, this.overallScale);
       // when animating, make smooth movement
       this.tweens.add({
         targets: sprite,
@@ -512,8 +538,11 @@ class MainScene extends Phaser.Scene {
 
     // iterate over all live city tiles
     f.cityTileData.forEach((data) => {
-      const p = mapPosToIsometricPixels(data.pos);
-      const img = this.add.image(p[0], p[1], 'city1').setScale(1.5).setDepth(4);
+      const p = mapPosToIsometricPixels(data.pos, this.overallScale);
+      const img = this.add
+        .image(p[0], p[1], 'city' + data.team)
+        .setDepth(4)
+        .setScale(this.defaultScales.city * this.overallScale);
       img.setY(img.y - 18);
       this.currentRenderedFramesImgs.push(img);
       visibleCityTiles.add(hashMapCoords(data.pos));
@@ -521,7 +550,7 @@ class MainScene extends Phaser.Scene {
     this.unitSprites.forEach(({ sprite, originalPosition }, key) => {
       if (!visibleUnits.has(key)) {
         sprite.setVisible(false);
-        const p = mapPosToIsometricPixels(originalPosition);
+        const p = mapPosToIsometricPixels(originalPosition, this.overallScale);
         sprite.x = p[0];
         sprite.y = p[1] - 18;
       }
