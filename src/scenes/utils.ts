@@ -54,6 +54,10 @@ export const hashToMapPosition = (hash: number): Position => {
   return new Position(Math.floor(hash / 10e5), hash % 10e5);
 };
 
+export const getDepthByPos = (pos: Position): number => {
+  return 5 + (pos.x * pos.y) / 1000;
+};
+
 export const memorySizeOf = (obj: any) => {
   var bytes = 0;
 

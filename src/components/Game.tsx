@@ -195,7 +195,7 @@ export const GameComponent = () => {
                     })}
                   </ButtonGroup>
                   <ButtonGroup disabled={!isReady}>
-                    {[0.75, 1, 1.25, 1.5].map((s) => {
+                    {[0.75, 1, 1.25, 1.5, 2].map((s) => {
                       const variant = visualScale === s ? "contained" : "outlined";
                       return <Button color="primary" variant={variant} onClick={() => {
                         setVisualScale(s);

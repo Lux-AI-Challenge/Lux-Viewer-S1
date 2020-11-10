@@ -8,6 +8,7 @@ import {
 } from '@lux-ai/2020-challenge/lib/es6/Unit/index';
 
 import {
+  getDepthByPos,
   hashMapCoords,
   mapCoordsToIsometricPixels,
   mapCoordsToPixels,
@@ -18,6 +19,7 @@ import {
 } from './utils';
 import { Position } from '@lux-ai/2020-challenge/lib/es6/GameMap/position';
 import { GameObjects } from 'phaser';
+import seedrandom from 'seedrandom';
 
 export interface Frame {
   // map from hashed position to resource data
@@ -136,11 +138,13 @@ class MainScene extends Phaser.Scene {
 
   overallScale = 1.5;
   defaultScales = {
-    city: 0.15,
+    city: 0.14,
     tree: 0.15,
-    worker: 0.09,
+    worker: 0.05,
     cart: 0.15,
     block: 0.11,
+    tree0: 0.13,
+    tree1: 0.1,
   };
 
   constructor() {
@@ -159,8 +163,17 @@ class MainScene extends Phaser.Scene {
     this.load.svg('block1', 'assets/ground.svg');
     this.load.svg('tree1', 'assets/sprites/tree1.svg');
     this.load.svg('tree0', 'assets/sprites/tree0.svg');
-    this.load.svg('city0', 'assets/sprites/city0.svg');
-    this.load.svg('city1', 'assets/sprites/city1.svg');
+    // city naming scheme
+    // city<team><variant><transparent? t : ''>
+    this.load.svg('city00', 'assets/sprites/city00.svg');
+    this.load.svg('city01', 'assets/sprites/city00.svg');
+    this.load.svg('city02', 'assets/sprites/city00.svg');
+    this.load.svg('city02t', 'assets/sprites/city00.svg');
+    // this.load.svg('city0t', 'assets/sprites/city0t.svg');
+    this.load.svg('city10', 'assets/sprites/city10.svg');
+    this.load.svg('city11', 'assets/sprites/city11.svg');
+    this.load.svg('city12', 'assets/sprites/city12.svg');
+    this.load.svg('city12t', 'assets/sprites/city12t.svg');
     this.load.image('coal', 'assets/sprites/coal.png');
     this.load.image('uranium', 'assets/sprites/uranium.png');
   }
@@ -450,22 +463,27 @@ class MainScene extends Phaser.Scene {
     switch (type) {
       case Resource.Types.WOOD: {
         let treeType = 0;
-        if (Math.random() < 0.5) {
+        let tscale = this.defaultScales.tree0;
+        const s = seedrandom('' + x * 10e5 + y);
+        if (s() < 0.5) {
           treeType = 1;
+          tscale = this.defaultScales.tree1;
         }
         const img = this.add
-          .image(p[0], p[1], 'tree' + treeType)
-          .setDepth(3)
-          .setScale(this.defaultScales.tree * this.overallScale);
-        // img.displayHeight = 42;
-        // img.displayWidth = 42;
-        img.setY(img.y - 18);
+          .image(
+            p[0] + 20 * tscale * this.overallScale,
+            p[1],
+            'tree' + treeType
+          )
+          .setDepth(getDepthByPos(new Position(x, y)))
+          .setScale(tscale * this.overallScale);
+        img.setY(img.y - 120 * tscale * this.overallScale);
         return img;
       }
       case Resource.Types.COAL: {
         const img = this.add
           .image(p[0], p[1], 'coal')
-          .setDepth(3)
+          .setDepth(getDepthByPos(new Position(x, y)))
           .setScale(1.5);
         img.setY(img.y - 18);
         return img;
@@ -473,7 +491,7 @@ class MainScene extends Phaser.Scene {
       case Resource.Types.URANIUM: {
         const img = this.add
           .image(p[0], p[1], 'uranium')
-          .setDepth(3)
+          .setDepth(getDepthByPos(new Position(x, y)))
           .setScale(1.5);
         img.setY(img.y - 18);
         return img;
@@ -486,7 +504,7 @@ class MainScene extends Phaser.Scene {
     const sprite = this.add
       .sprite(p[0], p[1], 'worker' + team)
       .setScale(this.defaultScales.worker * this.overallScale);
-    sprite.setDepth(5);
+    sprite.setDepth(getDepthByPos(new Position(x, y)));
     this.unitSprites.set(id, { sprite, originalPosition: new Position(x, y) });
     return sprite;
   }
@@ -496,7 +514,7 @@ class MainScene extends Phaser.Scene {
     const sprite = this.add
       .sprite(p[0], p[1], 'cart' + team)
       .setScale(this.defaultScales.cart * this.overallScale);
-    sprite.setDepth(5);
+    sprite.setDepth(getDepthByPos(new Position(x, y)));
     this.unitSprites.set(id, { sprite, originalPosition: new Position(x, y) });
     return sprite;
   }
@@ -515,47 +533,15 @@ class MainScene extends Phaser.Scene {
 
     let visibleUnits: Set<string> = new Set();
     let visibleCityTiles: Set<number> = new Set();
-
-    // iterate over all units in this frame / turn
+    let tilesWithUnits: Set<number> = new Set();
     f.unitData.forEach((data) => {
-      const id = data.id;
-      const { sprite } = this.unitSprites.get(id);
-
-      sprite.setVisible(true);
-      const p = mapPosToIsometricPixels(data.pos, this.overallScale);
-      // when animating, make smooth movement
-      this.tweens.add({
-        targets: sprite,
-        x: p[0],
-        y: p[1] - 18,
-        ease: 'Linear',
-        duration: 100,
-        repeat: 0,
-        yoyo: false,
-      });
-      visibleUnits.add(id);
+      visibleUnits.add(data.id);
+      tilesWithUnits.add(hashMapCoords(data.pos));
     });
-
-    // iterate over all live city tiles
     f.cityTileData.forEach((data) => {
-      const p = mapPosToIsometricPixels(data.pos, this.overallScale);
-      const img = this.add
-        .image(p[0], p[1], 'city' + data.team)
-        .setDepth(4)
-        .setScale(this.defaultScales.city * this.overallScale);
-      img.setY(img.y - 18);
-      this.currentRenderedFramesImgs.push(img);
       visibleCityTiles.add(hashMapCoords(data.pos));
     });
-    this.unitSprites.forEach(({ sprite, originalPosition }, key) => {
-      if (!visibleUnits.has(key)) {
-        sprite.setVisible(false);
-        const p = mapPosToIsometricPixels(originalPosition, this.overallScale);
-        sprite.x = p[0];
-        sprite.y = p[1] - 18;
-      }
-    });
-
+    const tilesWithResources: Set<number> = new Set();
     // paint in all resource tiles
     f.resourceData.forEach((data) => {
       const img = this.addResourceTile(
@@ -565,6 +551,88 @@ class MainScene extends Phaser.Scene {
         data.amt
       );
       this.currentRenderedFramesImgs.push(img);
+      tilesWithResources.add(hashMapCoords(data.pos));
+    });
+
+    // iterate over all units in this frame / turn
+    f.unitData.forEach((data) => {
+      const id = data.id;
+      const { sprite } = this.unitSprites.get(id);
+
+      sprite.setVisible(true);
+      const p = mapPosToIsometricPixels(data.pos, this.overallScale);
+      // when animating, make smooth movement
+
+      let newx = p[0] - 50 * this.defaultScales.worker * this.overallScale;
+      let newy = p[1] - 220 * this.defaultScales.worker * this.overallScale;
+      if (visibleCityTiles.has(hashMapCoords(data.pos))) {
+        newx = p[0] - 320 * this.defaultScales.worker * this.overallScale;
+      } else if (tilesWithResources.has(hashMapCoords(data.pos))) {
+        newy = p[1] - 50 * this.defaultScales.worker * this.overallScale;
+      }
+      this.tweens.add({
+        targets: sprite,
+        x: newx,
+        y: newy,
+        ease: 'Linear',
+        duration: 100,
+        repeat: 0,
+        yoyo: false,
+      });
+
+      if (data.type === LUnit.Type.WORKER) {
+        // add 1/10e5 to place this in front of cities
+        sprite
+          .setDepth(getDepthByPos(data.pos) + 1 / 10e5)
+          .setScale(this.defaultScales.worker * this.overallScale);
+      } else {
+        sprite
+          .setDepth(getDepthByPos(data.pos) + 1 / 10e5)
+          .setScale(this.defaultScales.cart * this.overallScale);
+      }
+    });
+
+    // iterate over all live city tiles
+    f.cityTileData.forEach((data) => {
+      const p = mapPosToIsometricPixels(data.pos, this.overallScale);
+      let cityTileType = 'city' + data.team;
+
+      const s = seedrandom('' + data.pos.x * 10e3 + data.pos.y);
+      let variant = '0';
+      const rngp = s();
+      if (rngp < 0.33) {
+        variant = '2';
+      } else if (rngp < 0.66) {
+        variant = '1';
+      }
+      cityTileType += variant;
+      // make tile transparent if there's a unit behind it and its a tall building (type 1)
+      if (
+        variant === '2' &&
+        tilesWithUnits.has(
+          hashMapCoords(new Position(data.pos.x - 1, data.pos.y - 1))
+        )
+      ) {
+        cityTileType += 't';
+      }
+      const img = this.add
+        .image(p[0], p[1], cityTileType)
+        .setDepth(getDepthByPos(data.pos))
+        .setScale(this.defaultScales.city * this.overallScale);
+      if (variant === '2') {
+        img.setY(img.y - 160 * this.defaultScales.city * this.overallScale);
+      } else {
+        img.setY(img.y - 120 * this.defaultScales.city * this.overallScale);
+      }
+      this.currentRenderedFramesImgs.push(img);
+    });
+    this.unitSprites.forEach(({ sprite, originalPosition }, key) => {
+      if (!visibleUnits.has(key)) {
+        sprite.setVisible(false);
+        const p = mapPosToIsometricPixels(originalPosition, this.overallScale);
+        sprite.x = p[0];
+        sprite.y = p[1] - 18;
+      }
     });
 
     if (this.currentSelectedTilePos !== null) {
