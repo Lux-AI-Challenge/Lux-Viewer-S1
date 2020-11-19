@@ -6,20 +6,20 @@ export const mapPosToPixels = (pos: Position): [number, number] => {
 };
 
 export const mapCoordsToPixels = (x: number, y: number): [number, number] => {
-  return [x * 32 + 16, y * 32 + 16];
+  return [x * 32 * 4 + 16, y * 32 * 4 + 16];
 };
 
-const angleFactor = 2.5;
+const angleFactor = 2.4;
 
 export const mapCoordsToIsometricPixels = (
   x: number,
   y: number,
   scale: number
 ): [number, number] => {
-  const f = 30 * scale; // based on tile size
+  const f = 35 * 2 * scale; // based on tile size
   return [
-    450 + x * f - f * y,
-    150 + y * f + f * x - ((x + y) * f) / angleFactor,
+    1280 + x * f - f * y,
+    1280 / 2 + y * f + f * x - ((x + y) * f) / angleFactor,
   ];
 };
 export const mapPosToIsometricPixels = (
@@ -35,9 +35,9 @@ export const mapIsometricPixelsToPosition = (
   scale: number
 ): Position => {
   //TODO 450 and 150 are hardcoded, hard to make responsive
-  px -= 450;
-  py -= 150;
-  const f = 30 * scale;
+  px -= 1280;
+  py -= 1280 / 2;
+  const f = 35 * 2 * scale;
 
   // TODO, why are these backward??
   let _y = (px - (angleFactor / (angleFactor - 1)) * py) / (-2 * f);

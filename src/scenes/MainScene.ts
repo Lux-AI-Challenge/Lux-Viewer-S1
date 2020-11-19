@@ -136,15 +136,16 @@ class MainScene extends Phaser.Scene {
   hoverImageTile: GameObjects.Image = null;
   originalHoverImageTileY = 0;
 
-  overallScale = 1.5;
+  overallScale = 1;
   defaultScales = {
-    city: 0.14,
-    tree: 0.15,
-    worker: 0.05,
-    cart: 0.15,
-    block: 0.11,
-    tree0: 0.13,
-    tree1: 0.1,
+    city: 0.34,
+    tree: 0.6,
+    worker: 0.16,
+    cart: 0.6,
+    block: 0.44,
+    tree0: 0.35,
+    tree1: 0.4,
+    uranium: 0.45,
   };
 
   constructor() {
@@ -155,10 +156,10 @@ class MainScene extends Phaser.Scene {
 
   preload() {
     this.load.image('Grass', 'assets/tilemaps/ground_tileset.png');
-    this.load.image('worker0', 'assets/sprites/worker0.svg');
-    this.load.image('worker1', 'assets/sprites/worker1.svg');
-    this.load.image('cart0', 'assets/sprites/cart0.svg');
-    this.load.image('cart1', 'assets/sprites/cart1.svg');
+    this.load.image('worker0', 'assets/sprites/worker0w.svg');
+    this.load.image('worker1', 'assets/sprites/worker1w.svg');
+    this.load.image('cart0', 'assets/sprites/carts/cart0e.svg');
+    this.load.image('cart1', 'assets/sprites/carts/cart1e.svg');
     this.load.image('player', 'assets/sprites/mushroom.png');
     this.load.svg('block1', 'assets/ground.svg');
     this.load.svg('tree1', 'assets/sprites/tree1.svg');
@@ -175,7 +176,7 @@ class MainScene extends Phaser.Scene {
     this.load.svg('city12', 'assets/sprites/city12.svg');
     this.load.svg('city12t', 'assets/sprites/city12t.svg');
     this.load.image('coal', 'assets/sprites/coal.png');
-    this.load.image('uranium', 'assets/sprites/uranium.png');
+    this.load.svg('uranium', 'assets/sprites/uranium.svg');
   }
 
   private onTileClicked(v: Position) {
@@ -492,8 +493,8 @@ class MainScene extends Phaser.Scene {
         const img = this.add
           .image(p[0], p[1], 'uranium')
           .setDepth(getDepthByPos(new Position(x, y)))
-          .setScale(1.5);
-        img.setY(img.y - 18);
+          .setScale(this.defaultScales.uranium * this.overallScale);
+        img.setY(img.y - 32);
         return img;
       }
     }
@@ -564,11 +565,11 @@ class MainScene extends Phaser.Scene {
       // when animating, make smooth movement
 
       let newx = p[0] - 50 * this.defaultScales.worker * this.overallScale;
-      let newy = p[1] - 220 * this.defaultScales.worker * this.overallScale;
+      let newy = p[1] - 190 * this.defaultScales.worker * this.overallScale;
       if (visibleCityTiles.has(hashMapCoords(data.pos))) {
-        newx = p[0] - 320 * this.defaultScales.worker * this.overallScale;
+        newx = p[0] - 280 * this.defaultScales.worker * this.overallScale;
       } else if (tilesWithResources.has(hashMapCoords(data.pos))) {
-        newy = p[1] - 50 * this.defaultScales.worker * this.overallScale;
+        newy = p[1] - 60 * this.defaultScales.worker * this.overallScale;
       }
       this.tweens.add({
         targets: sprite,

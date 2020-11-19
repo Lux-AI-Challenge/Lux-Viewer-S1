@@ -22,7 +22,7 @@ import { hashToMapPosition, mapCoordsToIsometricPixels } from '../scenes/utils';
 
 export const GameComponent = () => {
   const [notifWindowOpen, setNotifWindowOpen] = useState(false);
-  const [notifMsg, setNotifMsg] = useState("");
+  const [notifMsg, setNotifMsg] = useState('');
   const [running, setRunning] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [visualScale, setVisualScale] = useState(1);
@@ -65,7 +65,6 @@ export const GameComponent = () => {
         moveToTurn(currTurn);
         currTurn += 1;
         setTurn(currTurn);
-        
       }, 1000 / playbackSpeed);
       return () => clearInterval(interval);
     }
@@ -82,14 +81,14 @@ export const GameComponent = () => {
       moveToTurn(turn);
       // TODO: do a on scale change instead inside main
       main.floorImageTiles.forEach((tileImage, hash) => {
-        const pos = hashToMapPosition(hash)
+        const pos = hashToMapPosition(hash);
         const ps = mapCoordsToIsometricPixels(pos.x, pos.y, main.overallScale);
-        tileImage.setScale(main.defaultScales.block * main.overallScale)
-        tileImage.setX(ps[0])
-        tileImage.setY(ps[1])
+        tileImage.setScale(main.defaultScales.block * main.overallScale);
+        tileImage.setX(ps[0]);
+        tileImage.setY(ps[1]);
       });
     }
-  }, [main, visualScale])
+  }, [main, visualScale]);
   const [turn, setTurn] = useState(0);
   const [currentFrame, setFrame] = useState<Frame>(null);
   const [uploading, setUploading] = useState(false);
@@ -179,29 +178,49 @@ export const GameComponent = () => {
                 {gameLoading && <CircularProgress />}
                 <div id="content"></div>
                 <div className="play-buttons">
-                  <Button className="play" color="primary" variant="contained" disabled={!isReady} onClick={() => {
-                    setRunning(!running)
-                  }}>
+                  <Button
+                    className="play"
+                    color="primary"
+                    variant="contained"
+                    disabled={!isReady}
+                    onClick={() => {
+                      setRunning(!running);
+                    }}
+                  >
                     {running ? 'Pause' : 'Play'}
                   </Button>
                   <ButtonGroup disabled={!isReady}>
                     {[1, 2, 4, 8, 16].map((speed) => {
-                      const variant = playbackSpeed === speed ? "contained" : "outlined";
-                      return <Button color="primary" variant={variant} onClick={() => {
-                        setPlaybackSpeed(speed);
-                      }}>
-                      {speed}x
-                      </Button>
+                      const variant =
+                        playbackSpeed === speed ? 'contained' : 'outlined';
+                      return (
+                        <Button
+                          color="primary"
+                          variant={variant}
+                          onClick={() => {
+                            setPlaybackSpeed(speed);
+                          }}
+                        >
+                          {speed}x
+                        </Button>
+                      );
                     })}
                   </ButtonGroup>
                   <ButtonGroup disabled={!isReady}>
                     {[0.75, 1, 1.25, 1.5, 2].map((s) => {
-                      const variant = visualScale === s ? "contained" : "outlined";
-                      return <Button color="primary" variant={variant} onClick={() => {
-                        setVisualScale(s);
-                      }}>
-                      {s}x Scale
-                      </Button>
+                      const variant =
+                        visualScale === s ? 'contained' : 'outlined';
+                      return (
+                        <Button
+                          color="primary"
+                          variant={variant}
+                          onClick={() => {
+                            setVisualScale(s);
+                          }}
+                        >
+                          {s}x Scale
+                        </Button>
+                      );
                     })}
                   </ButtonGroup>
                 </div>
