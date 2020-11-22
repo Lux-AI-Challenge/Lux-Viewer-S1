@@ -35,6 +35,7 @@ export interface Frame {
   unitData: FrameUnitData;
   cityData: FrameCityData;
   cityTileData: FrameCityTileData;
+  errors: string[];
 }
 
 type FrameTeamStateData = {
@@ -112,20 +113,28 @@ class MainScene extends Phaser.Scene {
 
   frames: Array<Frame> = [];
 
+  /** To allow dimensions to run a match */
   pseudomatch: any = {
     state: {},
     configs: {
       storeReplay: false,
       debug: false,
     },
-    throw: () => {},
+    throw: (id: number, err: any) => {
+      this.currentTurnErrors.push(`Team ${id} - ${err}`);
+    },
     sendAll: () => {},
     send: () => {},
     log: {
       detail: () => {},
+      warn: (m: string) => {
+        this.currentTurnErrors.push(m);
+      },
     },
     agents: [],
   };
+
+  currentTurnErrors: Array<string> = [];
 
   map: Phaser.Tilemaps.Tilemap;
   floorImageTiles: Map<number, GameObjects.Image> = new Map();
@@ -145,7 +154,7 @@ class MainScene extends Phaser.Scene {
     block: 0.44,
     tree0: 0.35,
     tree1: 0.4,
-    uranium: 0.45,
+    uranium: 0.43,
   };
 
   constructor() {
@@ -179,6 +188,9 @@ class MainScene extends Phaser.Scene {
     this.load.svg('uranium', 'assets/sprites/uranium.svg');
   }
 
+  /**
+   * Handle when a tile is clicked
+   */
   private onTileClicked(v: Position) {
     const f = this.frames[this.turn];
     const unitDataAtXY: FrameUnitData = new Map();
@@ -206,6 +218,9 @@ class MainScene extends Phaser.Scene {
     this.currentSelectedTilePos = clickedPos;
   }
 
+  /**
+   * Load replay data into game
+   */
   loadReplayData(replayData: any): void {
     this.luxgame = new Game();
     let width = replayData.map[0].length;
@@ -286,22 +301,10 @@ class MainScene extends Phaser.Scene {
       }
     });
 
-    // this.input.on(Phaser.Input.Events.POINTER_DOWN, (pointer) => {
-    //   // console.log(drag);
-    //   // this.cameras.main.centerOnX(drag.dragX);
-    //   console.log('down,', pointer);
-    // });
-    // this.input.on(Phaser.Input.Events.Poin)
-    // this.input.on(Phaser.Input.Events.POINTER_UP, (pointer) => {
-    //   // console.log(drag);
-    //   // this.cameras.main.centerOnX(drag.dragX);
-    //   console.log('out,', pointer);
-    // });
-
+    // add initial resource information
     for (let y = 0; y < height; y++) {
       replayData.map[y].map((data, x) => {
         if (data.resource !== null) {
-          let p = Math.random();
           switch (data.resource) {
             case Resource.Types.WOOD:
               this.luxgame.map.addResource(x, y, Resource.Types.WOOD, data.amt);
@@ -322,6 +325,7 @@ class MainScene extends Phaser.Scene {
       });
     }
 
+    // add initial city tile information
     replayData.initialCityTiles.forEach((ct) => {
       let p = Math.random();
       let n = 7;
@@ -332,6 +336,8 @@ class MainScene extends Phaser.Scene {
       }
       this.luxgame.spawnCityTile(ct.team, ct.x, ct.y);
     });
+
+    // add initial unit information
     replayData.initialUnits.forEach((unit) => {
       if (unit.type === LUnit.Type.WORKER) {
         const worker = this.luxgame.spawnWorker(
@@ -442,6 +448,7 @@ class MainScene extends Phaser.Scene {
       cityData,
       cityTileData,
       teamStates,
+      errors: this.currentTurnErrors,
     };
   }
 
@@ -459,6 +466,9 @@ class MainScene extends Phaser.Scene {
     this.events.emit('created');
   }
 
+  /**
+   * Paint in a resource tile to the current rendered frame
+   */
   addResourceTile(type: Resource.Types, x: number, y: number, amt: number) {
     const p = mapCoordsToIsometricPixels(x, y, this.overallScale);
     switch (type) {
@@ -473,12 +483,11 @@ class MainScene extends Phaser.Scene {
         const img = this.add
           .image(
             p[0] + 20 * tscale * this.overallScale,
-            p[1],
+            p[1] - 120 * tscale * this.overallScale,
             'tree' + treeType
           )
           .setDepth(getDepthByPos(new Position(x, y)))
           .setScale(tscale * this.overallScale);
-        img.setY(img.y - 120 * tscale * this.overallScale);
         return img;
       }
       case Resource.Types.COAL: {
@@ -491,10 +500,13 @@ class MainScene extends Phaser.Scene {
       }
       case Resource.Types.URANIUM: {
         const img = this.add
-          .image(p[0], p[1], 'uranium')
+          .image(
+            p[0] - 22 * this.defaultScales.uranium * this.overallScale,
+            p[1] - 62 * this.defaultScales.uranium * this.overallScale,
+            'uranium'
+          )
           .setDepth(getDepthByPos(new Position(x, y)))
           .setScale(this.defaultScales.uranium * this.overallScale);
-        img.setY(img.y - 32);
         return img;
       }
     }
@@ -521,6 +533,7 @@ class MainScene extends Phaser.Scene {
   }
 
   currentRenderedFramesImgs: Array<GameObjects.Image> = [];
+
   renderFrame(turn: number) {
     this.turn = turn;
     const f = this.frames[turn];
@@ -562,15 +575,18 @@ class MainScene extends Phaser.Scene {
 
       sprite.setVisible(true);
       const p = mapPosToIsometricPixels(data.pos, this.overallScale);
-      // when animating, make smooth movement
 
-      let newx = p[0] - 50 * this.defaultScales.worker * this.overallScale;
-      let newy = p[1] - 190 * this.defaultScales.worker * this.overallScale;
+      // translate unit position depending on if there's a resource or city there
+      let newx = p[0] - 45 * this.defaultScales.worker * this.overallScale;
+      let newy = p[1] - 140 * this.defaultScales.worker * this.overallScale;
       if (visibleCityTiles.has(hashMapCoords(data.pos))) {
-        newx = p[0] - 280 * this.defaultScales.worker * this.overallScale;
+        // newx = p[0] - 280 * this.defaultScales.worker * this.overallScale;
+        newy = p[1] - 20 * this.defaultScales.worker * this.overallScale;
       } else if (tilesWithResources.has(hashMapCoords(data.pos))) {
         newy = p[1] - 60 * this.defaultScales.worker * this.overallScale;
       }
+
+      // create smooth movement
       this.tweens.add({
         targets: sprite,
         x: newx,
