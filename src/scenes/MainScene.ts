@@ -57,13 +57,15 @@ export interface FrameSingleUnitData {
   id: string;
 }
 
-type FrameCityTileData = Array<{
+type FrameCityTileData = Array<FrameSingleCityTileData>;
+
+type FrameSingleCityTileData = {
   pos: Position;
   team: LUnit.TEAM;
   cityid: string;
   tileid: string;
   cooldown: number;
-}>;
+};
 
 export type FrameCityData = Map<
   string,
@@ -176,14 +178,19 @@ class MainScene extends Phaser.Scene {
     // city naming scheme
     // city<team><variant><transparent? t : ''>
     this.load.svg('city00', 'assets/sprites/city00.svg');
-    this.load.svg('city01', 'assets/sprites/city00.svg');
-    this.load.svg('city02', 'assets/sprites/city00.svg');
-    this.load.svg('city02t', 'assets/sprites/city00.svg');
-    // this.load.svg('city0t', 'assets/sprites/city0t.svg');
+    this.load.svg('city01', 'assets/sprites/city01.svg');
+    this.load.svg('city02', 'assets/sprites/city02.svg');
+    this.load.svg('city02t', 'assets/sprites/city02t.svg');
+    this.load.svg('city03', 'assets/sprites/city03.svg');
+    this.load.svg('city03t', 'assets/sprites/city03t.svg');
+
     this.load.svg('city10', 'assets/sprites/city10.svg');
     this.load.svg('city11', 'assets/sprites/city11.svg');
     this.load.svg('city12', 'assets/sprites/city12.svg');
     this.load.svg('city12t', 'assets/sprites/city12t.svg');
+    this.load.svg('city13', 'assets/sprites/city13.svg');
+    this.load.svg('city13t', 'assets/sprites/city13t.svg');
+
     this.load.image('coal', 'assets/sprites/coal.png');
     this.load.svg('uranium', 'assets/sprites/uranium.svg');
   }
@@ -514,6 +521,62 @@ class MainScene extends Phaser.Scene {
     }
   }
 
+  addCityTile(data: FrameSingleCityTileData, tilesWithUnits: Set<number>) {
+    const p = mapPosToIsometricPixels(data.pos, this.overallScale);
+    let cityTileType = 'city' + data.team;
+
+    const s = seedrandom('' + data.pos.x * 10e3 + data.pos.y);
+    let variant = '0';
+    const rngp = s();
+    if (rngp < 0.25) {
+      variant = '2';
+    } else if (rngp < 0.5) {
+      variant = '1';
+    } else if (rngp < 0.75) {
+      variant = '3';
+    }
+    cityTileType += variant;
+    // make tile transparent if there's a unit behind it and its a tall building (type 2 or 3)
+    if (
+      (variant === '2' || variant === '3') &&
+      tilesWithUnits.has(
+        hashMapCoords(new Position(data.pos.x - 1, data.pos.y - 1))
+      )
+    ) {
+      cityTileType += 't';
+    }
+    const img = this.add
+      .image(p[0], p[1], cityTileType)
+      .setDepth(getDepthByPos(data.pos))
+      .setScale(this.defaultScales.city * this.overallScale);
+
+    switch (data.team + variant) {
+      case '00':
+      case '01':
+        img.setY(img.y - 80 * this.defaultScales.city * this.overallScale);
+        img.setX(img.x + 10 * this.defaultScales.city * this.overallScale);
+        break;
+      case '02':
+      case '03':
+        img.setY(img.y - 140 * this.defaultScales.city * this.overallScale);
+        img.setX(img.x + 10 * this.defaultScales.city * this.overallScale);
+        break;
+      case '10':
+      case '11':
+        img.setY(img.y - 110 * this.defaultScales.city * this.overallScale);
+        break;
+      case '12':
+      case '13':
+        img.setY(img.y - 160 * this.defaultScales.city * this.overallScale);
+        break;
+    }
+
+    return img;
+  }
+
+  /**
+   * Add worker sprite for use by any frame
+   */
   addWorkerSprite(x: number, y: number, team: LUnit.TEAM, id: string) {
     const p = mapCoordsToIsometricPixels(x, y, this.overallScale);
     const sprite = this.add
@@ -524,6 +587,9 @@ class MainScene extends Phaser.Scene {
     return sprite;
   }
 
+  /**
+   * Add cart sprite for use by any frame
+   */
   addCartSprite(x: number, y: number, team: LUnit.TEAM, id: string) {
     const p = mapCoordsToIsometricPixels(x, y, this.overallScale);
     const sprite = this.add
@@ -582,7 +648,6 @@ class MainScene extends Phaser.Scene {
       let newx = p[0] - 45 * this.defaultScales.worker * this.overallScale;
       let newy = p[1] - 140 * this.defaultScales.worker * this.overallScale;
       if (visibleCityTiles.has(hashMapCoords(data.pos))) {
-        // newx = p[0] - 280 * this.defaultScales.worker * this.overallScale;
         newy = p[1] - 20 * this.defaultScales.worker * this.overallScale;
       } else if (tilesWithResources.has(hashMapCoords(data.pos))) {
         newy = p[1] - 60 * this.defaultScales.worker * this.overallScale;
@@ -613,36 +678,7 @@ class MainScene extends Phaser.Scene {
 
     // iterate over all live city tiles
     f.cityTileData.forEach((data) => {
-      const p = mapPosToIsometricPixels(data.pos, this.overallScale);
-      let cityTileType = 'city' + data.team;
-
-      const s = seedrandom('' + data.pos.x * 10e3 + data.pos.y);
-      let variant = '0';
-      const rngp = s();
-      if (rngp < 0.33) {
-        variant = '2';
-      } else if (rngp < 0.66) {
-        variant = '1';
-      }
-      cityTileType += variant;
-      // make tile transparent if there's a unit behind it and its a tall building (type 1)
-      if (
-        variant === '2' &&
-        tilesWithUnits.has(
-          hashMapCoords(new Position(data.pos.x - 1, data.pos.y - 1))
-        )
-      ) {
-        cityTileType += 't';
-      }
-      const img = this.add
-        .image(p[0], p[1], cityTileType)
-        .setDepth(getDepthByPos(data.pos))
-        .setScale(this.defaultScales.city * this.overallScale);
-      if (variant === '2') {
-        img.setY(img.y - 160 * this.defaultScales.city * this.overallScale);
-      } else {
-        img.setY(img.y - 120 * this.defaultScales.city * this.overallScale);
-      }
+      const img = this.addCityTile(data, tilesWithUnits);
       this.currentRenderedFramesImgs.push(img);
     });
     this.unitSprites.forEach(({ sprite, originalPosition }, key) => {
@@ -714,9 +750,10 @@ class MainScene extends Phaser.Scene {
   }
 
   lastPointerPosition = null;
-  yBounds = [-100, 440];
-  xBounds = [-100, 640];
+
   update(time: number, delta: number) {
+    let yBounds = [-100 * this.overallScale, 340 * this.overallScale];
+    let xBounds = [-300 * this.overallScale, 640 * this.overallScale];
     if (this.game.input.activePointer.isDown) {
       // this.game.input.mousePointer.worldX
       if (this.lastPointerPosition != null) {
@@ -724,35 +761,35 @@ class MainScene extends Phaser.Scene {
         let dy = this.lastPointerPosition.y - this.game.input.activePointer.y;
 
         if (
-          this.cameras.main.scrollX <= this.xBounds[1] &&
-          this.cameras.main.scrollX >= this.xBounds[0]
+          this.cameras.main.scrollX <= xBounds[1] &&
+          this.cameras.main.scrollX >= xBounds[0]
         ) {
           this.cameras.main.scrollX += dx;
-        } else if (this.cameras.main.scrollX < this.xBounds[0] && dx > 0) {
+        } else if (this.cameras.main.scrollX < xBounds[0] && dx > 0) {
           this.cameras.main.scrollX += dx;
-        } else if (this.cameras.main.scrollX > this.xBounds[1] && dx < 0) {
+        } else if (this.cameras.main.scrollX > xBounds[1] && dx < 0) {
           this.cameras.main.scrollX += dx;
         }
 
         if (
-          this.cameras.main.scrollY <= this.yBounds[1] &&
-          this.cameras.main.scrollY >= this.yBounds[0]
+          this.cameras.main.scrollY <= yBounds[1] &&
+          this.cameras.main.scrollY >= yBounds[0]
         ) {
           this.cameras.main.scrollY += dy;
-        } else if (this.cameras.main.scrollY < this.yBounds[0] && dy > 0) {
+        } else if (this.cameras.main.scrollY < yBounds[0] && dy > 0) {
           this.cameras.main.scrollY += dy;
-        } else if (this.cameras.main.scrollY > this.yBounds[1] && dy < 0) {
+        } else if (this.cameras.main.scrollY > yBounds[1] && dy < 0) {
           this.cameras.main.scrollY += dy;
         }
 
-        if (this.cameras.main.scrollX < this.xBounds[0]) {
-          this.cameras.main.scrollX = this.xBounds[0];
+        if (this.cameras.main.scrollX < xBounds[0]) {
+          this.cameras.main.scrollX = xBounds[0];
         }
-        if (this.cameras.main.scrollY < this.yBounds[0]) {
-          this.cameras.main.scrollY = this.yBounds[0];
+        if (this.cameras.main.scrollY < yBounds[0]) {
+          this.cameras.main.scrollY = yBounds[0];
         }
-        if (this.cameras.main.scrollY > this.yBounds[1]) {
-          this.cameras.main.scrollY = this.yBounds[1];
+        if (this.cameras.main.scrollY > yBounds[1]) {
+          this.cameras.main.scrollY = yBounds[1];
         }
       }
       this.lastPointerPosition = {
