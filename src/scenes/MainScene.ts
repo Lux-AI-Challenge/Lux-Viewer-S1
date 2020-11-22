@@ -152,8 +152,8 @@ class MainScene extends Phaser.Scene {
     worker: 0.16,
     cart: 0.6,
     block: 0.44,
-    tree0: 0.35,
-    tree1: 0.4,
+    tree0: 0.3,
+    tree1: 0.33,
     uranium: 0.43,
   };
 
@@ -476,14 +476,16 @@ class MainScene extends Phaser.Scene {
         let treeType = 0;
         let tscale = this.defaultScales.tree0;
         const s = seedrandom('' + x * 10e5 + y);
+        let scaleFactor = 140;
         if (s() < 0.5) {
           treeType = 1;
           tscale = this.defaultScales.tree1;
+          scaleFactor = 120;
         }
         const img = this.add
           .image(
             p[0] + 20 * tscale * this.overallScale,
-            p[1] - 120 * tscale * this.overallScale,
+            p[1] - scaleFactor * tscale * this.overallScale,
             'tree' + treeType
           )
           .setDepth(getDepthByPos(new Position(x, y)))
