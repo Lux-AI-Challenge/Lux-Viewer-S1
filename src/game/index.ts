@@ -6,7 +6,7 @@ export const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: 'content',
   width: 1280 * 2,
-  height: 1280 * 2,
+  height: 1280 * 1,
   zoom: 0.5,
   render: {
     pixelArt: false,

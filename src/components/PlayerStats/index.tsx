@@ -1,7 +1,7 @@
 import { Unit } from '@lux-ai/2020-challenge/lib/es6/Unit';
-import Divider from '@material-ui/core/Divider'
-import Grid from '@material-ui/core/Grid'
-import CardContent from '@material-ui/core/CardContent'
+import Divider from '@material-ui/core/Divider';
+import Grid from '@material-ui/core/Grid';
+import CardContent from '@material-ui/core/CardContent';
 import Card from '@material-ui/core/Card';
 import React from 'react';
 import './styles.css';
@@ -29,7 +29,7 @@ const PlayerStats = ({
       <Grid className={`Cities team_${team}`}>
         {cities.map((city) => {
           return (
-            <Grid item xs={3} key={city.cityid}>
+            <Grid item xs={12} key={city.cityid}>
               <Card className="card">
                 <div className="accent"></div>
                 <CardContent>

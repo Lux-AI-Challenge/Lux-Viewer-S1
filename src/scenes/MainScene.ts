@@ -147,7 +147,7 @@ class MainScene extends Phaser.Scene {
   hoverImageTile: GameObjects.Image = null;
   originalHoverImageTileY = 0;
 
-  overallScale = 1;
+  overallScale = 1.5;
   defaultScales = {
     city: 0.34,
     tree: 0.6,
@@ -225,6 +225,8 @@ class MainScene extends Phaser.Scene {
     this.currentSelectedTilePos = clickedPos;
   }
 
+  mapWidth: number = -1;
+  mapHeight: number = -1;
   /**
    * Load replay data into game
    */
@@ -232,10 +234,16 @@ class MainScene extends Phaser.Scene {
     this.luxgame = new Game();
     let width = replayData.map[0].length;
     let height = replayData.map.length;
+    this.mapWidth = width;
+    this.mapHeight = height;
     // generate the ground
     for (let y = 0; y < height; y++) {
       replayData.map[y].forEach((data, x) => {
-        const ps = mapCoordsToIsometricPixels(x, y, this.overallScale);
+        const ps = mapCoordsToIsometricPixels(x, y, {
+          scale: this.overallScale,
+          width: this.mapWidth,
+          height: this.mapHeight,
+        });
 
         const img = this.add
           .image(ps[0], ps[1], 'block1')
@@ -249,11 +257,11 @@ class MainScene extends Phaser.Scene {
     this.input.on(
       Phaser.Input.Events.POINTER_DOWN,
       (d: { worldX: number; worldY: number }) => {
-        const pos = mapIsometricPixelsToPosition(
-          d.worldX,
-          d.worldY,
-          this.overallScale
-        );
+        const pos = mapIsometricPixelsToPosition(d.worldX, d.worldY, {
+          scale: this.overallScale,
+          width: this.mapWidth,
+          height: this.mapHeight,
+        });
         const imageTile = this.floorImageTiles.get(hashMapCoords(pos));
         if (imageTile) {
           if (this.activeImageTile == null) {
@@ -284,7 +292,11 @@ class MainScene extends Phaser.Scene {
     this.input.on(Phaser.Input.Events.POINTER_MOVE, (pointer) => {
       let px = pointer.worldX;
       let py = pointer.worldY;
-      const pos = mapIsometricPixelsToPosition(px, py, this.overallScale);
+      const pos = mapIsometricPixelsToPosition(px, py, {
+        scale: this.overallScale,
+        width: this.mapWidth,
+        height: this.mapHeight,
+      });
       const imageTile = this.floorImageTiles.get(hashMapCoords(pos));
       if (imageTile) {
         if (this.hoverImageTile == null) {
@@ -364,8 +376,10 @@ class MainScene extends Phaser.Scene {
       LuxDesignLogic.initialize(this.pseudomatch).then(() => {
         this.generateGameFrames(replayData).then(() => {
           // TODO: fix these harcodes of initial camera position
-          this.cameras.main.scrollX = 115;
-          this.cameras.main.scrollY = 25;
+          // this.cameras.main.scrollX = 640 * 1.5;
+          // this.cameras.main.scrollY = 320;
+          this.cameras.main.centerOnX(0);
+          this.cameras.main.centerOnY(0);
           this.renderFrame(0);
           this.game.events.emit('setup');
         });
@@ -477,7 +491,11 @@ class MainScene extends Phaser.Scene {
    * Paint in a resource tile to the current rendered frame
    */
   addResourceTile(type: Resource.Types, x: number, y: number, amt: number) {
-    const p = mapCoordsToIsometricPixels(x, y, this.overallScale);
+    const p = mapCoordsToIsometricPixels(x, y, {
+      scale: this.overallScale,
+      width: this.mapWidth,
+      height: this.mapHeight,
+    });
     switch (type) {
       case Resource.Types.WOOD: {
         let treeType = 0;
@@ -522,7 +540,11 @@ class MainScene extends Phaser.Scene {
   }
 
   addCityTile(data: FrameSingleCityTileData, tilesWithUnits: Set<number>) {
-    const p = mapPosToIsometricPixels(data.pos, this.overallScale);
+    const p = mapPosToIsometricPixels(data.pos, {
+      scale: this.overallScale,
+      width: this.mapWidth,
+      height: this.mapHeight,
+    });
     let cityTileType = 'city' + data.team;
 
     const s = seedrandom('' + data.pos.x * 10e3 + data.pos.y);
@@ -578,7 +600,11 @@ class MainScene extends Phaser.Scene {
    * Add worker sprite for use by any frame
    */
   addWorkerSprite(x: number, y: number, team: LUnit.TEAM, id: string) {
-    const p = mapCoordsToIsometricPixels(x, y, this.overallScale);
+    const p = mapCoordsToIsometricPixels(x, y, {
+      scale: this.overallScale,
+      width: this.mapWidth,
+      height: this.mapHeight,
+    });
     const sprite = this.add
       .sprite(p[0], p[1], 'worker' + team)
       .setScale(this.defaultScales.worker * this.overallScale);
@@ -591,7 +617,11 @@ class MainScene extends Phaser.Scene {
    * Add cart sprite for use by any frame
    */
   addCartSprite(x: number, y: number, team: LUnit.TEAM, id: string) {
-    const p = mapCoordsToIsometricPixels(x, y, this.overallScale);
+    const p = mapCoordsToIsometricPixels(x, y, {
+      scale: this.overallScale,
+      width: this.mapWidth,
+      height: this.mapHeight,
+    });
     const sprite = this.add
       .sprite(p[0], p[1], 'cart' + team)
       .setScale(this.defaultScales.cart * this.overallScale);
@@ -642,7 +672,11 @@ class MainScene extends Phaser.Scene {
       const { sprite } = this.unitSprites.get(id);
 
       sprite.setVisible(true);
-      const p = mapPosToIsometricPixels(data.pos, this.overallScale);
+      const p = mapPosToIsometricPixels(data.pos, {
+        scale: this.overallScale,
+        width: this.mapWidth,
+        height: this.mapHeight,
+      });
 
       // translate unit position depending on if there's a resource or city there
       let newx = p[0] - 45 * this.defaultScales.worker * this.overallScale;
@@ -684,7 +718,11 @@ class MainScene extends Phaser.Scene {
     this.unitSprites.forEach(({ sprite, originalPosition }, key) => {
       if (!visibleUnits.has(key)) {
         sprite.setVisible(false);
-        const p = mapPosToIsometricPixels(originalPosition, this.overallScale);
+        const p = mapPosToIsometricPixels(originalPosition, {
+          scale: this.overallScale,
+          width: this.mapWidth,
+          height: this.mapHeight,
+        });
         sprite.x = p[0];
         sprite.y = p[1] - 18;
       }
@@ -752,10 +790,9 @@ class MainScene extends Phaser.Scene {
   lastPointerPosition = null;
 
   update(time: number, delta: number) {
-    let yBounds = [-100 * this.overallScale, 340 * this.overallScale];
-    let xBounds = [-300 * this.overallScale, 640 * this.overallScale];
+    let yBounds = [-640 - 640 * this.overallScale, 640 * this.overallScale];
+    let xBounds = [-2560 - 640 * this.overallScale, 640 * this.overallScale];
     if (this.game.input.activePointer.isDown) {
-      // this.game.input.mousePointer.worldX
       if (this.lastPointerPosition != null) {
         let dx = this.lastPointerPosition.x - this.game.input.activePointer.x;
         let dy = this.lastPointerPosition.y - this.game.input.activePointer.y;

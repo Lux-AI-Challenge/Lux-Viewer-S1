@@ -2,6 +2,41 @@
   padding: 4rem;
 }
 
+.Game {
+  background-color: #00AFBD;
+}
+
+#content canvas {
+  width: 100vw !important;
+  height: 50vw !important;
+  position: absolute;
+  top: 0;
+}
+.Game .slider {
+  position: absolute;
+  background-color: white;
+  bottom: 4rem;
+  margin: auto;
+  transform: translateX(-50%);
+  left: 50%;
+}
+.Game .stats {
+  position: absolute;
+  background-color: white;
+  margin: auto;
+  right: 4rem;
+  top: 8rem;
+  width: 16rem;
+}
+
+.Game .global-stats {
+  position: absolute;
+  background-color: white;
+  margin: auto;
+  left: 4rem;
+  width: 16rem;
+}
+
 .Game .gameContainer .phaser-wrapper {
   /* height: 640px; */
 }

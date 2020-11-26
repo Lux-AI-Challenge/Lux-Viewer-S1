@@ -14,33 +14,36 @@ const angleFactor = 2.4;
 export const mapCoordsToIsometricPixels = (
   x: number,
   y: number,
-  scale: number
+  map: { scale: number; width: number; height: number }
 ): [number, number] => {
-  const f = 35 * 2 * scale; // based on tile size
+  const f = 35 * 2 * map.scale; // based on tile size
   return [
-    1280 + x * f - f * y,
-    1280 / 2 + y * f + f * x - ((x + y) * f) / angleFactor,
+    0 + x * f - f * y,
+    0 + (y - map.height / 2) * f + f * x - ((x + y) * f) / angleFactor,
   ];
 };
 export const mapPosToIsometricPixels = (
   pos: Position,
-  scale: number
+  map: { scale: number; width: number; height: number }
 ): [number, number] => {
-  return mapCoordsToIsometricPixels(pos.x, pos.y, scale);
+  return mapCoordsToIsometricPixels(pos.x, pos.y, map);
 };
 
 export const mapIsometricPixelsToPosition = (
   px: number,
   py: number,
-  scale: number
+  map: { scale: number; width: number; height: number }
 ): Position => {
   //TODO 450 and 150 are hardcoded, hard to make responsive
-  px -= 1280;
-  py -= 1280 / 2;
-  const f = 35 * 2 * scale;
+  // px
+  // py -= (scale * 1280) / 2;
+  const f = 35 * 2 * map.scale;
 
   // TODO, why are these backward??
-  let _y = (px - (angleFactor / (angleFactor - 1)) * py) / (-2 * f);
+  let _y =
+    (px - (angleFactor / (angleFactor - 1)) * py) / (-2 * f) +
+    map.height / 2 -
+    1;
   let _x = px / f + _y;
   return new Position(Math.ceil(_x), Math.ceil(_y));
 };

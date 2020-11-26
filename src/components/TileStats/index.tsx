@@ -8,19 +8,23 @@ import './styles.css';
 import { FrameTileData, FrameCityData } from '../../scenes/MainScene';
 import UnitCard from '../UnitCard';
 export type TileStatsProps = FrameTileData & { cities: FrameCityData };
-const TileStats = ({ pos, units, cityTile, cities, resources }: TileStatsProps) => {
+const TileStats = ({
+  pos,
+  units,
+  cityTile,
+  cities,
+  resources,
+}: TileStatsProps) => {
   return (
     <div className="TileStats">
       <p>
         Tile at ({pos.x}, {pos.y})
       </p>
-      <div>
-        {resources && `Resources: ${resources.amt} ${resources.type}`}
-      </div>
+      <div>{resources && `Resources: ${resources.amt} ${resources.type}`}</div>
       <Grid container className="UnitStats">
         {Array.from(units.values()).map((v) => {
           return (
-            <Grid item className="UnitData" xs={6} key={v.id}>
+            <Grid item className="UnitData" xs={12} key={v.id}>
               <UnitCard {...v} />
             </Grid>
           );

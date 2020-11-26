@@ -25,7 +25,7 @@ export const GameComponent = () => {
   const [notifMsg, setNotifMsg] = useState('');
   const [running, setRunning] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
-  const [visualScale, setVisualScale] = useState(1);
+  const [visualScale, setVisualScale] = useState(0.5);
   const [isReady, setReady] = useState(false);
   const [selectedTileData, setTileData] = useState<FrameTileData>(null);
   const [game, setGame] = useState<Phaser.Game>(null);
@@ -82,7 +82,11 @@ export const GameComponent = () => {
       // TODO: do a on scale change instead inside main
       main.floorImageTiles.forEach((tileImage, hash) => {
         const pos = hashToMapPosition(hash);
-        const ps = mapCoordsToIsometricPixels(pos.x, pos.y, main.overallScale);
+        const ps = mapCoordsToIsometricPixels(pos.x, pos.y, {
+          scale: main.overallScale,
+          width: main.mapWidth,
+          height: main.mapHeight,
+        });
         tileImage.setScale(main.defaultScales.block * main.overallScale);
         tileImage.setX(ps[0]);
         tileImage.setY(ps[1]);
@@ -163,136 +167,129 @@ export const GameComponent = () => {
   };
   return (
     <div className="Game">
-      <div className="gameContainer">
-        <h1>Lux AI Challenge</h1>
-        <Grid container spacing={3}>
-          <Grid item xs={9}>
-            <Card
-              className={classnames({
-                'phaser-wrapper': true,
-                Loading: gameLoading,
-              })}
+      <div id="content"></div>
+      <Card
+        className={classnames({
+          'phaser-wrapper': true,
+          Loading: gameLoading,
+          slider: true,
+        })}
+      >
+        <CardContent>
+          {noUpload && renderUploadButton()}
+          {gameLoading && <CircularProgress />}
+
+          <div className="play-buttons">
+            <Button
+              className="play"
+              color="primary"
+              variant="contained"
+              disabled={!isReady}
+              onClick={() => {
+                setRunning(!running);
+              }}
             >
-              <CardContent>
-                {noUpload && renderUploadButton()}
-                {gameLoading && <CircularProgress />}
-                <div id="content"></div>
-                <div className="play-buttons">
+              {running ? 'Pause' : 'Play'}
+            </Button>
+            <img src="./icons/arrows.svg" />
+            <ButtonGroup disabled={!isReady}>
+              {[1, 2, 4, 8, 16].map((speed) => {
+                const variant =
+                  playbackSpeed === speed ? 'contained' : 'outlined';
+                return (
                   <Button
-                    className="play"
                     color="primary"
-                    variant="contained"
-                    disabled={!isReady}
+                    variant={variant}
                     onClick={() => {
-                      setRunning(!running);
+                      setPlaybackSpeed(speed);
                     }}
                   >
-                    {running ? 'Pause' : 'Play'}
+                    {speed}x
                   </Button>
-                  <ButtonGroup disabled={!isReady}>
-                    {[1, 2, 4, 8, 16].map((speed) => {
-                      const variant =
-                        playbackSpeed === speed ? 'contained' : 'outlined';
-                      return (
-                        <Button
-                          color="primary"
-                          variant={variant}
-                          onClick={() => {
-                            setPlaybackSpeed(speed);
-                          }}
-                        >
-                          {speed}x
-                        </Button>
-                      );
-                    })}
-                  </ButtonGroup>
-                  <ButtonGroup disabled={!isReady}>
-                    {[0.75, 1, 1.25, 1.5, 2].map((s) => {
-                      const variant =
-                        visualScale === s ? 'contained' : 'outlined';
-                      return (
-                        <Button
-                          color="primary"
-                          variant={variant}
-                          onClick={() => {
-                            setVisualScale(s);
-                          }}
-                        >
-                          {s}x Scale
-                        </Button>
-                      );
-                    })}
-                  </ButtonGroup>
-                </div>
-                <Slider
-                  value={turn}
-                  disabled={!isReady}
-                  onChange={handleChange}
-                  aria-labelledby="continuous-slider"
-                  min={sliderConfigs.min}
-                  step={sliderConfigs.step}
-                  max={sliderConfigs.max}
+                );
+              })}
+            </ButtonGroup>
+            <ButtonGroup disabled={!isReady}>
+              {[0.5, 0.75, 1, 1.25, 1.5, 2].map((s) => {
+                const variant = visualScale === s ? 'contained' : 'outlined';
+                return (
+                  <Button
+                    color="primary"
+                    variant={variant}
+                    onClick={() => {
+                      setVisualScale(s);
+                    }}
+                  >
+                    {s}x Scale
+                  </Button>
+                );
+              })}
+            </ButtonGroup>
+          </div>
+          <Slider
+            value={turn}
+            disabled={!isReady}
+            onChange={handleChange}
+            aria-labelledby="continuous-slider"
+            min={sliderConfigs.min}
+            step={sliderConfigs.step}
+            max={sliderConfigs.max}
+          />
+          <ButtonGroup color="primary">
+            <Button
+              disabled={!isReady}
+              onClick={() => {
+                moveToTurn(turn - 1);
+              }}
+            >
+              {'<'}
+            </Button>
+            <Button
+              disabled={!isReady}
+              onClick={() => {
+                moveToTurn(turn + 1);
+              }}
+            >
+              {'>'}
+            </Button>
+          </ButtonGroup>
+        </CardContent>
+      </Card>
+      <Card className="stats">
+        <CardContent>
+          {selectedTileData && (
+            <TileStats {...selectedTileData} cities={currentFrame.cityData} />
+          )}
+          <GameStats turn={turn} />
+        </CardContent>
+      </Card>
+      <Card className="global-stats">
+        <CardContent>
+          {currentFrame !== null &&
+            [0, 1].map((team: Unit.TEAM) => {
+              return (
+                <PlayerStats
+                  key={team}
+                  workerUnits={currentFrame.teamStates[team].workers}
+                  cartUnits={currentFrame.teamStates[team].carts}
+                  cities={currentFrame.teamStates[team].citiesOwned.map(
+                    (id) => {
+                      const city = currentFrame.cityData.get(id);
+                      return {
+                        fuel: city.fuel,
+                        cells: city.cityTilePositions.length,
+                        cityid: id,
+                      };
+                    }
+                  )}
+                  team={team}
                 />
-                <ButtonGroup color="primary">
-                  <Button
-                    disabled={!isReady}
-                    onClick={() => {
-                      moveToTurn(turn - 1);
-                    }}
-                  >
-                    {'<'}
-                  </Button>
-                  <Button
-                    disabled={!isReady}
-                    onClick={() => {
-                      moveToTurn(turn + 1);
-                    }}
-                  >
-                    {'>'}
-                  </Button>
-                </ButtonGroup>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={3}>
-            <Card className="stats">
-              <CardContent>
-                {selectedTileData && (
-                  <TileStats
-                    {...selectedTileData}
-                    cities={currentFrame.cityData}
-                  />
-                )}
-                <GameStats turn={turn} />
-                {currentFrame !== null &&
-                  [0, 1].map((team: Unit.TEAM) => {
-                    return (
-                      <PlayerStats
-                        key={team}
-                        workerUnits={currentFrame.teamStates[team].workers}
-                        cartUnits={currentFrame.teamStates[team].carts}
-                        cities={currentFrame.teamStates[team].citiesOwned.map(
-                          (id) => {
-                            const city = currentFrame.cityData.get(id);
-                            return {
-                              fuel: city.fuel,
-                              cells: city.cityTilePositions.length,
-                              cityid: id,
-                            };
-                          }
-                        )}
-                        team={team}
-                      />
-                    );
-                  })}
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12}>
-            {!noUpload && renderUploadButton()}
-          </Grid>
-        </Grid>
-      </div>
+              );
+            })}
+        </CardContent>
+      </Card>
+      {!noUpload && renderUploadButton()}
+      <h1>Lux AI Challenge</h1>
     </div>
   );
 };
