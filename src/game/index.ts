@@ -11,7 +11,7 @@ export const config: Phaser.Types.Core.GameConfig = {
   render: {
     pixelArt: false,
   },
-  backgroundColor: '#34bdba',
+  backgroundColor: '#00AFBD',
   scene: [],
   // scale: {
   //   mode: Phaser.Scale.ENVELOP,

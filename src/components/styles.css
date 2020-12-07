@@ -4,6 +4,10 @@
 
 .Game {
   background-color: #00AFBD;
+  height: 100%;
+  width: 100%;
+  position: relative;
+  display: inline-block;
 }
 
 #content canvas {
@@ -29,7 +33,7 @@
 }
 
 .Game .controller {
-  bottom: 8rem;
+  bottom: 2rem;
   position: absolute;
   width: 34rem;
   left: calc(50% - 17rem)

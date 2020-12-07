@@ -26,12 +26,17 @@ export const GameComponent = () => {
   const [notifMsg, setNotifMsg] = useState('');
   const [running, setRunning] = useState(false);
   const [playbackSpeed, _setPlaybackSpeed] = useState(1);
-  const setPlaybackSpeed = (speed) => {
+  const setPlaybackSpeed = (speed: number) => {
     if (speed >= 0.5 && speed <= 16) {
       _setPlaybackSpeed(speed);
     }
   };
-  const [visualScale, setVisualScale] = useState(0.5);
+  const [visualScale, _setVisualScale] = useState(0.5);
+  const setVisualScale = (scale: number) => {
+    if (scale >= 0.25 && scale <= 2) {
+      _setVisualScale(scale);
+    }
+  };
   const [isReady, setReady] = useState(false);
   const [selectedTileData, setTileData] = useState<FrameTileData>(null);
   const [game, setGame] = useState<Phaser.Game>(null);
@@ -250,6 +255,22 @@ export const GameComponent = () => {
             }}
           >
             <img className="right-arrow-icon" src="./icons/arrows.svg" />
+          </IconButton>
+          <IconButton
+            aria-label="zoomin"
+            onClick={() => {
+              setVisualScale(visualScale + 0.25);
+            }}
+          >
+            +
+          </IconButton>
+          <IconButton
+            aria-label="zoomout"
+            onClick={() => {
+              setVisualScale(visualScale - 0.25);
+            }}
+          >
+            -
           </IconButton>
           <div className="speed-display">{playbackSpeed}x</div>
         </div>

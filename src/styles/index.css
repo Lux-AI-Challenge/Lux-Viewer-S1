@@ -1,10 +1,14 @@
 html {
   font-size: 12pt;
 }
-
 html,
 body,
 h1 {
   font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
   color: #323D34;
+  
+}
+.all-content {
+  width: 100vw;
+  height: 100vh;
 }
