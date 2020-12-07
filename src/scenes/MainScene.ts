@@ -823,44 +823,28 @@ class MainScene extends Phaser.Scene {
   lastPointerPosition = null;
 
   update(time: number, delta: number) {
-    let yBounds = [-640 - 640 * this.overallScale, 640 * this.overallScale];
-    let xBounds = [-2560 - 640 * this.overallScale, 640 * this.overallScale];
+    const panvelocity = 32 * Math.sqrt(this.overallScale);
+    const wkey = this.input.keyboard.addKey('W');
+    if (wkey.isDown) {
+      this.moveCamera(0, -panvelocity);
+    }
+    const skey = this.input.keyboard.addKey('S');
+    if (skey.isDown) {
+      this.moveCamera(0, panvelocity);
+    }
+    const akey = this.input.keyboard.addKey('A');
+    if (akey.isDown) {
+      this.moveCamera(-panvelocity, 0);
+    }
+    const dkey = this.input.keyboard.addKey('D');
+    if (dkey.isDown) {
+      this.moveCamera(panvelocity, 0);
+    }
     if (this.game.input.activePointer.isDown) {
       if (this.lastPointerPosition != null) {
         let dx = this.lastPointerPosition.x - this.game.input.activePointer.x;
         let dy = this.lastPointerPosition.y - this.game.input.activePointer.y;
-
-        if (
-          this.cameras.main.scrollX <= xBounds[1] &&
-          this.cameras.main.scrollX >= xBounds[0]
-        ) {
-          this.cameras.main.scrollX += dx;
-        } else if (this.cameras.main.scrollX < xBounds[0] && dx > 0) {
-          this.cameras.main.scrollX += dx;
-        } else if (this.cameras.main.scrollX > xBounds[1] && dx < 0) {
-          this.cameras.main.scrollX += dx;
-        }
-
-        if (
-          this.cameras.main.scrollY <= yBounds[1] &&
-          this.cameras.main.scrollY >= yBounds[0]
-        ) {
-          this.cameras.main.scrollY += dy;
-        } else if (this.cameras.main.scrollY < yBounds[0] && dy > 0) {
-          this.cameras.main.scrollY += dy;
-        } else if (this.cameras.main.scrollY > yBounds[1] && dy < 0) {
-          this.cameras.main.scrollY += dy;
-        }
-
-        if (this.cameras.main.scrollX < xBounds[0]) {
-          this.cameras.main.scrollX = xBounds[0];
-        }
-        if (this.cameras.main.scrollY < yBounds[0]) {
-          this.cameras.main.scrollY = yBounds[0];
-        }
-        if (this.cameras.main.scrollY > yBounds[1]) {
-          this.cameras.main.scrollY = yBounds[1];
-        }
+        this.moveCamera(dx, dy);
       }
       this.lastPointerPosition = {
         x: this.game.input.activePointer.x,
@@ -868,6 +852,42 @@ class MainScene extends Phaser.Scene {
       };
     } else {
       this.lastPointerPosition = null;
+    }
+  }
+
+  moveCamera(dx: number, dy: number) {
+    let yBounds = [-640 - 640 * this.overallScale, 640 * this.overallScale];
+    let xBounds = [-2560 - 640 * this.overallScale, 640 * this.overallScale];
+    if (
+      this.cameras.main.scrollX <= xBounds[1] &&
+      this.cameras.main.scrollX >= xBounds[0]
+    ) {
+      this.cameras.main.scrollX += dx;
+    } else if (this.cameras.main.scrollX < xBounds[0] && dx > 0) {
+      this.cameras.main.scrollX += dx;
+    } else if (this.cameras.main.scrollX > xBounds[1] && dx < 0) {
+      this.cameras.main.scrollX += dx;
+    }
+
+    if (
+      this.cameras.main.scrollY <= yBounds[1] &&
+      this.cameras.main.scrollY >= yBounds[0]
+    ) {
+      this.cameras.main.scrollY += dy;
+    } else if (this.cameras.main.scrollY < yBounds[0] && dy > 0) {
+      this.cameras.main.scrollY += dy;
+    } else if (this.cameras.main.scrollY > yBounds[1] && dy < 0) {
+      this.cameras.main.scrollY += dy;
+    }
+
+    if (this.cameras.main.scrollX < xBounds[0]) {
+      this.cameras.main.scrollX = xBounds[0];
+    }
+    if (this.cameras.main.scrollY < yBounds[0]) {
+      this.cameras.main.scrollY = yBounds[0];
+    }
+    if (this.cameras.main.scrollY > yBounds[1]) {
+      this.cameras.main.scrollY = yBounds[1];
     }
   }
 }

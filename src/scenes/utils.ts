@@ -45,7 +45,7 @@ export const mapIsometricPixelsToPosition = (
     map.height / 2 -
     1;
   let _x = px / f + _y;
-  return new Position(Math.ceil(_x), Math.ceil(_y));
+  return new Position(Math.round(_x), Math.round(_y));
 };
 
 export const hashMapCoords = (pos: Position): number => {
