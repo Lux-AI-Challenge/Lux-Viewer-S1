@@ -1,3 +1,23 @@
-.TileStats {
-  margin-bottom: 2rem;
+.TileStats .sub-header {
+  font-weight: 500;
+  font-size: 1.25rem;
+}
+.TileStats .resources {
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+.TileStats .tile-pos {
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+.TileStats .resources .resource-icon {
+  margin-right: 0.75rem;
+  margin-left: 0.75rem;
+  height: 2.5rem;
+}
+.TileStats .resources .resource-amount {
+  font-weight: 700;
 }

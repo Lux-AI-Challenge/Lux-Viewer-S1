@@ -1,1 +1,22 @@
-.UnitCard {}
+.UnitCard {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+.UnitCard .worker-icon-wrapper {
+  display: inline-block;
+  width: 4rem;
+  margin-right: 1rem;
+}
+.UnitCard .worker-icon-wrapper img {
+  width: 4rem;
+}
+.UnitCard .worker-data {
+  display: inline-block;
+  width: 6rem;
+  
+}
+.UnitCard .worker-data p {
+  margin: 0px;
+  font-size: 0.75rem;
+}

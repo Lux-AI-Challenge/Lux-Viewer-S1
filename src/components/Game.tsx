@@ -13,6 +13,7 @@ import {
   CardContent,
   Slider,
   Grid,
+  IconButton,
 } from '@material-ui/core';
 import './styles.css';
 import { LuxMatchConfigs, Unit } from '@lux-ai/2020-challenge/lib/es6';
@@ -24,7 +25,12 @@ export const GameComponent = () => {
   const [notifWindowOpen, setNotifWindowOpen] = useState(false);
   const [notifMsg, setNotifMsg] = useState('');
   const [running, setRunning] = useState(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [playbackSpeed, _setPlaybackSpeed] = useState(1);
+  const setPlaybackSpeed = (speed) => {
+    if (speed >= 0.5 && speed <= 16) {
+      _setPlaybackSpeed(speed);
+    }
+  };
   const [visualScale, setVisualScale] = useState(0.5);
   const [isReady, setReady] = useState(false);
   const [selectedTileData, setTileData] = useState<FrameTileData>(null);
@@ -181,6 +187,73 @@ export const GameComponent = () => {
   return (
     <div className="Game">
       <div id="content"></div>
+      <div className="controller">
+        <div className="turn-label">
+          <span>Turn {turn}</span>
+        </div>
+        <div>
+          <div className="daytime">
+            <img className="day-icon" src="./icons/daytime.svg" />
+            <span>Daytime</span>
+          </div>
+          <Slider
+            className="slider"
+            value={turn}
+            disabled={!isReady}
+            onChange={handleChange}
+            aria-labelledby="continuous-slider"
+            min={sliderConfigs.min}
+            step={sliderConfigs.step}
+            max={sliderConfigs.max}
+          />
+          <div className="nighttime">
+            <img className="night-icon" src="./icons/nighttime.svg" />
+            <span>Nighttime</span>
+          </div>
+        </div>
+        <div className="replay-buttons">
+          <IconButton aria-label="restart">
+            <img src="./icons/loading.svg" />
+          </IconButton>
+          <IconButton aria-label="options">
+            <img src="./icons/options.svg" />
+          </IconButton>
+          <IconButton
+            aria-label="leftarrow"
+            onClick={() => {
+              setPlaybackSpeed(playbackSpeed / 2);
+            }}
+          >
+            <img src="./icons/arrows.svg" />
+          </IconButton>
+          <IconButton
+            aria-label="pause"
+            className="pause-button"
+            disabled={!isReady}
+            onClick={() => {
+              setRunning(!running);
+            }}
+          >
+            <div className="pause-circle">
+              {running ? (
+                <img className="pause-icon" src="./icons/pause.svg" />
+              ) : (
+                // {/*TODO: change this to play icon*/}
+                <div style={{ color: 'white', zIndex: 999 }}>{'>'}</div>
+              )}
+            </div>
+          </IconButton>
+          <IconButton
+            aria-label="rightarrow"
+            onClick={() => {
+              setPlaybackSpeed(playbackSpeed * 2);
+            }}
+          >
+            <img className="right-arrow-icon" src="./icons/arrows.svg" />
+          </IconButton>
+          <div className="speed-display">{playbackSpeed}x</div>
+        </div>
+      </div>
       <Card
         className={classnames({
           'phaser-wrapper': true,
@@ -193,35 +266,6 @@ export const GameComponent = () => {
           {gameLoading && <CircularProgress />}
 
           <div className="play-buttons">
-            <Button
-              className="play"
-              color="primary"
-              variant="contained"
-              disabled={!isReady}
-              onClick={() => {
-                setRunning(!running);
-              }}
-            >
-              {running ? 'Pause' : 'Play'}
-            </Button>
-            <img src="./icons/arrows.svg" />
-            <ButtonGroup disabled={!isReady}>
-              {[1, 2, 4, 8, 16].map((speed) => {
-                const variant =
-                  playbackSpeed === speed ? 'contained' : 'outlined';
-                return (
-                  <Button
-                    color="primary"
-                    variant={variant}
-                    onClick={() => {
-                      setPlaybackSpeed(speed);
-                    }}
-                  >
-                    {speed}x
-                  </Button>
-                );
-              })}
-            </ButtonGroup>
             <ButtonGroup disabled={!isReady}>
               {[0.5, 0.75, 1, 1.25, 1.5, 2].map((s) => {
                 const variant = visualScale === s ? 'contained' : 'outlined';
@@ -239,43 +283,15 @@ export const GameComponent = () => {
               })}
             </ButtonGroup>
           </div>
-          <Slider
-            value={turn}
-            disabled={!isReady}
-            onChange={handleChange}
-            aria-labelledby="continuous-slider"
-            min={sliderConfigs.min}
-            step={sliderConfigs.step}
-            max={sliderConfigs.max}
-          />
-          <ButtonGroup color="primary">
-            <Button
-              disabled={!isReady}
-              onClick={() => {
-                moveToTurn(turn - 1);
-              }}
-            >
-              {'<'}
-            </Button>
-            <Button
-              disabled={!isReady}
-              onClick={() => {
-                moveToTurn(turn + 1);
-              }}
-            >
-              {'>'}
-            </Button>
-          </ButtonGroup>
         </CardContent>
       </Card>
-      <Card className="stats">
-        <CardContent>
-          {selectedTileData && (
-            <TileStats {...selectedTileData} cities={currentFrame.cityData} />
-          )}
-          <GameStats turn={turn} />
-        </CardContent>
-      </Card>
+      <div className="tile-stats-wrapper">
+        {selectedTileData ? (
+          <TileStats {...selectedTileData} cities={currentFrame.cityData} />
+        ) : (
+          <TileStats empty />
+        )}
+      </div>
       <Card className="global-stats">
         <CardContent>
           {currentFrame !== null &&

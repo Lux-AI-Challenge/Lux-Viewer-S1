@@ -12,22 +12,7 @@
   position: absolute;
   top: 0;
 }
-.Game .slider {
-  position: absolute;
-  background-color: white;
-  bottom: 4rem;
-  margin: auto;
-  transform: translateX(-50%);
-  left: 50%;
-}
-.Game .stats {
-  position: absolute;
-  background-color: white;
-  margin: auto;
-  right: 4rem;
-  top: 8rem;
-  width: 16rem;
-}
+
 
 .Game .global-stats {
   position: absolute;
@@ -37,10 +22,107 @@
   width: 16rem;
 }
 
-.Game .gameContainer .phaser-wrapper {
-  /* height: 640px; */
+.Game .tile-stats-wrapper {
+  position: absolute;
+  right: 4rem;
+  top: 4rem;
 }
 
+.Game .controller {
+  bottom: 8rem;
+  position: absolute;
+  width: 34rem;
+  left: calc(50% - 17rem)
+}
+.Game .controller .turn-label {
+  text-align: center;  
+  color: white;
+  font-weight: 400;
+  margin-bottom: -1.25rem;
+  font-size: 0.75rem;
+}
+
+.Game .controller .slider {
+  width: 22rem;
+  margin-left: 2rem;
+  margin-right: 2rem;
+  vertical-align: middle;
+  color: #F4A300;
+}
+.Game .controller .slider .MuiSlider-thumb {
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+}
+.Game .controller .slider .MuiSlider-rail {
+  height: 4px;
+  background-color: white;
+  opacity: 1;
+}
+.Game .controller .slider .MuiSlider-track {
+  height: 4px;
+}
+.Game .controller .nighttime, .Game .controller .daytime {
+  display: inline-block;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.75rem;
+}
+.Game .controller .day-icon {
+  margin: auto;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+.Game .controller .night-icon {
+  margin: auto;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+.Game .controller .replay-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+.Game .controller .replay-buttons .speed-display {
+  width: 5rem;
+  color: white;
+  vertical-align: middle;
+  align-items: center;
+  display: flex;
+  padding: 12px;
+}
+.Game .controller .replay-buttons img {
+  width: 1.25rem;
+  z-index: 5;
+}
+.Game .controller .MuiButtonBase-root {
+  margin-right: 1rem;
+}
+.Game .controller .replay-buttons .pause-button {
+  margin-right: 1.5rem;
+  margin-left: 0.5rem;
+}
+
+.Game .controller .replay-buttons .right-arrow-icon {
+  transform: rotate(180deg);
+}
+.Game .controller .replay-buttons .pause-circle::before {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  background: rgba(26, 101, 255, 0.6);
+  border-radius: 50%;
+  height: 3rem;
+  width: 3rem;
+}
+.Game .controller .replay-buttons .pause-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.Game .phaser-wrapper {
+  display: none;
+}
 .Game .gameContainer .phaser-wrapper.Loading #content {
   display: none;
 }
