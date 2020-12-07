@@ -22,13 +22,18 @@
   position: absolute;
   background-color: white;
   margin: auto;
-  left: 4rem;
+  left: 2rem;
   width: 16rem;
+}
+.Game .global-stats-wrapper {
+  position: absolute;
+  left: 2rem;
+  top: 8rem;
 }
 
 .Game .tile-stats-wrapper {
   position: absolute;
-  right: 4rem;
+  right: 2rem;
   top: 4rem;
 }
 

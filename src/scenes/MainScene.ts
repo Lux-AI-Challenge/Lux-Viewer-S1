@@ -38,7 +38,7 @@ export interface Frame {
   errors: string[];
 }
 
-type FrameTeamStateData = {
+export type FrameTeamStateData = {
   [x in LUnit.TEAM]: {
     workers: number;
     carts: number;

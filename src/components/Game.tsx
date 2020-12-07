@@ -20,6 +20,7 @@ import { LuxMatchConfigs, Unit } from '@lux-ai/2020-challenge/lib/es6';
 import TileStats from './TileStats';
 import debug_replay from '../scenes/replay.json';
 import { hashToMapPosition, mapCoordsToIsometricPixels } from '../scenes/utils';
+import GlobalStats from './GlobalStats';
 
 export const GameComponent = () => {
   const [notifWindowOpen, setNotifWindowOpen] = useState(false);
@@ -313,7 +314,23 @@ export const GameComponent = () => {
           <TileStats empty />
         )}
       </div>
-      <Card className="global-stats">
+      <div className="global-stats-wrapper">
+        <GlobalStats
+          currentFrame={currentFrame}
+          // cartUnits={currentFrame.teamStates[team].carts}
+          // cities={currentFrame.teamStates[team].citiesOwned.map(
+          //   (id) => {
+          //     const city = currentFrame.cityData.get(id);
+          //     return {
+          //       fuel: city.fuel,
+          //       cells: city.cityTilePositions.length,
+          //       cityid: id,
+          //     };
+          //   }
+          // )}
+        />
+      </div>
+      {/* <Card className="global-stats">
         <CardContent>
           {currentFrame !== null &&
             [0, 1].map((team: Unit.TEAM) => {
@@ -337,9 +354,8 @@ export const GameComponent = () => {
               );
             })}
         </CardContent>
-      </Card>
+      </Card> */}
       {!noUpload && renderUploadButton()}
-      <h1>Lux AI Challenge</h1>
     </div>
   );
 };
