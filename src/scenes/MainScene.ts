@@ -161,6 +161,8 @@ class MainScene extends Phaser.Scene {
     uranium: 0.43,
   };
 
+  speed = 1;
+
   constructor() {
     super({
       key: 'MainScene',
@@ -743,7 +745,7 @@ class MainScene extends Phaser.Scene {
         x: newx,
         y: newy,
         ease: 'Linear',
-        duration: 100,
+        duration: 340 / this.speed,
         repeat: 0,
         yoyo: false,
       });
@@ -789,16 +791,6 @@ class MainScene extends Phaser.Scene {
             18 * this.overallScale
           )
           .setDepth(getDepthByPos(data.pos) + 1);
-        // const text = this.add
-        //   .text(
-        //     p[0] + 9 * this.overallScale,
-        //     p[1] - 33 * this.overallScale,
-        //     `${c}`
-        //   )
-        //   .setDepth(getDepthByPos(data.pos) + 2);
-        // text.setColor('#323D34');
-        // text.setFontSize(24 * this.overallScale);
-        // text.setFontFamily('');
 
         const text = this.make.text({
           x: p[0] + 9 * this.overallScale,
@@ -809,6 +801,7 @@ class MainScene extends Phaser.Scene {
             fontSize: `${24 * this.overallScale}px`,
             fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
             color: '#323D34',
+            fontWeight: 'bold',
           },
         });
         this.currentRenderedFramesText.push(text);

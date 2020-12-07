@@ -30,6 +30,7 @@ export const GameComponent = () => {
   const setPlaybackSpeed = (speed: number) => {
     if (speed >= 0.5 && speed <= 16) {
       _setPlaybackSpeed(speed);
+      main.speed = speed;
     }
   };
   const [visualScale, _setVisualScale] = useState(0.5);
