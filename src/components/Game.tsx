@@ -78,6 +78,13 @@ export const GameComponent = () => {
   useEffect(() => {
     if (main && visualScale) {
       main.overallScale = visualScale;
+      if (main.activeImageTile) {
+        // main.activeImageTile.setY(main.originalTileY);
+        // main.activeImageTile.clearTint();
+        // main.activeImageTile = null;
+        // main.originalTileY
+      }
+      // move to current turn to rerender all objects appropriately
       moveToTurn(turn);
       // TODO: do a on scale change instead inside main
       main.floorImageTiles.forEach((tileImage, hash) => {
@@ -90,6 +97,12 @@ export const GameComponent = () => {
         tileImage.setScale(main.defaultScales.block * main.overallScale);
         tileImage.setX(ps[0]);
         tileImage.setY(ps[1]);
+        if (tileImage == main.activeImageTile) {
+          main.originalTileY = tileImage.y;
+        }
+        if (tileImage == main.hoverImageTile) {
+          main.originalHoverImageTileY = tileImage.y;
+        }
       });
     }
   }, [main, visualScale]);

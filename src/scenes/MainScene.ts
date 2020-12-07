@@ -227,8 +227,10 @@ class MainScene extends Phaser.Scene {
 
   mapWidth: number = -1;
   mapHeight: number = -1;
+
   /**
    * Load replay data into game
+   * and generate all relevant frames
    */
   loadReplayData(replayData: any): void {
     this.luxgame = new Game();
