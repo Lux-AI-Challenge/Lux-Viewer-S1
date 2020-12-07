@@ -159,6 +159,7 @@ class MainScene extends Phaser.Scene {
     tree0: 0.3,
     tree1: 0.33,
     uranium: 0.43,
+    clouds: 0.7,
   };
 
   speed = 1;
@@ -197,6 +198,10 @@ class MainScene extends Phaser.Scene {
 
     this.load.image('coal', 'assets/sprites/coal.png');
     this.load.svg('uranium', 'assets/sprites/uranium.svg');
+
+    this.load.svg('cloud0', 'assets/sprites/cloud0.svg');
+    this.load.svg('cloud1', 'assets/sprites/cloud1.svg');
+    this.load.svg('cloud2', 'assets/sprites/cloud2.svg');
   }
 
   /**
@@ -376,6 +381,43 @@ class MainScene extends Phaser.Scene {
         this.luxgame.spawnCart(unit.team, unit.x, unit.y, unit.id);
       }
     });
+
+    // spawn in clouds
+    const gameWidth = this.game.config.width as number;
+    const map_edge_cloud_tolerance = -2;
+    for (let x = -100; x < 100; x += 9) {
+      for (let y = -100; y < 100; y += 9) {
+        if (
+          x < this.mapWidth - map_edge_cloud_tolerance &&
+          x > map_edge_cloud_tolerance &&
+          y < this.mapHeight - map_edge_cloud_tolerance &&
+          y > map_edge_cloud_tolerance
+        ) {
+          continue;
+        }
+        const s = seedrandom('' + x * 10e5 + y);
+        let cloudtype = 'cloud';
+        const p = s();
+        if (p < 0.33) {
+          cloudtype += '0';
+        } else if (p < 0.66) {
+          cloudtype += '1';
+        } else {
+          cloudtype += '2';
+        }
+        const pos = new Position(x + s() * 5 - 2.5, y + s() * 5 - 2.5);
+        const isopos = mapPosToIsometricPixels(pos, {
+          scale: this.overallScale,
+          width: this.mapWidth,
+          height: this.mapHeight,
+        });
+        const cloud = this.add
+          .sprite(isopos[0], isopos[1], cloudtype)
+          .setDepth(10e5)
+          .setScale(this.overallScale * this.defaultScales.clouds);
+        this.cloudSprites.push({ cloud, pos });
+      }
+    }
 
     // load the initial state from replay
     this.pseudomatch.configs.preLoadedGame = this.luxgame;
@@ -672,6 +714,8 @@ class MainScene extends Phaser.Scene {
 
   currentRenderedFramesImgs: Array<GameObjects.Image> = [];
   currentRenderedFramesText: Array<GameObjects.Text> = [];
+  cloudSprites: Array<{ cloud: GameObjects.Sprite; pos: Position }> = [];
+
   renderFrame(turn: number) {
     this.turn = turn;
     const f = this.frames[turn];
@@ -684,6 +728,17 @@ class MainScene extends Phaser.Scene {
     });
     this.currentRenderedFramesText.forEach((txt) => {
       txt.destroy();
+    });
+
+    this.cloudSprites.forEach(({ cloud, pos }) => {
+      cloud.setScale(this.overallScale * this.defaultScales.clouds);
+      const p = mapPosToIsometricPixels(pos, {
+        scale: this.overallScale,
+        width: this.mapWidth,
+        height: this.mapHeight,
+      });
+      cloud.setX(p[0]);
+      cloud.setY(p[1]);
     });
 
     let visibleUnits: Set<string> = new Set();
