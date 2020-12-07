@@ -375,12 +375,45 @@ class MainScene extends Phaser.Scene {
     setTimeout(() => {
       LuxDesignLogic.initialize(this.pseudomatch).then(() => {
         this.generateGameFrames(replayData).then(() => {
-          // TODO: fix these harcodes of initial camera position
-          // this.cameras.main.scrollX = 640 * 1.5;
-          // this.cameras.main.scrollY = 320;
           this.cameras.main.centerOnX(0);
           this.cameras.main.centerOnY(0);
           this.renderFrame(0);
+
+          // TODO: random shader stuff that i dont understand
+          // var GrayscalePipeline = new Phaser.Class({
+          //   Extends: Phaser.Renderer.WebGL.Pipelines.TextureTintPipeline,
+
+          //   initialize: function GrayscalePipeline(game) {
+          //     Phaser.Renderer.WebGL.Pipelines.TextureTintPipeline.call(this, {
+          //       game: game,
+          //       renderer: game.renderer,
+          //       fragShader: `
+          //       precision mediump float;
+          //       uniform sampler2D uMainSampler;
+          //       varying vec2 outTexCoord;
+          //       void main(void) {
+          //       vec4 color = texture2D(uMainSampler, outTexCoord);
+          //       float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+          //       vec4 c = vec4(0.2, 0.2, 0.2, 0.2);
+          //       gl_FragColor = vec4(vec3(gray), 1.0);
+          //       const float eps = 0.1;
+          //       if (abs(color[0] - 156.0/255.0) <= eps && color[1] <= 145.0/255.0 && color[2] <= 69.0/255.0) {
+          //         gl_FragColor = color;
+          //       } else {
+          //         gl_FragColor = vec4(0.5, 0.2, 0.4, 1.0);
+          //       }
+          //       }`,
+          //     });
+          //   },
+          // });
+          // //@ts-ignore
+          // this.grayscalePipeline = this.game.renderer.addPipeline(
+          //   'Grayscale',
+          //   //@ts-ignore
+          //   new GrayscalePipeline(this.game)
+          // );
+          // //@ts-ignore
+          // this.cameras.main.setRenderToTexture(this.grayscalePipeline);
           this.game.events.emit('setup');
         });
       });
