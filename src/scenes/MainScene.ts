@@ -101,6 +101,8 @@ class MainScene extends Phaser.Scene {
   workers: Array<Phaser.GameObjects.Sprite> = [];
   luxgame: Game;
 
+  graphics: Phaser.GameObjects.Graphics;
+
   // All unit sprites rendered throughout match
   unitSprites: Map<
     string,
@@ -147,7 +149,7 @@ class MainScene extends Phaser.Scene {
   hoverImageTile: GameObjects.Image = null;
   originalHoverImageTileY = 0;
 
-  overallScale = 1.5;
+  overallScale = 1;
   defaultScales = {
     city: 0.34,
     tree: 0.6,
@@ -171,7 +173,7 @@ class MainScene extends Phaser.Scene {
     this.load.image('worker1', 'assets/sprites/worker1w.svg');
     this.load.image('cart0', 'assets/sprites/carts/cart0e.svg');
     this.load.image('cart1', 'assets/sprites/carts/cart1e.svg');
-    this.load.image('player', 'assets/sprites/mushroom.png');
+
     this.load.svg('block1', 'assets/ground.svg');
     this.load.svg('tree1', 'assets/sprites/tree1.svg');
     this.load.svg('tree0', 'assets/sprites/tree0.svg');
@@ -234,6 +236,7 @@ class MainScene extends Phaser.Scene {
    */
   loadReplayData(replayData: any): void {
     this.luxgame = new Game();
+    this.graphics = this.add.graphics({ x: 0, y: 0 });
     let width = replayData.map[0].length;
     let height = replayData.map.length;
     this.mapWidth = width;
@@ -374,11 +377,11 @@ class MainScene extends Phaser.Scene {
 
     // load the initial state from replay
     this.pseudomatch.configs.preLoadedGame = this.luxgame;
+    this.cameras.main.centerOnX(0);
+    this.cameras.main.centerOnY(0);
     setTimeout(() => {
       LuxDesignLogic.initialize(this.pseudomatch).then(() => {
         this.generateGameFrames(replayData).then(() => {
-          this.cameras.main.centerOnX(0);
-          this.cameras.main.centerOnY(0);
           this.renderFrame(0);
 
           // TODO: random shader stuff that i dont understand
@@ -419,7 +422,7 @@ class MainScene extends Phaser.Scene {
           this.game.events.emit('setup');
         });
       });
-    }, 1000);
+    }, 1);
   }
 
   /**
@@ -666,7 +669,7 @@ class MainScene extends Phaser.Scene {
   }
 
   currentRenderedFramesImgs: Array<GameObjects.Image> = [];
-
+  currentRenderedFramesText: Array<GameObjects.Text> = [];
   renderFrame(turn: number) {
     this.turn = turn;
     const f = this.frames[turn];
@@ -677,13 +680,25 @@ class MainScene extends Phaser.Scene {
     this.currentRenderedFramesImgs.forEach((img) => {
       img.destroy();
     });
+    this.currentRenderedFramesText.forEach((txt) => {
+      txt.destroy();
+    });
 
     let visibleUnits: Set<string> = new Set();
+    let unitPosToCount: Map<number, number> = new Map();
     let visibleCityTiles: Set<number> = new Set();
     let tilesWithUnits: Set<number> = new Set();
     f.unitData.forEach((data) => {
       visibleUnits.add(data.id);
-      tilesWithUnits.add(hashMapCoords(data.pos));
+      const hash = hashMapCoords(data.pos);
+      if (tilesWithUnits.has(hash)) {
+        if (unitPosToCount.has(hash)) {
+          unitPosToCount.set(hash, unitPosToCount.get(hash) + 1);
+        } else {
+          unitPosToCount.set(hash, 2);
+        }
+      }
+      tilesWithUnits.add(hash);
     });
     f.cityTileData.forEach((data) => {
       visibleCityTiles.add(hashMapCoords(data.pos));
@@ -746,9 +761,58 @@ class MainScene extends Phaser.Scene {
     });
 
     // iterate over all live city tiles
+    this.graphics.clear();
+    this.graphics.lineStyle(3 * this.overallScale, 0x323d34, 1);
+    this.graphics.fillStyle(0xe7ded1, 1);
     f.cityTileData.forEach((data) => {
       const img = this.addCityTile(data, tilesWithUnits);
       this.currentRenderedFramesImgs.push(img);
+      const hash = hashMapCoords(data.pos);
+      if (unitPosToCount.has(hash)) {
+        let c = unitPosToCount.get(hash);
+        const p = mapPosToIsometricPixels(data.pos, {
+          scale: this.overallScale,
+          width: this.mapWidth,
+          height: this.mapHeight,
+        });
+        this.graphics
+          .fillCircle(
+            p[0] + 16 * this.overallScale,
+            p[1] - 20 * this.overallScale,
+            18 * this.overallScale
+          )
+          .setDepth(getDepthByPos(data.pos) + 1);
+        this.graphics
+          .strokeCircle(
+            p[0] + 16 * this.overallScale,
+            p[1] - 20 * this.overallScale,
+            18 * this.overallScale
+          )
+          .setDepth(getDepthByPos(data.pos) + 1);
+        // const text = this.add
+        //   .text(
+        //     p[0] + 9 * this.overallScale,
+        //     p[1] - 33 * this.overallScale,
+        //     `${c}`
+        //   )
+        //   .setDepth(getDepthByPos(data.pos) + 2);
+        // text.setColor('#323D34');
+        // text.setFontSize(24 * this.overallScale);
+        // text.setFontFamily('');
+
+        const text = this.make.text({
+          x: p[0] + 9 * this.overallScale,
+          y: p[1] - 33 * this.overallScale,
+          text: `${c}`,
+          depth: getDepthByPos(data.pos) + 2,
+          style: {
+            fontSize: `${24 * this.overallScale}px`,
+            fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+            color: '#323D34',
+          },
+        });
+        this.currentRenderedFramesText.push(text);
+      }
     });
     this.unitSprites.forEach(({ sprite, originalPosition }, key) => {
       if (!visibleUnits.has(key)) {
