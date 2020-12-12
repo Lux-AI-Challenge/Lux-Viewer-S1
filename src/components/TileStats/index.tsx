@@ -1,13 +1,15 @@
-import { Unit } from '@lux-ai/2020-challenge/lib/es6/Unit';
-import Divider from '@material-ui/core/Divider';
-import Grid from '@material-ui/core/Grid';
-import CardContent from '@material-ui/core/CardContent';
-import Card from '@material-ui/core/Card';
 import React from 'react';
+import Grid from '@material-ui/core/Grid';
 import './styles.css';
 import { FrameTileData, FrameCityData } from '../../scenes/MainScene';
 import UnitCard from '../UnitCard';
 import LuxCard from '../LuxCard';
+
+import ResourceUranium from '../../icons/resource_uranium.svg';
+import ResourceCoal from '../../icons/resource_uranium.svg';
+import ResourceWood from '../../icons/resource_wood.svg';
+import { Resource } from '@lux-ai/2020-challenge/lib/es6/Resource';
+
 export type TileStatsProps = Partial<FrameTileData> & {
   cities?: FrameCityData;
   empty?: boolean;
@@ -21,12 +23,13 @@ const TileStats = ({
   empty,
 }: TileStatsProps) => {
   const renderResourceSVG = () => {
-    return (
-      <img
-        className="resource-icon"
-        src={`./icons/resource_${resources.type}.svg`}
-      />
-    );
+    let svg = ResourceWood;
+    if (resources.type === Resource.Types.URANIUM) {
+      svg = ResourceUranium;
+    } else if (resources.type === Resource.Types.COAL) {
+      svg = ResourceCoal;
+    }
+    return <img className="resource-icon" src={svg} />;
   };
   const allunits = units ? Array.from(units.values()) : [];
   return (

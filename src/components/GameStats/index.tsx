@@ -1,4 +1,4 @@
-import Divider from '@material-ui/core/Divider'
+import Divider from '@material-ui/core/Divider';
 import React from 'react';
 import './styles.css';
 export type PlayerStatsProps = {

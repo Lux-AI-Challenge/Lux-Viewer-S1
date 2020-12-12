@@ -83453,3 +83453,7 @@ declare module 'phaser' {
 
 }
 
+declare module "*.svg" {
+  const content: any;
+  export default content;
+}

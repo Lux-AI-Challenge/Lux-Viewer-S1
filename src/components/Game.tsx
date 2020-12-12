@@ -3,8 +3,6 @@ import React, { useEffect, useState } from 'react';
 import classnames from 'classnames';
 import MainScene, { Frame, FrameTileData } from '../scenes/MainScene';
 import { createGame } from '../game';
-import PlayerStats from './PlayerStats';
-import GameStats from './GameStats';
 import {
   Button,
   CircularProgress,
@@ -12,17 +10,25 @@ import {
   Card,
   CardContent,
   Slider,
-  Grid,
   IconButton,
 } from '@material-ui/core';
 import './styles.css';
-import { LuxMatchConfigs, Unit } from '@lux-ai/2020-challenge/lib/es6';
+import { LuxMatchConfigs } from '@lux-ai/2020-challenge/lib/es6';
 import TileStats from './TileStats';
-import debug_replay from '../scenes/replay.json';
 import { hashToMapPosition, mapCoordsToIsometricPixels } from '../scenes/utils';
 import GlobalStats from './GlobalStats';
+import ReplayButtonSVG from '../icons/loading.svg';
+import PauseButtonSVG from '../icons/pause.svg';
+import ArrowsSVG from '../icons/arrows.svg';
+import DayTimeSVG from '../icons/daytime.svg';
+import NightTimeSVG from '../icons/nighttime.svg';
+import OptionsSVG from '../icons/options.svg';
 
-export const GameComponent = () => {
+export type GameComponentProps = {
+  replayData: any;
+};
+
+export const GameComponent = ({ replayData }: GameComponentProps) => {
   const [notifWindowOpen, setNotifWindowOpen] = useState(false);
   const [notifMsg, setNotifMsg] = useState('');
   const [running, setRunning] = useState(false);
@@ -160,7 +166,7 @@ export const GameComponent = () => {
   };
   useEffect(() => {
     const newgame = createGame({
-      replayData: debug_replay,
+      replayData: replayData,
       handleUnitClicked,
       handleTileClicked,
     });
@@ -200,7 +206,7 @@ export const GameComponent = () => {
         </div>
         <div>
           <div className="daytime">
-            <img className="day-icon" src="./icons/daytime.svg" />
+            <img className="day-icon" src={DayTimeSVG} />
             <span>Daytime</span>
           </div>
           <Slider
@@ -214,16 +220,16 @@ export const GameComponent = () => {
             max={sliderConfigs.max}
           />
           <div className="nighttime">
-            <img className="night-icon" src="./icons/nighttime.svg" />
+            <img className="night-icon" src={NightTimeSVG} />
             <span>Nighttime</span>
           </div>
         </div>
         <div className="replay-buttons">
           <IconButton aria-label="restart">
-            <img src="./icons/loading.svg" />
+            <img src={ReplayButtonSVG} />
           </IconButton>
           <IconButton aria-label="options">
-            <img src="./icons/options.svg" />
+            <img src={OptionsSVG} />
           </IconButton>
           <IconButton
             aria-label="leftarrow"
@@ -231,7 +237,7 @@ export const GameComponent = () => {
               setPlaybackSpeed(playbackSpeed / 2);
             }}
           >
-            <img src="./icons/arrows.svg" />
+            <img src={ArrowsSVG} />
           </IconButton>
           <IconButton
             aria-label="pause"
@@ -243,7 +249,7 @@ export const GameComponent = () => {
           >
             <div className="pause-circle">
               {running ? (
-                <img className="pause-icon" src="./icons/pause.svg" />
+                <img className="pause-icon" src={PauseButtonSVG} />
               ) : (
                 // {/*TODO: change this to play icon*/}
                 <div style={{ color: 'white', zIndex: 999 }}>{'>'}</div>
@@ -256,7 +262,7 @@ export const GameComponent = () => {
               setPlaybackSpeed(playbackSpeed * 2);
             }}
           >
-            <img className="right-arrow-icon" src="./icons/arrows.svg" />
+            <img className="right-arrow-icon" src={ArrowsSVG} />
           </IconButton>
           <IconButton
             aria-label="zoomin"

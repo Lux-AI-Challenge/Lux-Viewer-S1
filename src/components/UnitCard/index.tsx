@@ -3,10 +3,25 @@ import Card from '@material-ui/core/Card';
 import React from 'react';
 import './styles.css';
 import { FrameSingleUnitData } from '../../scenes/MainScene';
+import Team0WorkerSVG from '../../icons/team0worker.svg';
+import Team1WorkerSVG from '../../icons/team1worker.svg';
+import { Unit } from '@lux-ai/2020-challenge/lib/es6/Unit';
 export type UnitCardProps = FrameSingleUnitData;
-const UnitCard = ({ cargo, pos, id, cooldown, team }: UnitCardProps) => {
+const UnitCard = ({ cargo, pos, id, cooldown, team, type }: UnitCardProps) => {
   const renderUnitSVG = () => {
-    return <img src={`./icons/team${team}worker.svg`} />;
+    let svg = Team1WorkerSVG;
+    if (type === Unit.Type.WORKER) {
+      if (team === 0) {
+        svg = Team0WorkerSVG;
+      }
+    } else {
+      svg = Team1WorkerSVG;
+      if (team === 0) {
+        svg = Team0WorkerSVG;
+      }
+    }
+
+    return <img src={svg} />;
   };
   return (
     <div className="UnitCard">
