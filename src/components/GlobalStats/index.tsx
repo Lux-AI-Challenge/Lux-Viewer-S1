@@ -29,7 +29,7 @@ const GlobalStats = ({
     <div className="GlobalStats">
       <LuxCard title="Global Stats">
         <Grid container>
-          <Grid item xs={2} key={0}></Grid>
+          <Grid item xs={2} key={1000}></Grid>
           <Grid item xs={5} key={0}>
             <div className="teamLabel">
               <div className="icons">

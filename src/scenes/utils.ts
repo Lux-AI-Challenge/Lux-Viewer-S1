@@ -58,7 +58,7 @@ export const hashToMapPosition = (hash: number): Position => {
 };
 
 export const getDepthByPos = (pos: Position): number => {
-  return 5 + (pos.x * pos.y) / 1000;
+  return 5 + (pos.x + 0.1) * (pos.y + 0.1) * 100;
 };
 
 export const memorySizeOf = (obj: any) => {
@@ -98,4 +98,12 @@ export const memorySizeOf = (obj: any) => {
   }
 
   return formatByteSize(sizeOf(obj));
+};
+
+export const getRoadType = (adjacency: boolean[]): string => {
+  let bin = '';
+  adjacency.forEach((b) => {
+    bin += b ? '1' : '0';
+  });
+  return 'path' + bin;
 };

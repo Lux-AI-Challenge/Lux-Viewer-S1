@@ -9,7 +9,9 @@ import {
 
 import {
   getDepthByPos,
+  getRoadType,
   hashMapCoords,
+  hashToMapPosition,
   mapCoordsToIsometricPixels,
   mapCoordsToPixels,
   mapIsometricPixelsToPosition,
@@ -44,7 +46,7 @@ export interface Frame {
   cityTileData: FrameCityTileData;
   annotations: CommandsArray;
   errors: string[];
-  cellsWithRoads: Array<Cell>;
+  cellsWithRoads: Map<number, Cell>;
 }
 
 export type FrameTeamStateData = {
@@ -189,7 +191,22 @@ class MainScene extends Phaser.Scene {
     this.load.image('cart1', 'assets/sprites/carts/cart1e.svg');
 
     this.load.svg('block1', 'assets/ground.svg');
-    this.load.svg('path0', 'assets/sprites/paths/path0.svg');
+
+    let bins = [];
+
+    // generate 15 binary values 0001 to 1111 and load the path
+    for (let i = 1; i <= 15; i++) {
+      let str = i.toString(2);
+      // pad if necessary
+      if (str.length < 4) {
+        let a = str.length;
+        for (let j = 0; j < 4 - a; j++) {
+          str = '0' + str;
+        }
+      }
+      this.load.svg(`path${str}`, `assets/sprites/paths/path${str}.svg`);
+    }
+    this.load.svg(`path0000`, `assets/sprites/paths/path1111.svg`);
 
     this.load.svg('tree1', 'assets/sprites/tree1.svg');
     this.load.svg('tree0', 'assets/sprites/tree0.svg');
@@ -482,12 +499,12 @@ class MainScene extends Phaser.Scene {
       });
     });
 
-    let cellsWithRoads: Array<Cell> = [];
+    let cellsWithRoads: Map<number, Cell> = new Map();
     for (let y = 0; y < game.map.height; y++) {
       let row = game.map.getRow(y);
       row.forEach((cell) => {
         if (cell.cooldown !== 1) {
-          cellsWithRoads.push(cell);
+          cellsWithRoads.set(hashMapCoords(cell.pos), cell);
         }
       });
     }
@@ -637,7 +654,7 @@ class MainScene extends Phaser.Scene {
     const img = this.add
       .image(ps[0], ps[1], 'block1')
       .setScale(this.defaultScales.block * this.overallScale);
-    img.setDepth(getDepthByPos(pos) / 1000);
+    img.setDepth(getDepthByPos(pos) / 100);
     return img;
   }
 
@@ -716,9 +733,27 @@ class MainScene extends Phaser.Scene {
         width: this.mapWidth,
         height: this.mapHeight,
       });
+
+      // determine road to render by adjacency
+      let adjacency = [false, false, false, false];
+
+      let dirs = [
+        Game.DIRECTIONS.NORTH,
+        Game.DIRECTIONS.EAST,
+        Game.DIRECTIONS.SOUTH,
+        Game.DIRECTIONS.WEST,
+      ];
+      dirs.forEach((dir, i) => {
+        let newpos = cell.pos.translate(dir, 1);
+        let hash = hashMapCoords(newpos);
+        if (f.cellsWithRoads.has(hash)) {
+          adjacency[i] = true;
+        }
+      });
+
       const img = this.add
-        .image(p[0], p[1], 'path0')
-        .setDepth(getDepthByPos(cell.pos) / 1000 + 1 / 1e7)
+        .image(p[0], p[1], getRoadType(adjacency))
+        .setDepth(getDepthByPos(cell.pos) / 100 + 1 / 1e7)
         .setScale(this.defaultScales.road * this.overallScale);
       this.currentRenderedFramesRoads.push({ img, pos: cell.pos });
       this.floorImageTiles.set(hash, img);
