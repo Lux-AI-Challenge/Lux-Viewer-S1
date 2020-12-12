@@ -21,6 +21,7 @@ import { Position } from '@lux-ai/2020-challenge/lib/es6/GameMap/position';
 import { GameObjects } from 'phaser';
 import seedrandom from 'seedrandom';
 import { TEAM_A_COLOR, TEAM_B_COLOR } from './types';
+import { Cell } from '@lux-ai/2020-challenge/lib/es6/GameMap/cell';
 
 type CommandsArray = Array<{
   command: string;
@@ -43,6 +44,7 @@ export interface Frame {
   cityTileData: FrameCityTileData;
   annotations: CommandsArray;
   errors: string[];
+  cellsWithRoads: Array<Cell>;
 }
 
 export type FrameTeamStateData = {
@@ -169,6 +171,7 @@ class MainScene extends Phaser.Scene {
     tree1: 0.33,
     uranium: 0.43,
     clouds: 0.7,
+    road: 0.44,
   };
 
   speed = 1;
@@ -180,13 +183,14 @@ class MainScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('Grass', 'assets/tilemaps/ground_tileset.png');
     this.load.image('worker0', 'assets/sprites/worker0w.svg');
     this.load.image('worker1', 'assets/sprites/worker1w.svg');
     this.load.image('cart0', 'assets/sprites/carts/cart0e.svg');
     this.load.image('cart1', 'assets/sprites/carts/cart1e.svg');
 
     this.load.svg('block1', 'assets/ground.svg');
+    this.load.svg('path0', 'assets/sprites/paths/path0.svg');
+
     this.load.svg('tree1', 'assets/sprites/tree1.svg');
     this.load.svg('tree0', 'assets/sprites/tree0.svg');
     // city naming scheme
@@ -269,16 +273,7 @@ class MainScene extends Phaser.Scene {
     for (let y = 0; y < height; y++) {
       let row = this.luxgame.map.getRow(y);
       row.forEach((cell) => {
-        const ps = mapCoordsToIsometricPixels(cell.pos.x, cell.pos.y, {
-          scale: this.overallScale,
-          width: this.mapWidth,
-          height: this.mapHeight,
-        });
-
-        const img = this.add
-          .image(ps[0], ps[1], 'block1')
-          .setScale(this.defaultScales.block * this.overallScale);
-        img.setDepth(2);
+        const img = this.addNormalFloorTile(cell.pos);
         this.floorImageTiles.set(
           hashMapCoords(new Position(cell.pos.x, cell.pos.y)),
           img
@@ -487,6 +482,16 @@ class MainScene extends Phaser.Scene {
       });
     });
 
+    let cellsWithRoads: Array<Cell> = [];
+    for (let y = 0; y < game.map.height; y++) {
+      let row = game.map.getRow(y);
+      row.forEach((cell) => {
+        if (cell.cooldown !== 1) {
+          cellsWithRoads.push(cell);
+        }
+      });
+    }
+
     return {
       resourceData,
       unitData,
@@ -495,6 +500,7 @@ class MainScene extends Phaser.Scene {
       teamStates,
       annotations,
       errors: this.currentTurnErrors,
+      cellsWithRoads,
     };
   }
 
@@ -621,6 +627,20 @@ class MainScene extends Phaser.Scene {
     return img;
   }
 
+  addNormalFloorTile(pos: Position) {
+    const ps = mapCoordsToIsometricPixels(pos.x, pos.y, {
+      scale: this.overallScale,
+      width: this.mapWidth,
+      height: this.mapHeight,
+    });
+
+    const img = this.add
+      .image(ps[0], ps[1], 'block1')
+      .setScale(this.defaultScales.block * this.overallScale);
+    img.setDepth(getDepthByPos(pos) / 1000);
+    return img;
+  }
+
   /**
    * Add worker sprite for use by any frame
    */
@@ -656,6 +676,10 @@ class MainScene extends Phaser.Scene {
   }
 
   currentRenderedFramesImgs: Array<GameObjects.Image> = [];
+  currentRenderedFramesRoads: Array<{
+    img: GameObjects.Image;
+    pos: Position;
+  }> = [];
   currentRenderedFramesText: Array<GameObjects.Text> = [];
   cloudSprites: Array<{ cloud: GameObjects.Sprite; pos: Position }> = [];
 
@@ -672,7 +696,35 @@ class MainScene extends Phaser.Scene {
     this.currentRenderedFramesText.forEach((txt) => {
       txt.destroy();
     });
+    this.currentRenderedFramesRoads.forEach(({ img, pos }) => {
+      img.destroy();
+      let hash = hashMapCoords(pos);
+      // let oldimg = this.floorImageTiles.get(hash);
+      let img2 = this.addNormalFloorTile(pos);
+      let old = this.floorImageTiles.get(hash);
+      old.destroy();
+      this.floorImageTiles.set(hash, img2);
+    });
 
+    // render roads
+    f.cellsWithRoads.forEach((cell) => {
+      let hash = hashMapCoords(cell.pos);
+      let oldimg = this.floorImageTiles.get(hash);
+      oldimg.destroy();
+      const p = mapPosToIsometricPixels(cell.pos, {
+        scale: this.overallScale,
+        width: this.mapWidth,
+        height: this.mapHeight,
+      });
+      const img = this.add
+        .image(p[0], p[1], 'path0')
+        .setDepth(getDepthByPos(cell.pos) / 1000 + 1 / 1e7)
+        .setScale(this.defaultScales.road * this.overallScale);
+      this.currentRenderedFramesRoads.push({ img, pos: cell.pos });
+      this.floorImageTiles.set(hash, img);
+    });
+
+    // render clouds to the appropriate size
     this.cloudSprites.forEach(({ cloud, pos }) => {
       cloud.setScale(this.overallScale * this.defaultScales.clouds);
       const p = mapPosToIsometricPixels(pos, {
@@ -688,6 +740,8 @@ class MainScene extends Phaser.Scene {
     let unitPosToCount: Map<number, number> = new Map();
     let visibleCityTiles: Set<number> = new Set();
     let tilesWithUnits: Set<number> = new Set();
+
+    // find tiles with units and count units per tile
     f.unitData.forEach((data) => {
       visibleUnits.add(data.id);
       const hash = hashMapCoords(data.pos);
@@ -700,9 +754,12 @@ class MainScene extends Phaser.Scene {
       }
       tilesWithUnits.add(hash);
     });
+
+    // find all standing cities
     f.cityTileData.forEach((data) => {
       visibleCityTiles.add(hashMapCoords(data.pos));
     });
+
     const tilesWithResources: Set<number> = new Set();
     // paint in all resource tiles
     f.resourceData.forEach((data) => {
@@ -790,18 +847,19 @@ class MainScene extends Phaser.Scene {
           )
           .setDepth(getDepthByPos(data.pos) + 1);
 
-        const text = this.make.text({
-          x: p[0] + 9 * this.overallScale,
-          y: p[1] - 33 * this.overallScale,
-          text: `${c}`,
-          depth: getDepthByPos(data.pos) + 2,
-          style: {
-            fontSize: `${24 * this.overallScale}px`,
-            fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-            color: '#323D34',
-            fontWeight: 'bold',
-          },
-        });
+        const text = this.make
+          .text({
+            x: p[0] + 9 * this.overallScale,
+            y: p[1] - 33 * this.overallScale,
+            text: `${c}`,
+            style: {
+              fontSize: `${24 * this.overallScale}px`,
+              fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+              color: '#323D34',
+              fontWeight: 'bold',
+            },
+          })
+          .setDepth(getDepthByPos(data.pos) + 1e8);
         this.currentRenderedFramesText.push(text);
       }
     });
