@@ -322,7 +322,10 @@ export const GameComponent = ({ replayData }: GameComponentProps) => {
         )}
       </div>
       <div className="global-stats-wrapper">
-        <GlobalStats currentFrame={currentFrame} />
+        <GlobalStats
+          currentFrame={currentFrame}
+          teamDetails={replayData.teamDetails}
+        />
       </div>
       {!noUpload && renderUploadButton()}
     </div>

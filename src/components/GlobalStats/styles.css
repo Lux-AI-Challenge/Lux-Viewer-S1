@@ -1,3 +1,11 @@
-.GlobalStats {
-  
+.GlobalStats .teamLabel .icons {
+  align-items: center;
+  display: flex;
+}
+.GlobalStats .teamLabel div {
+  margin-bottom: 0.75rem;
+}
+.GlobalStats .teamLabel .houses, .GlobalStats .teamLabel .collection {
+  align-items: center;
+  display: flex;
 }
