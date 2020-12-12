@@ -316,46 +316,8 @@ export const GameComponent = () => {
         )}
       </div>
       <div className="global-stats-wrapper">
-        <GlobalStats
-          currentFrame={currentFrame}
-          // cartUnits={currentFrame.teamStates[team].carts}
-          // cities={currentFrame.teamStates[team].citiesOwned.map(
-          //   (id) => {
-          //     const city = currentFrame.cityData.get(id);
-          //     return {
-          //       fuel: city.fuel,
-          //       cells: city.cityTilePositions.length,
-          //       cityid: id,
-          //     };
-          //   }
-          // )}
-        />
+        <GlobalStats currentFrame={currentFrame} />
       </div>
-      {/* <Card className="global-stats">
-        <CardContent>
-          {currentFrame !== null &&
-            [0, 1].map((team: Unit.TEAM) => {
-              return (
-                <PlayerStats
-                  key={team}
-                  workerUnits={currentFrame.teamStates[team].workers}
-                  cartUnits={currentFrame.teamStates[team].carts}
-                  cities={currentFrame.teamStates[team].citiesOwned.map(
-                    (id) => {
-                      const city = currentFrame.cityData.get(id);
-                      return {
-                        fuel: city.fuel,
-                        cells: city.cityTilePositions.length,
-                        cityid: id,
-                      };
-                    }
-                  )}
-                  team={team}
-                />
-              );
-            })}
-        </CardContent>
-      </Card> */}
       {!noUpload && renderUploadButton()}
     </div>
   );

@@ -20,6 +20,12 @@ import {
 import { Position } from '@lux-ai/2020-challenge/lib/es6/GameMap/position';
 import { GameObjects } from 'phaser';
 import seedrandom from 'seedrandom';
+import { TEAM_A_COLOR, TEAM_B_COLOR } from './types';
+
+type CommandsArray = Array<{
+  command: string;
+  agentID: number;
+}>;
 
 export interface Frame {
   // map from hashed position to resource data
@@ -35,6 +41,7 @@ export interface Frame {
   unitData: FrameUnitData;
   cityData: FrameCityData;
   cityTileData: FrameCityTileData;
+  annotations: CommandsArray;
   errors: string[];
 }
 
@@ -122,7 +129,9 @@ class MainScene extends Phaser.Scene {
     state: {},
     configs: {
       storeReplay: false,
+      runProfiler: false,
       debug: false,
+      seed: undefined,
     },
     throw: (id: number, err: any) => {
       this.currentTurnErrors.push(`Team ${id} - ${err}`);
@@ -241,17 +250,26 @@ class MainScene extends Phaser.Scene {
    * Load replay data into game
    * and generate all relevant frames
    */
-  loadReplayData(replayData: any): void {
-    this.luxgame = new Game();
+  async loadReplayData(replayData: any): Promise<void> {
+    this.pseudomatch.configs.seed = replayData.seed;
+    this.pseudomatch.configs.mapType = replayData.mapType;
+    this.pseudomatch.configs.width = replayData.width;
+    this.pseudomatch.configs.height = replayData.height;
+    await LuxDesignLogic.initialize(this.pseudomatch);
+    // console.log(this.pseudomatch);
+    // return;
+    this.luxgame = this.pseudomatch.state.game;
+    let width = this.luxgame.map.width;
+    let height = this.luxgame.map.height;
     this.graphics = this.add.graphics({ x: 0, y: 0 });
-    let width = replayData.map[0].length;
-    let height = replayData.map.length;
     this.mapWidth = width;
     this.mapHeight = height;
     // generate the ground
+
     for (let y = 0; y < height; y++) {
-      replayData.map[y].forEach((data, x) => {
-        const ps = mapCoordsToIsometricPixels(x, y, {
+      let row = this.luxgame.map.getRow(y);
+      row.forEach((cell) => {
+        const ps = mapCoordsToIsometricPixels(cell.pos.x, cell.pos.y, {
           scale: this.overallScale,
           width: this.mapWidth,
           height: this.mapHeight,
@@ -261,7 +279,10 @@ class MainScene extends Phaser.Scene {
           .image(ps[0], ps[1], 'block1')
           .setScale(this.defaultScales.block * this.overallScale);
         img.setDepth(2);
-        this.floorImageTiles.set(hashMapCoords(new Position(x, y)), img);
+        this.floorImageTiles.set(
+          hashMapCoords(new Position(cell.pos.x, cell.pos.y)),
+          img
+        );
       });
     }
 
@@ -332,56 +353,6 @@ class MainScene extends Phaser.Scene {
       }
     });
 
-    // add initial resource information
-    for (let y = 0; y < height; y++) {
-      replayData.map[y].map((data, x) => {
-        if (data.resource !== null) {
-          switch (data.resource) {
-            case Resource.Types.WOOD:
-              this.luxgame.map.addResource(x, y, Resource.Types.WOOD, data.amt);
-              break;
-            case Resource.Types.COAL:
-              this.luxgame.map.addResource(x, y, Resource.Types.COAL, data.amt);
-              break;
-            case Resource.Types.URANIUM:
-              this.luxgame.map.addResource(
-                x,
-                y,
-                Resource.Types.URANIUM,
-                data.amt
-              );
-              break;
-          }
-        }
-      });
-    }
-
-    // add initial city tile information
-    replayData.initialCityTiles.forEach((ct) => {
-      let p = Math.random();
-      let n = 7;
-      if (p > 0.67) {
-        n = 8;
-      } else if (p > 0.34) {
-        n = 9;
-      }
-      this.luxgame.spawnCityTile(ct.team, ct.x, ct.y);
-    });
-
-    // add initial unit information
-    replayData.initialUnits.forEach((unit) => {
-      if (unit.type === LUnit.Type.WORKER) {
-        const worker = this.luxgame.spawnWorker(
-          unit.team,
-          unit.x,
-          unit.y,
-          unit.id
-        );
-      } else {
-        this.luxgame.spawnCart(unit.team, unit.x, unit.y, unit.id);
-      }
-    });
-
     // spawn in clouds
     const gameWidth = this.game.config.width as number;
     const map_edge_cloud_tolerance = -2;
@@ -420,60 +391,31 @@ class MainScene extends Phaser.Scene {
     }
 
     // load the initial state from replay
-    this.pseudomatch.configs.preLoadedGame = this.luxgame;
+    // this.pseudomatch.configs.preLoadedGame = this.luxgame;
+
     this.cameras.main.centerOnX(0);
     this.cameras.main.centerOnY(0);
-    setTimeout(() => {
-      LuxDesignLogic.initialize(this.pseudomatch).then(() => {
-        this.generateGameFrames(replayData).then(() => {
-          this.renderFrame(0);
-
-          // TODO: random shader stuff that i dont understand
-          // var GrayscalePipeline = new Phaser.Class({
-          //   Extends: Phaser.Renderer.WebGL.Pipelines.TextureTintPipeline,
-
-          //   initialize: function GrayscalePipeline(game) {
-          //     Phaser.Renderer.WebGL.Pipelines.TextureTintPipeline.call(this, {
-          //       game: game,
-          //       renderer: game.renderer,
-          //       fragShader: `
-          //       precision mediump float;
-          //       uniform sampler2D uMainSampler;
-          //       varying vec2 outTexCoord;
-          //       void main(void) {
-          //       vec4 color = texture2D(uMainSampler, outTexCoord);
-          //       float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-          //       vec4 c = vec4(0.2, 0.2, 0.2, 0.2);
-          //       gl_FragColor = vec4(vec3(gray), 1.0);
-          //       const float eps = 0.1;
-          //       if (abs(color[0] - 156.0/255.0) <= eps && color[1] <= 145.0/255.0 && color[2] <= 69.0/255.0) {
-          //         gl_FragColor = color;
-          //       } else {
-          //         gl_FragColor = vec4(0.5, 0.2, 0.4, 1.0);
-          //       }
-          //       }`,
-          //     });
-          //   },
-          // });
-          // //@ts-ignore
-          // this.grayscalePipeline = this.game.renderer.addPipeline(
-          //   'Grayscale',
-          //   //@ts-ignore
-          //   new GrayscalePipeline(this.game)
-          // );
-          // //@ts-ignore
-          // this.cameras.main.setRenderToTexture(this.grayscalePipeline);
-          this.game.events.emit('setup');
-        });
-      });
-    }, 1);
+    console.log(this.luxgame.state);
+    this.generateGameFrames(replayData).then(() => {
+      this.renderFrame(0);
+      this.game.events.emit('setup');
+      console.log('generated frames', this.frames);
+    });
+    // setTimeout(() => {
+    //   LuxDesignLogic.initialize(this.pseudomatch).then(() => {
+    //     this.generateGameFrames(replayData).then(() => {
+    //       this.renderFrame(0);
+    //       this.game.events.emit('setup');
+    //     });
+    //   });
+    // }, 1);
   }
 
   /**
    * Creates a snapshot of the game state
    * @param game
    */
-  createFrame(game: Game): Frame {
+  createFrame(game: Game, annotations: CommandsArray): Frame {
     const teamStates: FrameTeamStateData = {
       [LUnit.TEAM.A]: {
         workers: 0,
@@ -551,6 +493,7 @@ class MainScene extends Phaser.Scene {
       cityData,
       cityTileData,
       teamStates,
+      annotations,
       errors: this.currentTurnErrors,
     };
   }
@@ -878,15 +821,136 @@ class MainScene extends Phaser.Scene {
     if (this.currentSelectedTilePos !== null) {
       this.onTileClicked(this.currentSelectedTilePos);
     }
+
+    // add annotations
+    f.annotations.forEach((cmd) => {
+      const strs = cmd.command.split(' ');
+      switch (strs[0]) {
+        case Game.ACTIONS.DEBUG_ANNOTATE_CIRCLE: {
+          if (strs.length === 3) {
+            let x = parseInt(strs[1]);
+            let y = parseInt(strs[2]);
+            if (isNaN(x) || isNaN(y)) {
+              return;
+            }
+            const p = mapCoordsToIsometricPixels(x, y, {
+              scale: this.overallScale,
+              width: this.mapWidth,
+              height: this.mapHeight,
+            });
+            if (cmd.agentID === LUnit.TEAM.A) {
+              this.graphics.lineStyle(7 * this.overallScale, TEAM_A_COLOR, 1);
+            } else {
+              this.graphics.lineStyle(7 * this.overallScale, TEAM_B_COLOR, 1);
+            }
+            this.graphics
+              .strokeCircle(
+                p[0] + 0 * this.overallScale,
+                p[1] - 16 * this.overallScale,
+                34 * this.overallScale
+              )
+              .setDepth(getDepthByPos(new Position(x, y)) + 1);
+          }
+          break;
+        }
+        case Game.ACTIONS.DEBUG_ANNOTATE_X:
+          if (strs.length === 3) {
+            let x = parseInt(strs[1]);
+            let y = parseInt(strs[2]);
+            if (isNaN(x) || isNaN(y)) {
+              return;
+            }
+            const p = mapCoordsToIsometricPixels(x, y, {
+              scale: this.overallScale,
+              width: this.mapWidth,
+              height: this.mapHeight,
+            });
+            if (cmd.agentID === LUnit.TEAM.A) {
+              this.graphics.lineStyle(7 * this.overallScale, TEAM_A_COLOR, 1);
+            } else {
+              this.graphics.lineStyle(7 * this.overallScale, TEAM_B_COLOR, 1);
+            }
+            this.graphics
+              .lineBetween(
+                p[0] - 28 * this.overallScale,
+                p[1] - 46 * this.overallScale,
+                p[0] + 32 * this.overallScale,
+                p[1] + 14 * this.overallScale
+              )
+              .setDepth(getDepthByPos(new Position(x, y)) + 1);
+            this.graphics
+              .lineBetween(
+                p[0] + 28 * this.overallScale,
+                p[1] - 46 * this.overallScale,
+                p[0] - 32 * this.overallScale,
+                p[1] + 14 * this.overallScale
+              )
+              .setDepth(getDepthByPos(new Position(x, y)) + 1);
+          }
+          break;
+        case Game.ACTIONS.DEBUG_ANNOTATION_LINE: {
+          if (strs.length === 5) {
+            let x1 = parseInt(strs[1]);
+            let y1 = parseInt(strs[2]);
+            let x2 = parseInt(strs[3]);
+            let y2 = parseInt(strs[4]);
+            if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) {
+              return;
+            }
+            const p = mapCoordsToIsometricPixels(x1, y1, {
+              scale: this.overallScale,
+              width: this.mapWidth,
+              height: this.mapHeight,
+            });
+            const p2 = mapCoordsToIsometricPixels(x2, y2, {
+              scale: this.overallScale,
+              width: this.mapWidth,
+              height: this.mapHeight,
+            });
+
+            if (cmd.agentID === LUnit.TEAM.A) {
+              this.graphics.lineStyle(7 * this.overallScale, TEAM_A_COLOR, 1);
+            } else {
+              this.graphics.lineStyle(7 * this.overallScale, TEAM_B_COLOR, 1);
+            }
+            this.graphics
+              .lineBetween(
+                p[0] - 0 * this.overallScale,
+                p[1] - 28 * this.overallScale,
+                p2[0] + 0 * this.overallScale,
+                p2[1] - 14 * this.overallScale
+              )
+              .setDepth(10e5);
+          }
+          break;
+        }
+        default:
+          return true;
+      }
+    });
   }
 
   async generateGameFrames(replayData) {
     while (this.currentTurn <= this.luxgame.configs.parameters.MAX_DAYS) {
-      const commands = replayData.allCommands[this.currentTurn];
+      const commands = replayData.allCommands[
+        this.currentTurn
+      ] as CommandsArray;
       const state: LuxMatchState = this.pseudomatch.state;
       const game = state.game;
-
-      await LuxDesignLogic.update(this.pseudomatch, commands);
+      let annotations = [] as CommandsArray;
+      let unannotated = commands.filter((cmd) => {
+        const strs = cmd.command.split(' ');
+        switch (strs[0]) {
+          case Game.ACTIONS.DEBUG_ANNOTATE_CIRCLE:
+          case Game.ACTIONS.DEBUG_ANNOTATE_X:
+          case Game.ACTIONS.DEBUG_ANNOTATION_LINE:
+            annotations.push(cmd);
+            return false;
+          default:
+            return true;
+        }
+      });
+      await LuxDesignLogic.update(this.pseudomatch, unannotated);
 
       [
         ...Array.from(game.getTeamsUnits(LUnit.TEAM.A).values()),
@@ -923,7 +987,7 @@ class MainScene extends Phaser.Scene {
         }
       });
 
-      const frame = this.createFrame(this.pseudomatch.state.game);
+      const frame = this.createFrame(this.pseudomatch.state.game, annotations);
       // console.log(
       //   { turn: this.currentTurn },
       //   'frame size',
