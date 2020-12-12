@@ -9,3 +9,58 @@
   align-items: center;
   display: flex;
 }
+
+.GlobalStats .resource-graph {
+  margin-top: 1rem;
+}
+.GlobalStats .resource-graph .graph-legend {
+  border-right: 4px solid black;
+  display: inline-block;
+  width: 2.75rem;
+}
+.GlobalStats .resource-graph .graph-legend div {
+  padding-top: 13px;
+  margin-bottom: 13px;
+}
+.GlobalStats .resource-graph .title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  text-align: center;
+}
+.GlobalStats .resource-graph .graph {
+  width: calc(100% - 3rem);
+  display: inline-block;
+  position: relative;
+  /* border-left: 0.25rem solid black; */
+}
+.GlobalStats .resource-graph .graph .wood {
+  width: 100%;
+  position: relative;
+}
+.GlobalStats .resource-graph .graph .wood, .GlobalStats .resource-graph .graph .coal, .GlobalStats .resource-graph .graph .uranium {
+  width: 100%;
+  position: relative;
+  height: 14px;
+  margin-top: 2.5rem;
+}
+.GlobalStats .resource-graph .graph .bgbar, .GlobalStats .resource-graph .graph .team0bar, .GlobalStats .resource-graph .graph .team1bar {
+  height: 14px;
+  position: absolute;
+}
+.GlobalStats .resource-graph .graph .bgbar {
+  width: 100%;
+  background-color: #ABB1AC;
+}
+.GlobalStats .resource-graph .graph .team0bar {
+  background-color: #f3a400;
+}
+.GlobalStats .resource-graph .graph .team0bar > span, .GlobalStats .resource-graph .graph .team1bar > span {
+  position: absolute;
+  top: -20px;
+  width: 100%;
+  text-align: center;
+  font-weight: 500;
+}
+.GlobalStats .resource-graph .graph .team1bar {
+  background-color: #3686ff;
+}

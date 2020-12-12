@@ -56,6 +56,12 @@ export type FrameTeamStateData = {
     /** array of city ids this team owns */
     citiesOwned: Array<string>;
     researchPoints: number;
+    statistics: {
+      fuelGenerated: number;
+      resourcesCollected: {
+        [x in Resource.Types]: number;
+      };
+    };
   };
 };
 type FrameUnitData = Map<string, FrameSingleUnitData>;
@@ -105,10 +111,25 @@ export type FrameTileData = {
 };
 type HandleTileClicked = (data: FrameTileData) => void;
 
+export interface StaticGlobalStats {
+  totalResources: {
+    wood: number;
+    coal: number;
+    uranium: number;
+  };
+}
+
 class MainScene extends Phaser.Scene {
   player: Phaser.GameObjects.Sprite;
   cursors: any;
 
+  globalStats: StaticGlobalStats = {
+    totalResources: {
+      wood: 0,
+      coal: 0,
+      uranium: 0,
+    },
+  };
   workers: Array<Phaser.GameObjects.Sprite> = [];
   luxgame: Game;
 
@@ -295,8 +316,13 @@ class MainScene extends Phaser.Scene {
           hashMapCoords(new Position(cell.pos.x, cell.pos.y)),
           img
         );
+        if (cell.hasResource()) {
+          this.globalStats.totalResources[cell.resource.type] +=
+            cell.resource.amount;
+        }
       });
     }
+    console.log(this.globalStats);
 
     // add handler for clicking tiles
     this.input.on(
@@ -407,11 +433,9 @@ class MainScene extends Phaser.Scene {
 
     this.cameras.main.centerOnX(0);
     this.cameras.main.centerOnY(0);
-    console.log(this.luxgame.state);
     this.generateGameFrames(replayData).then(() => {
       this.renderFrame(0);
       this.game.events.emit('setup');
-      console.log('generated frames', this.frames);
     });
     // setTimeout(() => {
     //   LuxDesignLogic.initialize(this.pseudomatch).then(() => {
@@ -434,12 +458,30 @@ class MainScene extends Phaser.Scene {
         carts: 0,
         citiesOwned: [],
         researchPoints: game.state.teamStates[0].researchPoints,
+        statistics: {
+          // TODO: remove hardcodes
+          fuelGenerated: 100,
+          resourcesCollected: {
+            wood: 10000,
+            coal: 320,
+            uranium: 20,
+          },
+        },
       },
       [LUnit.TEAM.B]: {
         workers: 0,
         carts: 0,
         citiesOwned: [],
         researchPoints: game.state.teamStates[1].researchPoints,
+        statistics: {
+          // TODO: remove hardcodes
+          fuelGenerated: 100,
+          resourcesCollected: {
+            wood: 12000,
+            coal: 520,
+            uranium: 45,
+          },
+        },
       },
     };
     const teams = [LUnit.TEAM.A, LUnit.TEAM.B];
