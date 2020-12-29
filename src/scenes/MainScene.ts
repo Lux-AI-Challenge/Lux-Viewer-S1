@@ -486,6 +486,15 @@ class MainScene extends Phaser.Scene {
     };
     const teams = [LUnit.TEAM.A, LUnit.TEAM.B];
     for (const team of teams) {
+      teamStates[team].statistics.fuelGenerated +=
+        game.stats.teamStats[team].fuelGenerated;
+      teamStates[team].statistics.resourcesCollected.wood =
+        game.stats.teamStats[team].resourcesCollected.wood;
+      teamStates[team].statistics.resourcesCollected.coal =
+        game.stats.teamStats[team].resourcesCollected.coal;
+      teamStates[team].statistics.resourcesCollected.uranium =
+        game.stats.teamStats[team].resourcesCollected.uranium;
+
       game.getTeamsUnits(team).forEach((unit) => {
         if (unit.type === LUnit.Type.WORKER) {
           teamStates[team].workers++;
