@@ -2,22 +2,15 @@ import { LuxMatchState } from '@lux-ai/2020-challenge/lib/es6/types';
 import { LuxDesignLogic } from '@lux-ai/2020-challenge/lib/es6/logic';
 import { Game } from '@lux-ai/2020-challenge/lib/es6/Game';
 import { Resource } from '@lux-ai/2020-challenge/lib/es6/Resource';
-import {
-  Unit as LUnit,
-  Worker,
-} from '@lux-ai/2020-challenge/lib/es6/Unit/index';
+import { Unit as LUnit } from '@lux-ai/2020-challenge/lib/es6/Unit/index';
 
 import {
   getDepthByPos,
   getRoadType,
   hashMapCoords,
-  hashToMapPosition,
   mapCoordsToIsometricPixels,
-  mapCoordsToPixels,
   mapIsometricPixelsToPosition,
   mapPosToIsometricPixels,
-  mapPosToPixels,
-  memorySizeOf,
 } from './utils';
 import { Position } from '@lux-ai/2020-challenge/lib/es6/GameMap/position';
 import { GameObjects } from 'phaser';
@@ -183,7 +176,10 @@ class MainScene extends Phaser.Scene {
   hoverImageTile: GameObjects.Image = null;
   originalHoverImageTileY = 0;
 
+  /** Overall zoom of replayer */
   overallScale = 1;
+
+  /** relative scales for each of these svgs */
   defaultScales = {
     city: 0.34,
     tree: 0.6,
@@ -197,6 +193,7 @@ class MainScene extends Phaser.Scene {
     road: 0.44,
   };
 
+  /** playback speed */
   speed = 1;
 
   constructor() {
@@ -213,9 +210,7 @@ class MainScene extends Phaser.Scene {
 
     this.load.svg('block1', 'assets/ground.svg');
 
-    let bins = [];
-
-    // generate 15 binary values 0001 to 1111 and load the path
+    // generate 15 binary values 0001 to 1111 and load the path tiles
     for (let i = 1; i <= 15; i++) {
       let str = i.toString(2);
       // pad if necessary
@@ -297,16 +292,16 @@ class MainScene extends Phaser.Scene {
     this.pseudomatch.configs.mapType = replayData.mapType;
     this.pseudomatch.configs.width = replayData.width;
     this.pseudomatch.configs.height = replayData.height;
+
+    // use design to initialize "fake game"
     await LuxDesignLogic.initialize(this.pseudomatch);
-    // console.log(this.pseudomatch);
-    // return;
+
     this.luxgame = this.pseudomatch.state.game;
     let width = this.luxgame.map.width;
     let height = this.luxgame.map.height;
     this.graphics = this.add.graphics({ x: 0, y: 0 });
     this.mapWidth = width;
     this.mapHeight = height;
-    // generate the ground
 
     for (let y = 0; y < height; y++) {
       let row = this.luxgame.map.getRow(y);
@@ -322,7 +317,6 @@ class MainScene extends Phaser.Scene {
         }
       });
     }
-    console.log(this.globalStats);
 
     // add handler for clicking tiles
     this.input.on(
@@ -392,7 +386,6 @@ class MainScene extends Phaser.Scene {
     });
 
     // spawn in clouds
-    const gameWidth = this.game.config.width as number;
     const map_edge_cloud_tolerance = -2;
     for (let x = -100; x < 100; x += 9) {
       for (let y = -100; y < 100; y += 9) {
@@ -459,12 +452,11 @@ class MainScene extends Phaser.Scene {
         citiesOwned: [],
         researchPoints: game.state.teamStates[0].researchPoints,
         statistics: {
-          // TODO: remove hardcodes
-          fuelGenerated: 100,
+          fuelGenerated: 0,
           resourcesCollected: {
-            wood: 10000,
-            coal: 320,
-            uranium: 20,
+            wood: 0,
+            coal: 0,
+            uranium: 0,
           },
         },
       },
@@ -474,12 +466,11 @@ class MainScene extends Phaser.Scene {
         citiesOwned: [],
         researchPoints: game.state.teamStates[1].researchPoints,
         statistics: {
-          // TODO: remove hardcodes
-          fuelGenerated: 100,
+          fuelGenerated: 0,
           resourcesCollected: {
-            wood: 12000,
-            coal: 520,
-            uranium: 45,
+            wood: 0,
+            coal: 0,
+            uranium: 0,
           },
         },
       },
@@ -589,7 +580,7 @@ class MainScene extends Phaser.Scene {
   /**
    * Paint in a resource tile to the current rendered frame
    */
-  addResourceTile(type: Resource.Types, x: number, y: number, amt: number) {
+  addResourceTile(type: Resource.Types, x: number, y: number) {
     const p = mapCoordsToIsometricPixels(x, y, {
       scale: this.overallScale,
       width: this.mapWidth,
@@ -849,12 +840,7 @@ class MainScene extends Phaser.Scene {
     const tilesWithResources: Set<number> = new Set();
     // paint in all resource tiles
     f.resourceData.forEach((data) => {
-      const img = this.addResourceTile(
-        data.type,
-        data.pos.x,
-        data.pos.y,
-        data.amt
-      );
+      const img = this.addResourceTile(data.type, data.pos.x, data.pos.y);
       this.currentRenderedFramesImgs.push(img);
       tilesWithResources.add(hashMapCoords(data.pos));
     });
@@ -903,7 +889,7 @@ class MainScene extends Phaser.Scene {
       }
     });
 
-    // iterate over all live city tiles
+    // iterate over all live city tiles and draw in unit counts
     this.graphics.clear();
     this.graphics.lineStyle(3 * this.overallScale, 0x323d34, 1);
     this.graphics.fillStyle(0xe7ded1, 1);
@@ -949,6 +935,7 @@ class MainScene extends Phaser.Scene {
         this.currentRenderedFramesText.push(text);
       }
     });
+
     this.unitSprites.forEach(({ sprite, originalPosition }, key) => {
       if (!visibleUnits.has(key)) {
         sprite.setVisible(false);

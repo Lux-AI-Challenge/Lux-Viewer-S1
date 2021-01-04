@@ -13,13 +13,6 @@ export const config: Phaser.Types.Core.GameConfig = {
   },
   backgroundColor: '#00AFBD',
   scene: [],
-  // scale: {
-  //   mode: Phaser.Scale.ENVELOP,
-  //   parent: 'content',
-  //   autoCenter: Phaser.Scale.CENTER_VERTICALLY,
-  //   // width: 800,
-  //   // height: 600,
-  // },
 };
 
 export const createGame = (configs: GameCreationConfigs): Phaser.Game => {
