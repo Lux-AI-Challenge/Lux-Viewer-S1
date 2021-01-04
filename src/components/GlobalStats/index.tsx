@@ -4,6 +4,7 @@ import {
   Frame,
   FrameTeamStateData,
   StaticGlobalStats,
+  TurnStats,
 } from '../../scenes/MainScene';
 import './styles.css';
 import { Unit } from '@lux-ai/2020-challenge/lib/es6/Unit';
@@ -17,16 +18,25 @@ import { TeamDetails } from '../../scenes/types';
 import ResourceUranium from '../../icons/resource_uranium.svg';
 import ResourceCoal from '../../icons/resource_uranium.svg';
 import ResourceWood from '../../icons/resource_wood.svg';
+import Graph from '../Graph';
+import ArrowLeftIcon from '@material-ui/icons/ArrowLeft';
+import ArrowRightIcon from '@material-ui/icons/ArrowRight';
+
+type GlobalStatsProps = {
+  currentFrame: Frame;
+  teamDetails: TeamDetails;
+  staticGlobalStats: StaticGlobalStats;
+  turn: number;
+  accumulatedStats: Array<TurnStats>;
+};
 
 const GlobalStats = ({
   currentFrame,
   teamDetails,
   staticGlobalStats,
-}: {
-  currentFrame: Frame;
-  teamDetails: TeamDetails;
-  staticGlobalStats: StaticGlobalStats;
-}) => {
+  turn,
+  accumulatedStats,
+}: GlobalStatsProps) => {
   const numOfCities = [0, 0];
   let resourceCollectionPercents = [] as Array<{
     wood: number;
@@ -51,10 +61,48 @@ const GlobalStats = ({
   } else {
     return null;
   }
+  const slicedAccStats = accumulatedStats.slice(0, turn + 1);
+  const [caroselIndex, setCaroselIndex] = useState(0);
+
+  const charts = [
+    {
+      title: 'City Growth',
+      graph: (
+        <Graph
+          data={slicedAccStats.map((v, i) => {
+            return {
+              name: `${i}`,
+              team0: v.citiesOwned[0],
+              team1: v.citiesOwned[1],
+            };
+          })}
+          xlabel="Turn #"
+          ylabel="# of Cities"
+        />
+      ),
+    },
+    {
+      title: 'Fuel Generation',
+      graph: (
+        <Graph
+          data={slicedAccStats.map((v, i) => {
+            return {
+              name: `${i}`,
+              team0: v.totalFuelGenerated[0],
+              team1: v.totalFuelGenerated[1],
+            };
+          })}
+          xlabel="Turn #"
+          ylabel="Fuel Generated"
+        />
+      ),
+    },
+  ];
+
   return (
     <div className="GlobalStats">
       <LuxCard title="Global Stats">
-        <Grid container>
+        <Grid container className="overall">
           <Grid item xs={2} key={1000}></Grid>
           <Grid item xs={5} key={0}>
             <div className="teamLabel">
@@ -152,7 +200,30 @@ const GlobalStats = ({
             </div>
           </div>
         </div>
-        {currentFrame !== null &&
+        <div className="Carosel">
+          <div className="Carosel-Control">
+            <ArrowLeftIcon
+              className="ArrowLeft"
+              onClick={() => {
+                if (caroselIndex === 0) {
+                  setCaroselIndex(charts.length - 1);
+                } else {
+                  setCaroselIndex((caroselIndex - 1) % charts.length);
+                }
+              }}
+            />
+            <div className="chart-title">{charts[caroselIndex].title}</div>
+            <ArrowRightIcon
+              className="ArrowRight"
+              onClick={() => {
+                setCaroselIndex((caroselIndex + 1) % charts.length);
+              }}
+            />
+          </div>
+          {charts[caroselIndex].graph}
+        </div>
+
+        {/* {currentFrame !== null &&
           [0, 1].map((team) => {
             const state = currentFrame.teamStates[team as Unit.TEAM];
             let totalCityFuel = 0;
@@ -172,7 +243,7 @@ const GlobalStats = ({
                 <p>Total Fuel: {totalCityFuel}</p>
               </div>
             );
-          })}
+          })} */}
       </LuxCard>
     </div>
   );

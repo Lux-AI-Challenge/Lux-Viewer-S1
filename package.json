@@ -35,6 +35,7 @@
   "dependencies": {
     "@lux-ai/2020-challenge": "^1.1.25",
     "@material-ui/core": "^4.11.0",
+    "@material-ui/icons": "^4.11.2",
     "@types/classnames": "^2.2.10",
     "classnames": "^2.2.6",
     "dimensions-ai": "^4.6.8",
@@ -42,6 +43,7 @@
     "phaser": "^3.24.1",
     "phaser3-plugin-isometric": "0.0.7",
     "react": "^16.12.0",
-    "react-dom": "^16.12.0"
+    "react-dom": "^16.12.0",
+    "recharts": "^2.0.0"
   }
 }

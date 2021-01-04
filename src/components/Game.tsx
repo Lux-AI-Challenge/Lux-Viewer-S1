@@ -351,6 +351,8 @@ export const GameComponent = ({ replayData }: GameComponentProps) => {
         {main && (
           <GlobalStats
             currentFrame={currentFrame}
+            turn={turn}
+            accumulatedStats={main.accumulatedStats}
             teamDetails={replayData.teamDetails}
             staticGlobalStats={main.globalStats}
           />
