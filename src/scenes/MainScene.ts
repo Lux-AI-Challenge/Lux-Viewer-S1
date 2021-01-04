@@ -196,6 +196,9 @@ class MainScene extends Phaser.Scene {
   /** playback speed */
   speed = 1;
 
+  /** debug mode on or off */
+  debug = true;
+
   constructor() {
     super({
       key: 'MainScene',
@@ -954,111 +957,113 @@ class MainScene extends Phaser.Scene {
     }
 
     // add annotations
-    f.annotations.forEach((cmd) => {
-      const strs = cmd.command.split(' ');
-      switch (strs[0]) {
-        case Game.ACTIONS.DEBUG_ANNOTATE_CIRCLE: {
-          if (strs.length === 3) {
-            let x = parseInt(strs[1]);
-            let y = parseInt(strs[2]);
-            if (isNaN(x) || isNaN(y)) {
-              return;
+    if (this.debug) {
+      f.annotations.forEach((cmd) => {
+        const strs = cmd.command.split(' ');
+        switch (strs[0]) {
+          case Game.ACTIONS.DEBUG_ANNOTATE_CIRCLE: {
+            if (strs.length === 3) {
+              let x = parseInt(strs[1]);
+              let y = parseInt(strs[2]);
+              if (isNaN(x) || isNaN(y)) {
+                return;
+              }
+              const p = mapCoordsToIsometricPixels(x, y, {
+                scale: this.overallScale,
+                width: this.mapWidth,
+                height: this.mapHeight,
+              });
+              if (cmd.agentID === LUnit.TEAM.A) {
+                this.graphics.lineStyle(7 * this.overallScale, TEAM_A_COLOR, 1);
+              } else {
+                this.graphics.lineStyle(7 * this.overallScale, TEAM_B_COLOR, 1);
+              }
+              this.graphics
+                .strokeCircle(
+                  p[0] + 0 * this.overallScale,
+                  p[1] - 16 * this.overallScale,
+                  34 * this.overallScale
+                )
+                .setDepth(getDepthByPos(new Position(x, y)) + 1);
             }
-            const p = mapCoordsToIsometricPixels(x, y, {
-              scale: this.overallScale,
-              width: this.mapWidth,
-              height: this.mapHeight,
-            });
-            if (cmd.agentID === LUnit.TEAM.A) {
-              this.graphics.lineStyle(7 * this.overallScale, TEAM_A_COLOR, 1);
-            } else {
-              this.graphics.lineStyle(7 * this.overallScale, TEAM_B_COLOR, 1);
-            }
-            this.graphics
-              .strokeCircle(
-                p[0] + 0 * this.overallScale,
-                p[1] - 16 * this.overallScale,
-                34 * this.overallScale
-              )
-              .setDepth(getDepthByPos(new Position(x, y)) + 1);
+            break;
           }
-          break;
-        }
-        case Game.ACTIONS.DEBUG_ANNOTATE_X:
-          if (strs.length === 3) {
-            let x = parseInt(strs[1]);
-            let y = parseInt(strs[2]);
-            if (isNaN(x) || isNaN(y)) {
-              return;
+          case Game.ACTIONS.DEBUG_ANNOTATE_X:
+            if (strs.length === 3) {
+              let x = parseInt(strs[1]);
+              let y = parseInt(strs[2]);
+              if (isNaN(x) || isNaN(y)) {
+                return;
+              }
+              const p = mapCoordsToIsometricPixels(x, y, {
+                scale: this.overallScale,
+                width: this.mapWidth,
+                height: this.mapHeight,
+              });
+              if (cmd.agentID === LUnit.TEAM.A) {
+                this.graphics.lineStyle(7 * this.overallScale, TEAM_A_COLOR, 1);
+              } else {
+                this.graphics.lineStyle(7 * this.overallScale, TEAM_B_COLOR, 1);
+              }
+              this.graphics
+                .lineBetween(
+                  p[0] - 28 * this.overallScale,
+                  p[1] - 46 * this.overallScale,
+                  p[0] + 32 * this.overallScale,
+                  p[1] + 14 * this.overallScale
+                )
+                .setDepth(getDepthByPos(new Position(x, y)) + 1);
+              this.graphics
+                .lineBetween(
+                  p[0] + 28 * this.overallScale,
+                  p[1] - 46 * this.overallScale,
+                  p[0] - 32 * this.overallScale,
+                  p[1] + 14 * this.overallScale
+                )
+                .setDepth(getDepthByPos(new Position(x, y)) + 1);
             }
-            const p = mapCoordsToIsometricPixels(x, y, {
-              scale: this.overallScale,
-              width: this.mapWidth,
-              height: this.mapHeight,
-            });
-            if (cmd.agentID === LUnit.TEAM.A) {
-              this.graphics.lineStyle(7 * this.overallScale, TEAM_A_COLOR, 1);
-            } else {
-              this.graphics.lineStyle(7 * this.overallScale, TEAM_B_COLOR, 1);
-            }
-            this.graphics
-              .lineBetween(
-                p[0] - 28 * this.overallScale,
-                p[1] - 46 * this.overallScale,
-                p[0] + 32 * this.overallScale,
-                p[1] + 14 * this.overallScale
-              )
-              .setDepth(getDepthByPos(new Position(x, y)) + 1);
-            this.graphics
-              .lineBetween(
-                p[0] + 28 * this.overallScale,
-                p[1] - 46 * this.overallScale,
-                p[0] - 32 * this.overallScale,
-                p[1] + 14 * this.overallScale
-              )
-              .setDepth(getDepthByPos(new Position(x, y)) + 1);
-          }
-          break;
-        case Game.ACTIONS.DEBUG_ANNOTATION_LINE: {
-          if (strs.length === 5) {
-            let x1 = parseInt(strs[1]);
-            let y1 = parseInt(strs[2]);
-            let x2 = parseInt(strs[3]);
-            let y2 = parseInt(strs[4]);
-            if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) {
-              return;
-            }
-            const p = mapCoordsToIsometricPixels(x1, y1, {
-              scale: this.overallScale,
-              width: this.mapWidth,
-              height: this.mapHeight,
-            });
-            const p2 = mapCoordsToIsometricPixels(x2, y2, {
-              scale: this.overallScale,
-              width: this.mapWidth,
-              height: this.mapHeight,
-            });
+            break;
+          case Game.ACTIONS.DEBUG_ANNOTATION_LINE: {
+            if (strs.length === 5) {
+              let x1 = parseInt(strs[1]);
+              let y1 = parseInt(strs[2]);
+              let x2 = parseInt(strs[3]);
+              let y2 = parseInt(strs[4]);
+              if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) {
+                return;
+              }
+              const p = mapCoordsToIsometricPixels(x1, y1, {
+                scale: this.overallScale,
+                width: this.mapWidth,
+                height: this.mapHeight,
+              });
+              const p2 = mapCoordsToIsometricPixels(x2, y2, {
+                scale: this.overallScale,
+                width: this.mapWidth,
+                height: this.mapHeight,
+              });
 
-            if (cmd.agentID === LUnit.TEAM.A) {
-              this.graphics.lineStyle(7 * this.overallScale, TEAM_A_COLOR, 1);
-            } else {
-              this.graphics.lineStyle(7 * this.overallScale, TEAM_B_COLOR, 1);
+              if (cmd.agentID === LUnit.TEAM.A) {
+                this.graphics.lineStyle(7 * this.overallScale, TEAM_A_COLOR, 1);
+              } else {
+                this.graphics.lineStyle(7 * this.overallScale, TEAM_B_COLOR, 1);
+              }
+              this.graphics
+                .lineBetween(
+                  p[0] - 0 * this.overallScale,
+                  p[1] - 28 * this.overallScale,
+                  p2[0] + 0 * this.overallScale,
+                  p2[1] - 14 * this.overallScale
+                )
+                .setDepth(10e5);
             }
-            this.graphics
-              .lineBetween(
-                p[0] - 0 * this.overallScale,
-                p[1] - 28 * this.overallScale,
-                p2[0] + 0 * this.overallScale,
-                p2[1] - 14 * this.overallScale
-              )
-              .setDepth(10e5);
+            break;
           }
-          break;
+          default:
+            return true;
         }
-        default:
-          return true;
-      }
-    });
+      });
+    }
   }
 
   async generateGameFrames(replayData) {

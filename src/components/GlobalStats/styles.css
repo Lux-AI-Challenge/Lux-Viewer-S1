@@ -28,10 +28,9 @@
   text-align: center;
 }
 .GlobalStats .resource-graph .graph {
-  width: calc(100% - 3rem);
+  width: calc(100% - 6rem);
   display: inline-block;
   position: relative;
-  /* border-left: 0.25rem solid black; */
 }
 .GlobalStats .resource-graph .graph .wood {
   width: 100%;
@@ -50,6 +49,8 @@
 .GlobalStats .resource-graph .graph .bgbar {
   width: 100%;
   background-color: #ABB1AC;
+  border-top-right-radius: 1rem;
+  border-bottom-right-radius: 1rem;
 }
 .GlobalStats .resource-graph .graph .team0bar {
   background-color: #f3a400;
@@ -63,4 +64,6 @@
 }
 .GlobalStats .resource-graph .graph .team1bar {
   background-color: #3686ff;
+  border-top-right-radius: 1rem;
+  border-bottom-right-radius: 1rem;
 }

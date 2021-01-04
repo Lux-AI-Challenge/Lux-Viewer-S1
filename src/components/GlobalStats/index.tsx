@@ -109,7 +109,6 @@ const GlobalStats = ({
             </div>
             <div className="graph">
               {['wood', 'coal', 'uranium'].map((resourceType) => {
-                console.log(resourceCollectionPercents);
                 return (
                   <div className={resourceType} key={resourceType}>
                     <div className="bgbar"></div>

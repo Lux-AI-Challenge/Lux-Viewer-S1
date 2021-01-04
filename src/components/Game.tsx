@@ -11,6 +11,9 @@ import {
   CardContent,
   Slider,
   IconButton,
+  Switch,
+  FormControlLabel,
+  FormGroup,
 } from '@material-ui/core';
 import './styles.css';
 import { LuxMatchConfigs } from '@lux-ai/2020-challenge/lib/es6';
@@ -197,6 +200,29 @@ export const GameComponent = ({ replayData }: GameComponentProps) => {
   const handleTileClicked = (data) => {
     setTileData(data);
   };
+
+  const [debugOn, _setDebug] = useState(true);
+  const setDebug = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    checked: boolean
+  ) => {
+    _setDebug(checked);
+    main.debug = checked;
+    moveToTurn(turn);
+  };
+  const renderDebugModeButton = () => {
+    return (
+      <FormGroup row className="debug-mode-button-wrapper">
+        <FormControlLabel
+          control={
+            <Switch checked={debugOn} onChange={setDebug} name="checkedA" />
+          }
+          label="Debug Mode"
+        />
+      </FormGroup>
+    );
+  };
+
   return (
     <div className="Game">
       <div id="content"></div>
@@ -331,6 +357,7 @@ export const GameComponent = ({ replayData }: GameComponentProps) => {
         )}
       </div>
       {!noUpload && renderUploadButton()}
+      {renderDebugModeButton()}
     </div>
   );
 };
