@@ -20,7 +20,7 @@ export type GraphProps = {
 const Graph = ({ data, ylabel, xlabel }: GraphProps) => {
   return (
     <div className="Graph">
-      <ResponsiveContainer width={'100%'} height={280}>
+      <ResponsiveContainer width={'100%'} height={220}>
         <LineChart
           // width={200}
           onClick={() => {}}

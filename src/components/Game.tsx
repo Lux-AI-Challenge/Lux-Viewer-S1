@@ -13,6 +13,10 @@ import {
   IconButton,
   Switch,
   FormControlLabel,
+  createMuiTheme,
+  makeStyles,
+  ThemeProvider,
+  createStyles,
   FormGroup,
 } from '@material-ui/core';
 import './styles.css';
@@ -25,11 +29,23 @@ import PauseButtonSVG from '../icons/pause.svg';
 import ArrowsSVG from '../icons/arrows.svg';
 import DayTimeSVG from '../icons/daytime.svg';
 import NightTimeSVG from '../icons/nighttime.svg';
-import OptionsSVG from '../icons/options.svg';
+import UploadSVG from '../icons/upload.svg';
+import ZoomInOut from './ZoomInOut';
 
 export type GameComponentProps = {
   replayData: any;
 };
+
+const theme = createMuiTheme({
+  palette: {
+    primary: {
+      main: '#fea201',
+    },
+    secondary: {
+      main: '#3686FF',
+    },
+  },
+});
 
 export const GameComponent = ({ replayData }: GameComponentProps) => {
   const [notifWindowOpen, setNotifWindowOpen] = useState(false);
@@ -225,141 +241,122 @@ export const GameComponent = ({ replayData }: GameComponentProps) => {
 
   return (
     <div className="Game">
-      <div id="content"></div>
-      <div className="controller">
-        <div className="turn-label">
-          <span>Turn {turn}</span>
-        </div>
-        <div>
-          <div className="daytime">
+      <ThemeProvider theme={theme}>
+        <div id="content"></div>
+        <div className="controller">
+          <div className="time-of-day">
             <img className="day-icon" src={DayTimeSVG} />
-            <span>Daytime</span>
           </div>
-          <Slider
-            className="slider"
-            value={turn}
-            disabled={!isReady}
-            onChange={handleChange}
-            aria-labelledby="continuous-slider"
-            min={sliderConfigs.min}
-            step={sliderConfigs.step}
-            max={sliderConfigs.max}
-          />
-          <div className="nighttime">
-            <img className="night-icon" src={NightTimeSVG} />
-            <span>Nighttime</span>
+          <div className="turn-label">
+            <span>Turn {turn}</span>
           </div>
-        </div>
-        <div className="replay-buttons">
-          <IconButton aria-label="restart">
-            <img src={ReplayButtonSVG} />
-          </IconButton>
-          <IconButton aria-label="options">
-            <img src={OptionsSVG} />
-          </IconButton>
-          <IconButton
-            aria-label="leftarrow"
-            onClick={() => {
-              setPlaybackSpeed(playbackSpeed / 2);
-            }}
-          >
-            <img src={ArrowsSVG} />
-          </IconButton>
-          <IconButton
-            aria-label="pause"
-            className="pause-button"
-            disabled={!isReady}
-            onClick={() => {
-              setRunning(!running);
-            }}
-          >
-            <div className="pause-circle">
-              {running ? (
-                <img className="pause-icon" src={PauseButtonSVG} />
-              ) : (
-                // {/*TODO: change this to play icon*/}
-                <div style={{ color: 'white', zIndex: 999 }}>{'>'}</div>
-              )}
-            </div>
-          </IconButton>
-          <IconButton
-            aria-label="rightarrow"
-            onClick={() => {
-              setPlaybackSpeed(playbackSpeed * 2);
-            }}
-          >
-            <img className="right-arrow-icon" src={ArrowsSVG} />
-          </IconButton>
-          <IconButton
-            aria-label="zoomin"
-            onClick={() => {
-              setVisualScale(visualScale + 0.25);
-            }}
-          >
-            +
-          </IconButton>
-          <IconButton
-            aria-label="zoomout"
-            onClick={() => {
-              setVisualScale(visualScale - 0.25);
-            }}
-          >
-            -
-          </IconButton>
-          <div className="speed-display">{playbackSpeed}x</div>
-        </div>
-      </div>
-      <Card
-        className={classnames({
-          'phaser-wrapper': true,
-          Loading: gameLoading,
-          slider: true,
-        })}
-      >
-        <CardContent>
-          {noUpload && renderUploadButton()}
-          {gameLoading && <CircularProgress />}
+          <div className="time-display">
+            <Slider
+              className="slider"
+              value={turn}
+              disabled={!isReady}
+              onChange={handleChange}
+              aria-labelledby="continuous-slider"
+              min={sliderConfigs.min}
+              step={sliderConfigs.step}
+              max={sliderConfigs.max}
+            />
+            {/* <div className="nighttime">
+              <img className="night-icon" src={NightTimeSVG} />
+              <span>Nighttime</span>
+            </div> */}
+          </div>
+          <div className="replay-buttons">
+            <IconButton
+              aria-label="restart"
+              onClick={() => {
+                moveToTurn(0);
+              }}
+            >
+              <img src={ReplayButtonSVG} />
+            </IconButton>
+            <IconButton
+              aria-label="leftarrow"
+              onClick={() => {
+                setPlaybackSpeed(playbackSpeed / 2);
+              }}
+            >
+              <img src={ArrowsSVG} />
+            </IconButton>
+            <IconButton
+              aria-label="pause"
+              className="pause-button"
+              disabled={!isReady}
+              onClick={() => {
+                setRunning(!running);
+              }}
+            >
+              <div className="pause-circle">
+                {running ? (
+                  <img className="pause-icon" src={PauseButtonSVG} />
+                ) : (
+                  // {/*TODO: change this to play icon*/}
+                  <div style={{ color: 'white', zIndex: 999 }}>{'>'}</div>
+                )}
+              </div>
+            </IconButton>
+            <IconButton
+              aria-label="rightarrow"
+              onClick={() => {
+                setPlaybackSpeed(playbackSpeed * 2);
+              }}
+            >
+              <img className="right-arrow-icon" src={ArrowsSVG} />
+            </IconButton>
+            <div className="speed-display">{playbackSpeed}x</div>
 
-          <div className="play-buttons">
-            <ButtonGroup disabled={!isReady}>
-              {[0.5, 0.75, 1, 1.25, 1.5, 2].map((s) => {
-                const variant = visualScale === s ? 'contained' : 'outlined';
-                return (
-                  <Button
-                    color="primary"
-                    variant={variant}
-                    onClick={() => {
-                      setVisualScale(s);
-                    }}
-                  >
-                    {s}x Scale
-                  </Button>
-                );
-              })}
-            </ButtonGroup>
+            <input
+              accept=".json, .luxr"
+              type="file"
+              style={{ display: 'none' }}
+              onChange={handleUpload}
+              ref={fileInput}
+            />
+            <IconButton
+              aria-label="upload"
+              onClick={() => {
+                fileInput.current.click();
+              }}
+            >
+              <img className="upload-icon" src={UploadSVG} />
+            </IconButton>
           </div>
-        </CardContent>
-      </Card>
-      <div className="tile-stats-wrapper">
-        {selectedTileData ? (
-          <TileStats {...selectedTileData} cities={currentFrame.cityData} />
-        ) : (
-          <TileStats empty />
-        )}
-      </div>
-      <div className="global-stats-wrapper">
-        {main && (
-          <GlobalStats
-            currentFrame={currentFrame}
-            turn={turn}
-            accumulatedStats={main.accumulatedStats}
-            teamDetails={replayData.teamDetails}
-            staticGlobalStats={main.globalStats}
-          />
-        )}
-      </div>
-      {!noUpload && renderUploadButton()}
-      {renderDebugModeButton()}
+        </div>
+        <div className="tile-stats-wrapper">
+          {selectedTileData ? (
+            <TileStats {...selectedTileData} cities={currentFrame.cityData} />
+          ) : (
+            <TileStats empty />
+          )}
+        </div>
+        <div className="global-stats-wrapper">
+          {main && (
+            <GlobalStats
+              currentFrame={currentFrame}
+              turn={turn}
+              accumulatedStats={main.accumulatedStats}
+              teamDetails={replayData.teamDetails}
+              staticGlobalStats={main.globalStats}
+            />
+          )}
+        </div>
+        {!noUpload && renderUploadButton()}
+        {renderDebugModeButton()}
+        <ZoomInOut
+          className="zoom-in-out"
+          handleZoomIn={() => {
+            setVisualScale(visualScale + 0.25);
+          }}
+          handleZoomOut={() => {
+            setVisualScale(visualScale - 0.25);
+          }}
+        />
+      </ThemeProvider>
     </div>
   );
 };
