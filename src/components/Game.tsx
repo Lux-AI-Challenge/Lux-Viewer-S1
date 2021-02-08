@@ -234,6 +234,7 @@ export const GameComponent = () => {
         <div id="content"></div>
         {!isReady && (
           <div className="upload-no-replay-wrapper">
+            <p>Welcome to the Lux AI Season 1 Visualizer</p>
             <div>
               <Button
                 className="upload-btn"
