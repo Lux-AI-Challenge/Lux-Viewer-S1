@@ -36,6 +36,9 @@
   display: inline-block;
   width: 2.75rem;
 }
+.GlobalStats .resource-graph .graph-legend img {
+  width: 30px;
+}
 .GlobalStats .resource-graph .graph-legend div {
   padding-top: 13px;
   margin-bottom: 13px;

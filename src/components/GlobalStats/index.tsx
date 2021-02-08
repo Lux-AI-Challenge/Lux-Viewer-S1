@@ -16,7 +16,7 @@ import Team0Worker from '../../icons/team0worker.svg';
 import Resources from '../../icons/Resources.svg';
 import { TeamDetails } from '../../scenes/types';
 import ResourceUranium from '../../icons/resource_uranium.svg';
-import ResourceCoal from '../../icons/resource_uranium.svg';
+import ResourceCoal from '../../icons/resource_coal.svg';
 import ResourceWood from '../../icons/resource_wood.svg';
 import Graph from '../Graph';
 import ArrowLeftIcon from '@material-ui/icons/ArrowLeft';

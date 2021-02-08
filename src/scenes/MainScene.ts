@@ -200,6 +200,7 @@ class MainScene extends Phaser.Scene {
     uranium: 0.43,
     clouds: 0.7,
     road: 0.44,
+    coal: 0.35,
   };
 
   /** playback speed */
@@ -257,7 +258,7 @@ class MainScene extends Phaser.Scene {
     this.load.svg('city13', 'assets/sprites/city13.svg');
     this.load.svg('city13t', 'assets/sprites/city13t.svg');
 
-    this.load.image('coal', 'assets/sprites/coal.png');
+    this.load.image('coal', 'assets/sprites/coal.svg');
     this.load.svg('uranium', 'assets/sprites/uranium.svg');
 
     this.load.svg('cloud0', 'assets/sprites/cloud0.svg');
@@ -348,14 +349,18 @@ class MainScene extends Phaser.Scene {
             this.originalTileY = imageTile.y;
             this.activeImageTile = imageTile;
             this.activeImageTile.setTint(0x86bfda);
-            this.activeImageTile.setY(this.originalTileY - 5);
+            this.activeImageTile.setY(
+              this.originalTileY - 15 * this.overallScale
+            );
           } else if (this.activeImageTile !== imageTile) {
             this.activeImageTile.setY(this.originalTileY);
             this.activeImageTile.clearTint();
             this.originalTileY = imageTile.y;
             this.activeImageTile = imageTile;
             this.activeImageTile.setTint(0x86bfda);
-            this.activeImageTile.setY(this.originalTileY - 5);
+            this.activeImageTile.setY(
+              this.originalTileY - 15 * this.overallScale
+            );
           }
         } else {
           if (this.activeImageTile) {
@@ -624,9 +629,13 @@ class MainScene extends Phaser.Scene {
       }
       case Resource.Types.COAL: {
         const img = this.add
-          .image(p[0], p[1], 'coal')
+          .image(
+            p[0],
+            p[1] - 10 * this.defaultScales.coal * this.overallScale,
+            'coal'
+          )
           .setDepth(getDepthByPos(new Position(x, y)))
-          .setScale(1.5);
+          .setScale(this.defaultScales.coal * this.overallScale);
         img.setY(img.y - 18);
         return img;
       }

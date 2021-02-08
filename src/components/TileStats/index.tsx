@@ -6,7 +6,7 @@ import UnitCard from '../UnitCard';
 import LuxCard from '../LuxCard';
 
 import ResourceUranium from '../../icons/resource_uranium.svg';
-import ResourceCoal from '../../icons/resource_uranium.svg';
+import ResourceCoal from '../../icons/resource_coal.svg';
 import ResourceWood from '../../icons/resource_wood.svg';
 import { Resource } from '@lux-ai/2020-challenge/lib/es6/Resource';
 
