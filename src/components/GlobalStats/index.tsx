@@ -13,7 +13,7 @@ import Team0City from '../../icons/city00.svg';
 import Team1City from '../../icons/city10.svg';
 import Team1Worker from '../../icons/team1worker.svg';
 import Team0Worker from '../../icons/team0worker.svg';
-import Resources from '../../icons/Resources.svg';
+import Resources from '../../icons/resources.svg';
 import { TeamDetails } from '../../scenes/types';
 import ResourceUranium from '../../icons/resource_uranium.svg';
 import ResourceCoal from '../../icons/resource_coal.svg';
