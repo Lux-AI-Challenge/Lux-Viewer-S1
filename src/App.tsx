@@ -5,7 +5,7 @@ import debug_replay from './scenes/replay.json';
 export default function App() {
   return (
     <div className="all-content">
-      <GameComponent replayData={debug_replay} />
+      <GameComponent />
     </div>
   );
 }

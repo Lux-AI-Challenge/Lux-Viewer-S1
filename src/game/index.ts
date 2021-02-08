@@ -6,7 +6,7 @@ export const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: 'content',
   width: 1280 * 2,
-  height: 1280 * 1,
+  height: 1280 * 2,
   zoom: 0.5,
   render: {
     pixelArt: false,
@@ -15,8 +15,14 @@ export const config: Phaser.Types.Core.GameConfig = {
   scene: [],
 };
 
-export const createGame = (configs: GameCreationConfigs): Phaser.Game => {
+export const createGame = (
+  gameCreationConfigs: GameCreationConfigs
+): Phaser.Game => {
+  let max = Math.max(window.innerHeight, window.innerWidth);
+  config.height = max * 2;
+  config.width = max * 2;
   const game = new Phaser.Game(config);
-  game.scene.add('MainScene', MainScene, true, configs);
+
+  game.scene.add('MainScene', MainScene, true, gameCreationConfigs);
   return game;
 };

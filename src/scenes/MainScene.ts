@@ -441,23 +441,13 @@ class MainScene extends Phaser.Scene {
       }
     }
 
-    // load the initial state from replay
-    // this.pseudomatch.configs.preLoadedGame = this.luxgame;
-
-    this.cameras.main.centerOnX(0);
-    this.cameras.main.centerOnY(0);
     this.generateGameFrames(replayData).then(() => {
       this.renderFrame(0);
       this.game.events.emit('setup');
+      this.cameras.main.centerOnX(0);
+      this.cameras.main.centerOnY(0);
+      this.moveCamera(0, 0);
     });
-    // setTimeout(() => {
-    //   LuxDesignLogic.initialize(this.pseudomatch).then(() => {
-    //     this.generateGameFrames(replayData).then(() => {
-    //       this.renderFrame(0);
-    //       this.game.events.emit('setup');
-    //     });
-    //   });
-    // }, 1);
   }
 
   /**
