@@ -81,7 +81,7 @@ export const GameComponent = () => {
 
         setSliderConfigs({
           min: 0,
-          max: configs.parameters.MAX_DAYS,
+          max: Math.min(configs.parameters.MAX_DAYS, main.frames.length - 1),
           step: 1,
         });
         setReady(true);
@@ -93,7 +93,7 @@ export const GameComponent = () => {
     if (running && configs) {
       let currTurn = turn;
       const interval = setInterval(() => {
-        if (currTurn >= configs.parameters.MAX_DAYS) {
+        if (currTurn >= Math.min(configs.parameters.MAX_DAYS, main.frames.length - 1)) {
           setRunning(false);
           return;
         }
@@ -280,8 +280,8 @@ export const GameComponent = () => {
                   cities={currentFrame.cityData}
                 />
               ) : (
-                <TileStats empty />
-              )}
+                  <TileStats empty />
+                )}
             </div>
             <div className="global-stats-wrapper">
               {main && (

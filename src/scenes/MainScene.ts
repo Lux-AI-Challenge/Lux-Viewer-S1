@@ -1082,6 +1082,10 @@ class MainScene extends Phaser.Scene {
       const commands = replayData.allCommands[
         this.currentTurn
       ] as CommandsArray;
+      if (commands === undefined) {
+        // we are done with match
+        return;
+      }
       const state: LuxMatchState = this.pseudomatch.state;
       const game = state.game;
       let annotations = [] as CommandsArray;
