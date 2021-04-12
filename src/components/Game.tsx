@@ -27,6 +27,7 @@ import GlobalStats from './GlobalStats';
 import Controller from './Controller';
 import ZoomInOut from './ZoomInOut';
 import UploadSVG from '../icons/upload.svg';
+import { parseReplayData } from '../utils/replays';
 
 export type GameComponentProps = {
   // replayData?: any;
@@ -48,6 +49,7 @@ export const GameComponent = () => {
   const [replayData, setReplayData] = useState(null);
   const [notifMsg, setNotifMsg] = useState('');
   const [running, setRunning] = useState(false);
+  const [useKaggleReplay, setUseKaggleReplay] = useState(true);
   const [playbackSpeed, _setPlaybackSpeed] = useState(1);
   const setPlaybackSpeed = (speed: number) => {
     if (speed >= 0.5 && speed <= 16) {
@@ -71,6 +73,13 @@ export const GameComponent = () => {
     min: 0,
     max: 1000,
   });
+
+  const [turn, setTurn] = useState(0);
+  const [currentFrame, setFrame] = useState<Frame>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInput = React.createRef<HTMLInputElement>();
+
+  // If the game changes, put a setup callback to set up controller configs
   useEffect(() => {
     if (game) {
       game.events.on('setup', () => {
@@ -89,11 +98,15 @@ export const GameComponent = () => {
     }
   }, [game]);
 
+  // If play is toggled (running) or playback speed is changed, we update the playback
   useEffect(() => {
     if (running && configs) {
       let currTurn = turn;
       const interval = setInterval(() => {
-        if (currTurn >= Math.min(configs.parameters.MAX_DAYS, main.frames.length - 1)) {
+        if (
+          currTurn >=
+          Math.min(configs.parameters.MAX_DAYS, main.frames.length - 1)
+        ) {
           setRunning(false);
           return;
         }
@@ -105,11 +118,14 @@ export const GameComponent = () => {
     }
   }, [running, playbackSpeed]);
 
+  // if game loaded is ready, move to turn 0 and load that turn's frame
   useEffect(() => {
     if (isReady) {
       moveToTurn(0);
     }
   }, [isReady]);
+
+  // whenever the main scene is changed or visualScale is changed, call main to change the visual scale appropriately.
   useEffect(() => {
     if (main && visualScale) {
       main.overallScale = visualScale;
@@ -141,20 +157,38 @@ export const GameComponent = () => {
       });
     }
   }, [main, visualScale]);
-  const [turn, setTurn] = useState(0);
-  const [currentFrame, setFrame] = useState<Frame>(null);
-  const [uploading, setUploading] = useState(false);
+
+  /** handle the change of the slider to move turns */
   const handleSliderChange = (_event: any, newValue: number) => {
     moveToTurn(newValue);
   };
-  const fileInput = React.createRef<HTMLInputElement>();
+
+  /** Move to a specific turn and render that turn's frame */
   const moveToTurn = (turn: number) => {
     setTurn(turn);
     main.renderFrame(turn);
     setFrame(main.frames[turn]);
   };
+
+  /** load game given json replay data */
+  const loadGame = (jsonReplayData: any) => {
+    if (game) {
+      game.destroy(true, false);
+    }
+    setReady(false);
+    setReplayData(jsonReplayData);
+    const newgame = createGame({
+      replayData: jsonReplayData,
+      handleUnitClicked,
+      handleTileClicked,
+    });
+    setGame(newgame);
+  };
+
+  /** handle uploaded files */
   const handleUpload = () => {
     setUploading(true);
+    setUseKaggleReplay(false);
     if (fileInput.current.files.length) {
       const file = fileInput.current.files[0];
       const name = file.name;
@@ -165,36 +199,37 @@ export const GameComponent = () => {
           .text()
           .then(JSON.parse)
           .then((data) => {
-            if (game) {
-              game.destroy(true, false);
-            }
-            setReady(false);
-            setReplayData(data);
-            const newgame = createGame({
-              replayData: data,
-              handleUnitClicked,
-              handleTileClicked,
-            });
-            setGame(newgame);
             setUploading(false);
+            loadGame(data);
           });
       }
     }
   };
   useEffect(() => {
-    if (replayData) {
-      const newgame = createGame({
-        replayData: replayData,
-        handleUnitClicked,
-        handleTileClicked,
-      });
-      setGame(newgame);
-      setUploading(false);
+    if (useKaggleReplay) {
     }
-  }, [replayData]);
-  const noUpload = !uploading && game === null;
-  const gameLoading =
-    (uploading && game === null) || (!isReady && game !== null);
+    //@ts-ignore
+    if (window.kaggle) {
+      //@ts-ignore
+      let replay = window.kaggle.environment;
+      replay = parseReplayData(replay);
+      console.log(replay);
+      loadGame(replay);
+    }
+  }, []);
+
+  /** when replay data is changed, create new game */
+  // useEffect(() => {
+  //   if (replayData) {
+  //     const newgame = createGame({
+  //       replayData: replayData,
+  //       handleUnitClicked,
+  //       handleTileClicked,
+  //     });
+  //     setGame(newgame);
+  //     setUploading(false);
+  //   }
+  // }, [replayData]);
 
   const handleUnitClicked = (data) => {
     console.log(data);
@@ -280,8 +315,8 @@ export const GameComponent = () => {
                   cities={currentFrame.cityData}
                 />
               ) : (
-                  <TileStats empty />
-                )}
+                <TileStats empty />
+              )}
             </div>
             <div className="global-stats-wrapper">
               {main && (

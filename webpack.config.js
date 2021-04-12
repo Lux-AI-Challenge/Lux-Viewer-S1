@@ -2,9 +2,7 @@ var path = require('path');
 var webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-const {
-  BundleAnalyzerPlugin
-} = require('webpack-bundle-analyzer');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 var pathToPhaser = path.join(__dirname, '/node_modules/phaser/');
 // var pathToLux = path.join(__dirname, "/node_modules/@lux-ai/2020-challenge");
@@ -25,7 +23,8 @@ module.exports = {
   },
   target: 'web',
   module: {
-    rules: [{
+    rules: [
+      {
         test: /\.ts$/,
         loader: 'ts-loader',
         exclude: '/node_modules/',
@@ -37,12 +36,14 @@ module.exports = {
       },
       {
         test: /\.(png|svg|jpg|gif)$/,
-        use: [{
-          loader: 'file-loader',
-          options: {
-            name: 'images/[hash]-[name].[ext]',
+        use: [
+          {
+            loader: 'url-loader',
+            // options: {
+            //   name: 'images/[hash]-[name].[ext]',
+            // },
           },
-        }],
+        ],
       },
       {
         test: /\.css$/i,
