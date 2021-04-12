@@ -219,12 +219,17 @@ class MainScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('worker0', 'assets/sprites/worker0w.svg');
-    this.load.image('worker1', 'assets/sprites/worker1w.svg');
-    this.load.image('cart0', 'assets/sprites/carts/cart0e.svg');
-    this.load.image('cart1', 'assets/sprites/carts/cart1e.svg');
+    let base = 'assets';
+    // @ts-ignore;
+    if (window.kaggle) {
+      base = 'https://2021vis.lux-ai.org/assets';
+    }
+    this.load.image('worker0', `${base}/sprites/worker0w.svg`);
+    this.load.image('worker1', `${base}/sprites/worker1w.svg`);
+    this.load.image('cart0', `${base}/sprites/carts/cart0e.svg`);
+    this.load.image('cart1', `${base}/sprites/carts/cart1e.svg`);
 
-    this.load.svg('block1', 'assets/ground.svg');
+    this.load.svg('block1', `${base}/ground.svg`);
 
     // generate 15 binary values 0001 to 1111 and load the path tiles
     for (let i = 1; i <= 15; i++) {
@@ -236,34 +241,34 @@ class MainScene extends Phaser.Scene {
           str = '0' + str;
         }
       }
-      this.load.svg(`path${str}`, `assets/sprites/paths/path${str}.svg`);
+      this.load.svg(`path${str}`, `${base}/sprites/paths/path${str}.svg`);
     }
-    this.load.svg(`path0000`, `assets/sprites/paths/path1111.svg`);
+    this.load.svg(`path0000`, `${base}/sprites/paths/path1111.svg`);
 
-    this.load.svg('tree1', 'assets/sprites/tree1.svg');
-    this.load.svg('tree0', 'assets/sprites/tree0.svg');
+    this.load.svg('tree1', `${base}/sprites/tree1.svg`);
+    this.load.svg('tree0', `${base}/sprites/tree0.svg`);
     // city naming scheme
     // city<team><variant><transparent? t : ''>
-    this.load.svg('city00', 'assets/sprites/city00.svg');
-    this.load.svg('city01', 'assets/sprites/city01.svg');
-    this.load.svg('city02', 'assets/sprites/city02.svg');
-    this.load.svg('city02t', 'assets/sprites/city02t.svg');
-    this.load.svg('city03', 'assets/sprites/city03.svg');
-    this.load.svg('city03t', 'assets/sprites/city03t.svg');
+    this.load.svg('city00', `${base}/sprites/city00.svg`);
+    this.load.svg('city01', `${base}/sprites/city01.svg`);
+    this.load.svg('city02', `${base}/sprites/city02.svg`);
+    this.load.svg('city02t', `${base}/sprites/city02t.svg`);
+    this.load.svg('city03', `${base}/sprites/city03.svg`);
+    this.load.svg('city03t', `${base}/sprites/city03t.svg`);
 
-    this.load.svg('city10', 'assets/sprites/city10.svg');
-    this.load.svg('city11', 'assets/sprites/city11.svg');
-    this.load.svg('city12', 'assets/sprites/city12.svg');
-    this.load.svg('city12t', 'assets/sprites/city12t.svg');
-    this.load.svg('city13', 'assets/sprites/city13.svg');
-    this.load.svg('city13t', 'assets/sprites/city13t.svg');
+    this.load.svg('city10', `${base}/sprites/city10.svg`);
+    this.load.svg('city11', `${base}/sprites/city11.svg`);
+    this.load.svg('city12', `${base}/sprites/city12.svg`);
+    this.load.svg('city12t', `${base}/sprites/city12t.svg`);
+    this.load.svg('city13', `${base}/sprites/city13.svg`);
+    this.load.svg('city13t', `${base}/sprites/city13t.svg`);
 
-    this.load.image('coal', 'assets/sprites/coal.svg');
-    this.load.svg('uranium', 'assets/sprites/uranium.svg');
+    this.load.image('coal', `${base}/sprites/coal.svg`);
+    this.load.svg('uranium', `${base}/sprites/uranium.svg`);
 
-    this.load.svg('cloud0', 'assets/sprites/cloud0.svg');
-    this.load.svg('cloud1', 'assets/sprites/cloud1.svg');
-    this.load.svg('cloud2', 'assets/sprites/cloud2.svg');
+    this.load.svg('cloud0', `${base}/sprites/cloud0.svg`);
+    this.load.svg('cloud1', `${base}/sprites/cloud1.svg`);
+    this.load.svg('cloud2', `${base}/sprites/cloud2.svg`);
   }
 
   /**
