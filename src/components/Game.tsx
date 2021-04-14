@@ -200,20 +200,18 @@ export const GameComponent = () => {
           .then(JSON.parse)
           .then((data) => {
             setUploading(false);
+            data = parseReplayData(data);
             loadGame(data);
           });
       }
     }
   };
   useEffect(() => {
-    if (useKaggleReplay) {
-    }
     //@ts-ignore
     if (window.kaggle) {
       //@ts-ignore
       let replay = window.kaggle.environment;
       replay = parseReplayData(replay);
-      console.log(replay);
       loadGame(replay);
     }
   }, []);
@@ -259,10 +257,6 @@ export const GameComponent = () => {
       </FormGroup>
     );
   };
-
-  if (replayData) {
-    console.log(replayData);
-  }
   return (
     <div className="Game">
       <ThemeProvider theme={theme}>

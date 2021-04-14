@@ -3,14 +3,16 @@ export const parseReplayData = (rawReplayData: any) => {
     // kaggle replay
     const commands = [];
     rawReplayData.steps.forEach((stepInfo) => {
+      let turnCommands = [];
       stepInfo.forEach(
         (step: { action: string[]; observation: { player: number } }) => {
           let mappedActions = step.action.map((action) => {
-            return { command: action, agentId: step.observation.player };
+            return { command: action, agentID: step.observation.player };
           });
-          commands.push(mappedActions);
+          turnCommands.push(...mappedActions);
         }
       );
+      commands.push(turnCommands);
     });
     const seed = 0;
 
