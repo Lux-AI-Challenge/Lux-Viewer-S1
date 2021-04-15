@@ -18,7 +18,7 @@ export const parseReplayData = (rawReplayData: any) => {
 
     const replay = {
       seed,
-      allCommands: commands,
+      allCommands: commands.slice(1), // slice 1 to remove empty first entry that represents the "observation"
       mapType: 'debug',
       width: 16,
       height: 16,
@@ -33,6 +33,7 @@ export const parseReplayData = (rawReplayData: any) => {
         },
       ],
     };
+    console.log('PARSED REPLAY', replay);
     return replay;
   } else {
     return rawReplayData;
