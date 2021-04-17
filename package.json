@@ -46,6 +46,6 @@
     "phaser3-plugin-isometric": "0.0.7",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
-    "recharts": "^2.0.0"
+    "recharts": "^2.0.9"
   }
 }

@@ -18,6 +18,11 @@ export type GraphProps = {
   xlabel: string;
 };
 const Graph = ({ data, ylabel, xlabel }: GraphProps) => {
+  const renderColorfulLegendText = (value: string, entry: any) => {
+    const { color } = entry;
+
+    return <span style={{ color: '#f9efe2' }}>{value}</span>;
+  };
   return (
     <div className="Graph">
       <ResponsiveContainer width={'100%'} height={220}>
@@ -32,16 +37,25 @@ const Graph = ({ data, ylabel, xlabel }: GraphProps) => {
           <XAxis dataKey="name">
             <Label
               value={xlabel}
-              offset={0}
+              offset={-15}
               position="insideBottom"
-              color={'#323D34'}
+              fill="#f9efe2"
             />
           </XAxis>
           <YAxis
-            label={{ value: ylabel, angle: -90, position: 'insideLeft' }}
+            label={{
+              value: ylabel,
+              angle: -90,
+              position: 'insideLeft',
+              fill: '#f9efe2',
+            }}
           ></YAxis>
-          <Tooltip />
-          <Legend verticalAlign="top" height={36} />
+          <Tooltip labelStyle={{ color: '#323D34' }} />
+          {/* <Legend
+            verticalAlign="top"
+            height={36}
+            formatter={renderColorfulLegendText}
+          /> */}
           <Line
             type="monotone"
             dataKey="team0"

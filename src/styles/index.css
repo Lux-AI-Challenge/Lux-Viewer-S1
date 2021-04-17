@@ -1,14 +1,14 @@
 html {
   font-size: 10pt;
+  background-color: #00afbd;
 }
 html,
 body,
 h1 {
   font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
-  color: #323D34;
-  
+  color: #f9efe2;
 }
 .all-content {
-  width: 100vw;
+  width: 100%;
   height: 100vh;
 }

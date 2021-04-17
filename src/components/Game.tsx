@@ -1,26 +1,17 @@
 import 'phaser';
 import React, { useEffect, useState } from 'react';
-import classnames from 'classnames';
 import MainScene, { Frame, FrameTileData } from '../scenes/MainScene';
 import { createGame } from '../game';
 import {
   Button,
-  CircularProgress,
-  ButtonGroup,
-  Card,
-  CardContent,
-  Slider,
-  IconButton,
   Switch,
   FormControlLabel,
   createMuiTheme,
-  makeStyles,
   ThemeProvider,
-  createStyles,
   FormGroup,
 } from '@material-ui/core';
 import './styles.css';
-import { LuxMatchConfigs } from '@lux-ai/2020-challenge/lib/es6';
+import { LuxMatchConfigs, Game } from '@lux-ai/2020-challenge/lib/es6';
 import TileStats from './TileStats';
 import { hashToMapPosition, mapCoordsToIsometricPixels } from '../scenes/utils';
 import GlobalStats from './GlobalStats';
@@ -28,7 +19,7 @@ import Controller from './Controller';
 import ZoomInOut from './ZoomInOut';
 import UploadSVG from '../icons/upload.svg';
 import { parseReplayData } from '../utils/replays';
-
+import debug_replay from '../scenes/replay.json';
 export type GameComponentProps = {
   // replayData?: any;
 };
@@ -214,6 +205,7 @@ export const GameComponent = () => {
       replay = parseReplayData(replay);
       loadGame(replay);
     }
+    // loadGame(debug_replay);
   }, []);
 
   /** when replay data is changed, create new game */
@@ -333,6 +325,17 @@ export const GameComponent = () => {
                 setVisualScale(visualScale - 0.25);
               }}
             />
+            <div className="map-meta-wrapper">
+              <p>
+                <strong>Map Size:</strong>{' '}
+                {(main.pseudomatch.state.game as Game).map.width}x
+                {(main.pseudomatch.state.game as Game).map.height}
+              </p>
+              <p>
+                <strong>Map Seed:</strong>{' '}
+                {(main.pseudomatch.state.game as Game).configs.seed}
+              </p>
+            </div>
           </div>
         )}
       </ThemeProvider>
