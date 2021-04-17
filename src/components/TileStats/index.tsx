@@ -29,7 +29,11 @@ const TileStats = ({
     } else if (resources.type === Resource.Types.COAL) {
       svg = ResourceCoal;
     }
-    return <img className="resource-icon" src={svg} />;
+    return (
+      <span>
+        <img className="resource-icon" src={svg} />
+      </span>
+    );
   };
   const allunits = units ? Array.from(units.values()) : [];
   return (
@@ -39,19 +43,23 @@ const TileStats = ({
           ''
         ) : (
           <>
-            <p className="sub-header">
-              Tile at ({pos.x}, {pos.y})
-            </p>
+            <div className="sub-header">
+              <span>
+                ({pos.x}, {pos.y})
+              </span>
+            </div>
+            {resources && <div className="subtitle">Available Resource</div>}
             <div className="resources">
               {resources && (
                 <>
-                  Resources: {renderResourceSVG()}{' '}
+                  <span className="resource-name">{resources.type}</span>{' '}
+                  {renderResourceSVG()}{' '}
                   <span className="resource-amount">{resources.amt}</span>
                 </>
               )}
             </div>
-            {allunits.length > 0 && <div className="sub-header">Units:</div>}
-            <Grid container className="UnitStats">
+            {allunits.length > 0 && <div className="subtitle">Units:</div>}
+            <Grid container className="UnitStats" spacing={1}>
               {allunits.map((v) => {
                 return (
                   <Grid item className="UnitData" xs={6} key={v.id}>

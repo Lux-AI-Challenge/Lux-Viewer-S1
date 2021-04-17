@@ -1,13 +1,51 @@
+.TileStats .LuxCard {
+  width: 24rem;
+}
 .TileStats .sub-header {
   font-weight: 500;
+  font-size: 1.75rem;
+  text-align: center;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+.TileStats .sub-header span {
+  padding: 0.75rem;
+  border-radius: 1rem;
+  background-color: rgba(50, 61, 52, 0.1);
+}
+.TileStats .subtitle {
   font-size: 1.25rem;
+  font-weight: 500;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+.TileStats .subtitle:before {
+  content: '';
+  position: absolute;
+  margin-top: 26px;
+  left: 10%;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(50, 61, 52, 0.2) 51.04%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  height: 4px;
+  width: calc(80%);
 }
 .TileStats .resources {
   font-size: 1.25rem;
-  display: flex;
   align-items: center;
   font-weight: 500;
+  width: calc(100% - 8rem);
+  margin-left: 4rem;
   margin-bottom: 1rem;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(50, 61, 52, 0.1) 51.04%,
+    rgba(0, 0, 0, 0) 100%
+  );
 }
 .TileStats .tile-pos {
   font-size: 1.25rem;
@@ -17,7 +55,14 @@
   margin-right: 0.75rem;
   margin-left: 0.75rem;
   height: 2.5rem;
+  vertical-align: middle;
+}
+.TileStats .resources .resource-name,
+.TileStats .resources .resource-amount {
+  text-transform: capitalize;
+  font-weight: 500;
+  line-height: 2.5rem;
 }
 .TileStats .resources .resource-amount {
-  font-weight: 700;
+  float: right;
 }
