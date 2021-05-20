@@ -156,6 +156,7 @@ class MainScene extends Phaser.Scene {
     state: {},
     configs: {
       storeReplay: false,
+      storeReplayDirectory: '/',
       runProfiler: false,
       debug: false,
       seed: undefined,
@@ -412,40 +413,40 @@ class MainScene extends Phaser.Scene {
     });
 
     // spawn in clouds
-    const map_edge_cloud_tolerance = -2;
-    for (let x = -100; x < 100; x += 9) {
-      for (let y = -100; y < 100; y += 9) {
-        if (
-          x < this.mapWidth - map_edge_cloud_tolerance &&
-          x > map_edge_cloud_tolerance &&
-          y < this.mapHeight - map_edge_cloud_tolerance &&
-          y > map_edge_cloud_tolerance
-        ) {
-          continue;
-        }
-        const s = seedrandom('' + x * 10e5 + y);
-        let cloudtype = 'cloud';
-        const p = s();
-        if (p < 0.33) {
-          cloudtype += '0';
-        } else if (p < 0.66) {
-          cloudtype += '1';
-        } else {
-          cloudtype += '2';
-        }
-        const pos = new Position(x + s() * 5 - 2.5, y + s() * 5 - 2.5);
-        const isopos = mapPosToIsometricPixels(pos, {
-          scale: this.overallScale,
-          width: this.mapWidth,
-          height: this.mapHeight,
-        });
-        const cloud = this.add
-          .sprite(isopos[0], isopos[1], cloudtype)
-          .setDepth(10e5)
-          .setScale(this.overallScale * this.defaultScales.clouds);
-        this.cloudSprites.push({ cloud, pos });
-      }
-    }
+    // const map_edge_cloud_tolerance = -2;
+    // for (let x = -100; x < 100; x += 9) {
+    //   for (let y = -100; y < 100; y += 9) {
+    //     if (
+    //       x < this.mapWidth - map_edge_cloud_tolerance &&
+    //       x > map_edge_cloud_tolerance &&
+    //       y < this.mapHeight - map_edge_cloud_tolerance &&
+    //       y > map_edge_cloud_tolerance
+    //     ) {
+    //       continue;
+    //     }
+    //     const s = seedrandom('' + x * 10e5 + y);
+    //     let cloudtype = 'cloud';
+    //     const p = s();
+    //     if (p < 0.33) {
+    //       cloudtype += '0';
+    //     } else if (p < 0.66) {
+    //       cloudtype += '1';
+    //     } else {
+    //       cloudtype += '2';
+    //     }
+    //     const pos = new Position(x + s() * 5 - 2.5, y + s() * 5 - 2.5);
+    //     const isopos = mapPosToIsometricPixels(pos, {
+    //       scale: this.overallScale,
+    //       width: this.mapWidth,
+    //       height: this.mapHeight,
+    //     });
+    //     const cloud = this.add
+    //       .sprite(isopos[0], isopos[1], cloudtype)
+    //       .setDepth(10e5)
+    //       .setScale(this.overallScale * this.defaultScales.clouds);
+    //     this.cloudSprites.push({ cloud, pos });
+    //   }
+    // }
 
     this.generateGameFrames(replayData).then(() => {
       this.renderFrame(0);
@@ -561,7 +562,7 @@ class MainScene extends Phaser.Scene {
     for (let y = 0; y < game.map.height; y++) {
       let row = game.map.getRow(y);
       row.forEach((cell) => {
-        if (cell.cooldown !== 1) {
+        if (cell.cooldown !== 0) {
           cellsWithRoads.set(hashMapCoords(cell.pos), cell);
         }
       });
