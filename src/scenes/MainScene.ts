@@ -562,7 +562,7 @@ class MainScene extends Phaser.Scene {
     for (let y = 0; y < game.map.height; y++) {
       let row = game.map.getRow(y);
       row.forEach((cell) => {
-        if (cell.cooldown !== 0) {
+        if (cell.cooldown > 1) {
           cellsWithRoads.set(hashMapCoords(cell.pos), cell);
         }
       });
