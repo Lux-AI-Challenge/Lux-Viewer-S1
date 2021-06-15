@@ -24,11 +24,11 @@ export const parseReplayData = (rawReplayData: any) => {
       height: 16,
       teamDetails: [
         {
-          name: 'spambot',
+          name: 'team-1',
           tournamentID: '',
         },
         {
-          name: 'better',
+          name: 'team-2',
           tournamentID: '',
         },
       ],
