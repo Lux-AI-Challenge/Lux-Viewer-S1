@@ -11,7 +11,7 @@ import {
   FormGroup,
 } from '@material-ui/core';
 import './styles.css';
-import { LuxMatchConfigs, Game } from '@lux-ai/2020-challenge/lib/es6';
+import { LuxMatchConfigs, Game } from '@lux-ai/2021-challenge/lib/es6';
 import TileStats from './TileStats';
 import { hashToMapPosition, mapCoordsToIsometricPixels } from '../scenes/utils';
 import GlobalStats from './GlobalStats';
@@ -74,6 +74,7 @@ export const GameComponent = () => {
   useEffect(() => {
     if (game) {
       game.events.on('setup', () => {
+        // @ts-ignore
         const main: MainScene = game.scene.scenes[0];
         setMain(main);
         const configs = main.luxgame.configs;

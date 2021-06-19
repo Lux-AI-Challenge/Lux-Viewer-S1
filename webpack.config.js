@@ -5,7 +5,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 var pathToPhaser = path.join(__dirname, '/node_modules/phaser/');
-// var pathToLux = path.join(__dirname, "/node_modules/@lux-ai/2020-challenge");
+// var pathToLux = path.join(__dirname, "/node_modules/@lux-ai/2021-challenge");
 var phaser = path.join(pathToPhaser, 'dist/phaser.js');
 // var lux = path.join(pathToLux, "dist/lux.js");
 

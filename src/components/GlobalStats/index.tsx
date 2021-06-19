@@ -7,7 +7,7 @@ import {
   TurnStats,
 } from '../../scenes/MainScene';
 import './styles.css';
-import { Unit } from '@lux-ai/2020-challenge/lib/es6/Unit';
+import { Unit } from '@lux-ai/2021-challenge/lib/es6/Unit';
 import { Grid } from '@material-ui/core';
 import Team0City from '../../icons/city00.svg';
 import Team1City from '../../icons/city10.svg';

@@ -1,8 +1,8 @@
-import { LuxMatchState } from '@lux-ai/2020-challenge/lib/es6/types';
-import { LuxDesignLogic } from '@lux-ai/2020-challenge/lib/es6/logic';
-import { Game } from '@lux-ai/2020-challenge/lib/es6/Game';
-import { Resource } from '@lux-ai/2020-challenge/lib/es6/Resource';
-import { Unit as LUnit } from '@lux-ai/2020-challenge/lib/es6/Unit/index';
+import { LuxMatchState } from '@lux-ai/2021-challenge/lib/es6/types';
+import { LuxDesignLogic } from '@lux-ai/2021-challenge/lib/es6/logic';
+import { Game } from '@lux-ai/2021-challenge/lib/es6/Game';
+import { Resource } from '@lux-ai/2021-challenge/lib/es6/Resource';
+import { Unit as LUnit } from '@lux-ai/2021-challenge/lib/es6/Unit/index';
 
 import {
   getDepthByPos,
@@ -12,11 +12,11 @@ import {
   mapIsometricPixelsToPosition,
   mapPosToIsometricPixels,
 } from './utils';
-import { Position } from '@lux-ai/2020-challenge/lib/es6/GameMap/position';
+import { Position } from '@lux-ai/2021-challenge/lib/es6/GameMap/position';
 import { GameObjects } from 'phaser';
 import seedrandom from 'seedrandom';
 import { TEAM_A_COLOR, TEAM_B_COLOR } from './types';
-import { Cell } from '@lux-ai/2020-challenge/lib/es6/GameMap/cell';
+import { Cell } from '@lux-ai/2021-challenge/lib/es6/GameMap/cell';
 
 type CommandsArray = Array<{
   command: string;
@@ -949,6 +949,7 @@ class MainScene extends Phaser.Scene {
               fontSize: `${24 * this.overallScale}px`,
               fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
               color: '#323D34',
+              // @ts-ignore
               fontWeight: 'bold',
             },
           })

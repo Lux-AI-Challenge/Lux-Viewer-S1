@@ -1,5 +1,5 @@
-import { GameMap } from '@lux-ai/2020-challenge/lib/es6/GameMap';
-import { Position } from '@lux-ai/2020-challenge/lib/es6/GameMap/position';
+import { GameMap } from '@lux-ai/2021-challenge/lib/es6/GameMap';
+import { Position } from '@lux-ai/2021-challenge/lib/es6/GameMap/position';
 
 export const mapPosToPixels = (pos: Position): [number, number] => {
   return mapCoordsToPixels(pos.x, pos.y);

@@ -5,7 +5,7 @@ import './styles.css';
 import { FrameSingleUnitData } from '../../scenes/MainScene';
 import Team0WorkerSVG from '../../icons/team0worker.svg';
 import Team1WorkerSVG from '../../icons/team1worker.svg';
-import { Unit } from '@lux-ai/2020-challenge/lib/es6/Unit';
+import { Unit } from '@lux-ai/2021-challenge/lib/es6/Unit';
 import { LinearProgress, makeStyles } from '@material-ui/core';
 export type UnitCardProps = FrameSingleUnitData;
 
