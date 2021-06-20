@@ -14,14 +14,10 @@ export const parseReplayData = (rawReplayData: any) => {
       );
       commands.push(turnCommands);
     });
-    const seed = 0;
-
     const replay = {
-      seed,
       allCommands: commands.slice(1), // slice 1 to remove empty first entry that represents the "observation"
-      mapType: 'debug',
-      width: 16,
-      height: 16,
+      mapType: rawReplayData.configuration.mapType,
+      seed: parseInt(rawReplayData.configuration.seed),
       teamDetails: [
         {
           name: 'team-1',
