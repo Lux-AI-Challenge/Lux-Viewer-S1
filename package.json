@@ -1,8 +1,8 @@
 {
-  "name": "phaser3-typescript-webpack",
+  "name": "lux-viewer-2021",
   "version": "1.0.0",
   "description": "",
-  "author": "troyedwardsjr",
+  "author": "Lux AI challenge",
   "main": "index.js",
   "scripts": {
     "dev": "webpack --mode development && webpack-dev-server --mode development --devtool source-map",
