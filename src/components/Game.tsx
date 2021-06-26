@@ -206,7 +206,7 @@ export const GameComponent = () => {
       replay = parseReplayData(replay);
       loadGame(replay);
     }
-    // loadGame(debug_replay);
+    loadGame(debug_replay);
   }, []);
 
   /** when replay data is changed, create new game */

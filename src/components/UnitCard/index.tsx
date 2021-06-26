@@ -5,6 +5,8 @@ import './styles.css';
 import { FrameSingleUnitData } from '../../scenes/MainScene';
 import Team0WorkerSVG from '../../icons/team0worker.svg';
 import Team1WorkerSVG from '../../icons/team1worker.svg';
+import Team0CartSVG from '../../icons/team0cart.svg';
+import Team1CartSVG from '../../icons/team1cart.svg';
 import { Unit } from '@lux-ai/2021-challenge/lib/es6/Unit';
 import { LinearProgress, makeStyles } from '@material-ui/core';
 export type UnitCardProps = FrameSingleUnitData;
@@ -26,9 +28,9 @@ const UnitCard = ({ cargo, pos, id, cooldown, team, type }: UnitCardProps) => {
         svg = Team0WorkerSVG;
       }
     } else {
-      svg = Team1WorkerSVG;
+      svg = Team1CartSVG;
       if (team === 0) {
-        svg = Team0WorkerSVG;
+        svg = Team0CartSVG;
       }
     }
 
