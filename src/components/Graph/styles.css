@@ -1,3 +1,6 @@
 .Graph {
   overflow: hidden;
 }
+.Graph .recharts-surface {
+  height: 260px;
+}

@@ -1,0 +1,47 @@
+.CityStatsCard {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  position: relative;
+}
+.CityStatsCard .city-id {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+.CityStatsCard .city-id:before {
+  content: '';
+  position: absolute;
+  margin-top: 18px;
+  background: rgba(50, 61, 52, 0.1);
+  height: 4px;
+  width: calc(100%);
+}
+.CityStatsCard .worker-icon-wrapper {
+  display: inline-block;
+  width: 4rem;
+  margin-right: 1rem;
+}
+.CityStatsCard .worker-icon-wrapper img {
+  width: 4rem;
+}
+.CityStatsCard .worker-data {
+  display: inline-block;
+  width: 18rem;
+}
+.CityStatsCard .worker-data p {
+  margin: 0px;
+  font-size: 1rem;
+  padding: 0.5rem;
+}
+.CityStatsCard .worker-data p span {
+  float: right;
+}
+.CityStatsCard .worker-data p:nth-child(even) {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(50, 61, 52, 0.1) 51.04%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}

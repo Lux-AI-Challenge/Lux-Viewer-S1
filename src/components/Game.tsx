@@ -19,7 +19,7 @@ import Controller from './Controller';
 import ZoomInOut from './ZoomInOut';
 import UploadSVG from '../icons/upload.svg';
 import { parseReplayData } from '../utils/replays';
-import debug_replay from '../scenes/replay.json';
+import debug_replay from '../scenes/sample_replay.json';
 export type GameComponentProps = {
   // replayData?: any;
 };

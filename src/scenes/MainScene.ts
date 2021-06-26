@@ -77,14 +77,13 @@ type FrameSingleCityTileData = {
   cooldown: number;
 };
 
-export type FrameCityData = Map<
-  string,
-  {
-    cityTilePositions: Array<Position>;
-    fuel: number;
-    team: LUnit.TEAM;
-  }
->;
+export type FrameCityData = Map<string, FrameSingleCityData>;
+export type FrameSingleCityData = {
+  cityTilePositions: Array<Position>;
+  fuel: number;
+  team: LUnit.TEAM;
+  upkeep: number;
+};
 
 export type GameCreationConfigs = {
   replayData: object;
@@ -117,6 +116,9 @@ export interface TurnStats {
     [x in LUnit.TEAM]: number;
   };
   totalFuelGenerated: {
+    [x in LUnit.TEAM]: number;
+  };
+  researchPoints: {
     [x in LUnit.TEAM]: number;
   };
 }
@@ -535,6 +537,7 @@ class MainScene extends Phaser.Scene {
         cityTilePositions: city.citycells.map((cell) => cell.pos),
         fuel: city.fuel,
         team: city.team,
+        upkeep: city.getLightUpkeep(),
       });
       city.citycells.forEach((cell) => {
         const ct = cell.citytile;
@@ -1153,6 +1156,10 @@ class MainScene extends Phaser.Scene {
         totalFuelGenerated: [
           game.stats.teamStats[0].fuelGenerated,
           game.stats.teamStats[1].fuelGenerated,
+        ],
+        researchPoints: [
+          game.state.teamStates[0].researchPoints,
+          game.state.teamStates[1].researchPoints,
         ],
       };
       game.cities.forEach((city) => {

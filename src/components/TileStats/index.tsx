@@ -9,6 +9,7 @@ import ResourceUranium from '../../icons/resource_uranium.svg';
 import ResourceCoal from '../../icons/resource_coal.svg';
 import ResourceWood from '../../icons/resource_wood.svg';
 import { Resource } from '@lux-ai/2021-challenge/lib/es6/Resource';
+import CityStatsCard from '../CityStatsCard';
 
 export type TileStatsProps = Partial<FrameTileData> & {
   cities?: FrameCityData;
@@ -48,7 +49,18 @@ const TileStats = ({
                 ({pos.x}, {pos.y})
               </span>
             </div>
-            {resources && <div className="subtitle">Available Resource</div>}
+            {cityTile.length > 0 && (
+              <>
+                <div className="subtitle">City Info</div>
+                <Grid container className="CityStats">
+                  <CityStatsCard
+                    {...cities.get(cityTile[0].cityid)}
+                    cityid={cityTile[0].cityid}
+                  />
+                </Grid>
+              </>
+            )}
+            {resources && <div className="subtitle">Resources</div>}
             <div className="resources">
               {resources && (
                 <>
@@ -68,16 +80,7 @@ const TileStats = ({
                 );
               })}
             </Grid>
-            <Grid container className="CityStats">
-              {cityTile.length > 0 && (
-                <Grid item xs={12}>
-                  <p>City ID: {cityTile[0].cityid}</p>
-                  <p>Light: {cities.get(cityTile[0].cityid).fuel}</p>
-                  <p>Team: {cities.get(cityTile[0].cityid).team}</p>
-                </Grid>
-              )}
-            </Grid>
-            <Grid container className="CityTileStats">
+            {/* <Grid container className="CityTileStats">
               {cityTile.length > 0 && (
                 <Grid item xs={12}>
                   <p>City ID: {cityTile[0].cityid}</p>
@@ -85,7 +88,7 @@ const TileStats = ({
                   <p>Team: {cityTile[0].team}</p>
                 </Grid>
               )}
-            </Grid>
+            </Grid> */}
           </>
         )}
       </LuxCard>

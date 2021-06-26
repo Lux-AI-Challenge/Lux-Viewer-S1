@@ -97,6 +97,22 @@ const GlobalStats = ({
         />
       ),
     },
+    {
+      title: 'Research Points',
+      graph: (
+        <Graph
+          data={slicedAccStats.map((v, i) => {
+            return {
+              name: `${i}`,
+              team0: v.researchPoints[0],
+              team1: v.researchPoints[1],
+            };
+          })}
+          xlabel="Turn #"
+          ylabel="Research Points"
+        />
+      ),
+    },
   ];
 
   return (
