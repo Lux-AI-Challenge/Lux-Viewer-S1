@@ -1,6 +1,20 @@
-# LuxViewer
+# Lux AI Challenge: Season 1 Visualizer
 
-The replay viewer
+This is the codebase for the Season 1 competition visualizer. The latest version is hosted on https://2021vis.lux-ai.org/. To download a local or past version, check out [the releases](https://github.com/Lux-AI-Challenge/LuxViewer2021/releases/)
+
+To run the visualizer locally, first unzip the release and it should create a folder called dist. Then install the serve package via
+
+```
+npm i -g serve
+```
+
+Then run
+
+```
+serve dist
+```
+
+And you should be able to navigate to http://localhost:5000 to use the visualizer, upload replays, and watch them, and begin to analyze matches!
 
 # Development
 
