@@ -5,7 +5,7 @@ import PauseButtonSVG from '../../icons/pause.svg';
 import ArrowsSVG from '../../icons/arrows.svg';
 import UploadSVG from '../../icons/upload.svg';
 import DayTimeSVG from '../../icons/daytime.svg';
-import NightTimeSVG from '../../icons/nighttime.svg';
+import MoonSVG from '../../icons/moon.svg';
 
 export type ControllerProps = {
   turn: number;
@@ -37,10 +37,11 @@ const Controller = ({
   fileInput,
   running,
 }: ControllerProps) => {
+  const isNightTime = (turn % 40 > 30 || turn % 40 == 0) && turn !== 0;
   return (
     <div className="controller">
       <div className="time-of-day">
-        <img className="day-icon" src={DayTimeSVG} />
+        <img className="day-icon" src={isNightTime ? MoonSVG : DayTimeSVG} />
       </div>
       <div className="turn-label">
         <span>Turn {turn}</span>
