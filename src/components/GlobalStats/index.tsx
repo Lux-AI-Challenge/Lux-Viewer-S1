@@ -143,7 +143,7 @@ const GlobalStats = ({
               </div>
             </div>
           </Grid>
-          <Grid item xs={1} key={1000}></Grid>
+          <Grid item xs={1} key={1001}></Grid>
           <Grid item xs={5} key={1}>
             <div className="teamLabel">
               <div className="icons">

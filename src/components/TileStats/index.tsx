@@ -58,11 +58,13 @@ const TileStats = ({
                 {renderResourceSVG()}{' '}
               </div>
             )}
-            <div className="roadlevel">
-              <p>
-                Road Level: <span>{roadLevel.toFixed(1)}/6.0</span>
-              </p>
-            </div>
+            {roadLevel !== undefined && (
+              <div className="roadlevel">
+                <p>
+                  Road Level: <span>{roadLevel.toFixed(1)}/6.0</span>
+                </p>
+              </div>
+            )}
             {allunits.length > 0 && <div className="subtitle">Units:</div>}
             <Grid container className="UnitStats" spacing={1}>
               {allunits.map((v) => {

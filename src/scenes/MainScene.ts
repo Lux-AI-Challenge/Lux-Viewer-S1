@@ -302,7 +302,7 @@ class MainScene extends Phaser.Scene {
       units: unitDataAtXY,
       cityTile: cityTile,
       resources: resourceAtXY,
-      roadLevel: f.roadLevels[v.y][v.x],
+      roadLevel: f.roadLevels[v.y] ? f.roadLevels[v.y][v.x] : undefined,
     });
     this.currentSelectedTilePos = clickedPos;
   }
@@ -417,40 +417,40 @@ class MainScene extends Phaser.Scene {
     });
 
     // spawn in clouds
-    // const map_edge_cloud_tolerance = -2;
-    // for (let x = -100; x < 100; x += 9) {
-    //   for (let y = -100; y < 100; y += 9) {
-    //     if (
-    //       x < this.mapWidth - map_edge_cloud_tolerance &&
-    //       x > map_edge_cloud_tolerance &&
-    //       y < this.mapHeight - map_edge_cloud_tolerance &&
-    //       y > map_edge_cloud_tolerance
-    //     ) {
-    //       continue;
-    //     }
-    //     const s = seedrandom('' + x * 10e5 + y);
-    //     let cloudtype = 'cloud';
-    //     const p = s();
-    //     if (p < 0.33) {
-    //       cloudtype += '0';
-    //     } else if (p < 0.66) {
-    //       cloudtype += '1';
-    //     } else {
-    //       cloudtype += '2';
-    //     }
-    //     const pos = new Position(x + s() * 5 - 2.5, y + s() * 5 - 2.5);
-    //     const isopos = mapPosToIsometricPixels(pos, {
-    //       scale: this.overallScale,
-    //       width: this.mapWidth,
-    //       height: this.mapHeight,
-    //     });
-    //     const cloud = this.add
-    //       .sprite(isopos[0], isopos[1], cloudtype)
-    //       .setDepth(10e5)
-    //       .setScale(this.overallScale * this.defaultScales.clouds);
-    //     this.cloudSprites.push({ cloud, pos });
-    //   }
-    // }
+    const map_edge_cloud_tolerance = -2;
+    for (let x = -100; x < 100; x += 9) {
+      for (let y = -100; y < 100; y += 9) {
+        if (
+          x < this.mapWidth - map_edge_cloud_tolerance &&
+          x > map_edge_cloud_tolerance &&
+          y < this.mapHeight - map_edge_cloud_tolerance &&
+          y > map_edge_cloud_tolerance
+        ) {
+          continue;
+        }
+        const s = seedrandom('' + x * 10e5 + y);
+        let cloudtype = 'cloud';
+        const p = s();
+        if (p < 0.33) {
+          cloudtype += '0';
+        } else if (p < 0.66) {
+          cloudtype += '1';
+        } else {
+          cloudtype += '2';
+        }
+        const pos = new Position(x + s() * 5 - 2.5, y + s() * 5 - 2.5);
+        const isopos = mapPosToIsometricPixels(pos, {
+          scale: this.overallScale,
+          width: this.mapWidth,
+          height: this.mapHeight,
+        });
+        const cloud = this.add
+          .sprite(isopos[0], isopos[1], cloudtype)
+          .setDepth(10e5)
+          .setScale(this.overallScale * this.defaultScales.clouds);
+        this.cloudSprites.push({ cloud, pos });
+      }
+    }
 
     this.generateGameFrames(replayData).then(() => {
       this.renderFrame(0);
@@ -665,11 +665,11 @@ class MainScene extends Phaser.Scene {
     const s = seedrandom('' + data.pos.x * 10e3 + data.pos.y);
     let variant = '0';
     const rngp = s();
-    if (rngp < 0.25) {
+    if (rngp < 0.125) {
       variant = '2';
     } else if (rngp < 0.5) {
       variant = '1';
-    } else if (rngp < 0.75) {
+    } else if (rngp < 0.625) {
       variant = '3';
     }
     cityTileType += variant;
@@ -800,6 +800,7 @@ class MainScene extends Phaser.Scene {
     f.roadLevels.forEach((row, y) => {
       row.forEach((level, x) => {
         if (level < 1e-1) return;
+
         let pos = new Position(x, y);
         let hash = hashMapCoords(pos);
 
@@ -832,11 +833,18 @@ class MainScene extends Phaser.Scene {
           }
         });
 
+        // add the img_base because we use transparency on the roads and need something behind it
+        const img_base = this.add
+          .image(p[0], p[1], 'block1')
+          .setDepth(getDepthByPos(pos) / 100 + 0.5 / 1e7)
+          .setScale(this.defaultScales.block * this.overallScale);
         const img = this.add
           .image(p[0], p[1], getRoadType(adjacency))
           .setDepth(getDepthByPos(pos) / 100 + 1 / 1e7)
-          .setScale(this.defaultScales.road * this.overallScale);
+          .setScale(this.defaultScales.road * this.overallScale)
+          .setAlpha(Math.ceil(level) / 6);
         this.currentRenderedFramesRoads.push({ img, pos: pos });
+        this.currentRenderedFramesRoads.push({ img: img_base, pos: pos });
         this.floorImageTiles.set(hash, img);
       });
     });
