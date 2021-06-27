@@ -33,13 +33,13 @@ export interface Frame {
       pos: Position;
     }
   >;
+  roadLevels: number[][];
   teamStates: FrameTeamStateData;
   unitData: FrameUnitData;
   cityData: FrameCityData;
   cityTileData: FrameCityTileData;
   annotations: CommandsArray;
   errors: string[];
-  cellsWithRoads: Map<number, Cell>;
 }
 
 export type FrameTeamStateData = {
@@ -96,6 +96,7 @@ export type FrameTileData = {
   pos: Position;
   units: Map<string, FrameSingleUnitData>;
   cityTile: FrameCityTileData;
+  roadLevel: number;
   resources: {
     type: Resource.Types;
     amt: number;
@@ -301,6 +302,7 @@ class MainScene extends Phaser.Scene {
       units: unitDataAtXY,
       cityTile: cityTile,
       resources: resourceAtXY,
+      roadLevel: f.roadLevels[v.y][v.x],
     });
     this.currentSelectedTilePos = clickedPos;
   }
@@ -561,13 +563,12 @@ class MainScene extends Phaser.Scene {
       });
     });
 
-    let cellsWithRoads: Map<number, Cell> = new Map();
+    let roadLevels: number[][] = [];
     for (let y = 0; y < game.map.height; y++) {
       let row = game.map.getRow(y);
-      row.forEach((cell) => {
-        if (cell.cooldown > 1) {
-          cellsWithRoads.set(hashMapCoords(cell.pos), cell);
-        }
+      roadLevels.push([]);
+      row.forEach((cell, x) => {
+        roadLevels[y][x] = cell.cooldown;
       });
     }
 
@@ -578,8 +579,8 @@ class MainScene extends Phaser.Scene {
       cityTileData,
       teamStates,
       annotations,
+      roadLevels,
       errors: this.currentTurnErrors,
-      cellsWithRoads,
     };
   }
 
@@ -789,40 +790,55 @@ class MainScene extends Phaser.Scene {
       this.floorImageTiles.set(hash, img2);
     });
 
+    // find all standing cities
+    let visibleCityTiles: Set<number> = new Set();
+    f.cityTileData.forEach((data) => {
+      visibleCityTiles.add(hashMapCoords(data.pos));
+    });
+
     // render roads
-    f.cellsWithRoads.forEach((cell) => {
-      let hash = hashMapCoords(cell.pos);
-      let oldimg = this.floorImageTiles.get(hash);
-      oldimg.destroy();
-      const p = mapPosToIsometricPixels(cell.pos, {
-        scale: this.overallScale,
-        width: this.mapWidth,
-        height: this.mapHeight,
+    f.roadLevels.forEach((row, y) => {
+      row.forEach((level, x) => {
+        if (level < 1e-1) return;
+        let pos = new Position(x, y);
+        let hash = hashMapCoords(pos);
+
+        // if (visibleCityTiles.has(hash)) return;
+
+        let oldimg = this.floorImageTiles.get(hash);
+        oldimg.destroy();
+        const p = mapPosToIsometricPixels(pos, {
+          scale: this.overallScale,
+          width: this.mapWidth,
+          height: this.mapHeight,
+        });
+
+        // determine road to render by adjacency
+        let adjacency = [false, false, false, false];
+
+        let dirs = [
+          Game.DIRECTIONS.NORTH,
+          Game.DIRECTIONS.EAST,
+          Game.DIRECTIONS.SOUTH,
+          Game.DIRECTIONS.WEST,
+        ];
+        dirs.forEach((dir, i) => {
+          let newpos = pos.translate(dir, 1);
+          if (
+            f.roadLevels[newpos.y] !== undefined &&
+            f.roadLevels[newpos.y][newpos.x] > 0
+          ) {
+            adjacency[i] = true;
+          }
+        });
+
+        const img = this.add
+          .image(p[0], p[1], getRoadType(adjacency))
+          .setDepth(getDepthByPos(pos) / 100 + 1 / 1e7)
+          .setScale(this.defaultScales.road * this.overallScale);
+        this.currentRenderedFramesRoads.push({ img, pos: pos });
+        this.floorImageTiles.set(hash, img);
       });
-
-      // determine road to render by adjacency
-      let adjacency = [false, false, false, false];
-
-      let dirs = [
-        Game.DIRECTIONS.NORTH,
-        Game.DIRECTIONS.EAST,
-        Game.DIRECTIONS.SOUTH,
-        Game.DIRECTIONS.WEST,
-      ];
-      dirs.forEach((dir, i) => {
-        let newpos = cell.pos.translate(dir, 1);
-        let hash = hashMapCoords(newpos);
-        if (f.cellsWithRoads.has(hash)) {
-          adjacency[i] = true;
-        }
-      });
-
-      const img = this.add
-        .image(p[0], p[1], getRoadType(adjacency))
-        .setDepth(getDepthByPos(cell.pos) / 100 + 1 / 1e7)
-        .setScale(this.defaultScales.road * this.overallScale);
-      this.currentRenderedFramesRoads.push({ img, pos: cell.pos });
-      this.floorImageTiles.set(hash, img);
     });
 
     // render clouds to the appropriate size
@@ -839,7 +855,6 @@ class MainScene extends Phaser.Scene {
 
     let visibleUnits: Set<string> = new Set();
     let unitPosToCount: Map<number, number> = new Map();
-    let visibleCityTiles: Set<number> = new Set();
     let tilesWithUnits: Set<number> = new Set();
 
     // find tiles with units and count units per tile
@@ -854,11 +869,6 @@ class MainScene extends Phaser.Scene {
         }
       }
       tilesWithUnits.add(hash);
-    });
-
-    // find all standing cities
-    f.cityTileData.forEach((data) => {
-      visibleCityTiles.add(hashMapCoords(data.pos));
     });
 
     const tilesWithResources: Set<number> = new Set();

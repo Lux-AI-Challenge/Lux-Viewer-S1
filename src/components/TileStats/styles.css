@@ -34,12 +34,12 @@
   width: calc(80%);
 }
 .TileStats .resources {
-  font-size: 1.25rem;
+  font-size: 1rem;
   align-items: center;
   font-weight: 500;
   width: calc(100% - 8rem);
   margin-left: 4rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.25rem;
   background: linear-gradient(
     90deg,
     rgba(0, 0, 0, 0) 0%,
@@ -54,15 +54,31 @@
 .TileStats .resources .resource-icon {
   margin-right: 0.75rem;
   margin-left: 0.75rem;
-  height: 2.5rem;
+  height: 1.5rem;
+  margin-top: 0.25rem;
   vertical-align: middle;
+}
+.TileStats .resources .resource-name {
+  text-transform: capitalize;
 }
 .TileStats .resources .resource-name,
 .TileStats .resources .resource-amount {
-  text-transform: capitalize;
   font-weight: 500;
-  line-height: 2.5rem;
+  line-height: 2rem;
+}
+.TileStats .resources .resource-icon-wrapper {
+  float: right;
 }
 .TileStats .resources .resource-amount {
+  float: right;
+}
+
+.TileStats .roadlevel {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-left: 4rem;
+  width: calc(100% - 8rem);
+}
+.TileStats .roadlevel p span {
   float: right;
 }

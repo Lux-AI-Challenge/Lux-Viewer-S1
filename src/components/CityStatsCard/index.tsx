@@ -3,6 +3,7 @@ import './styles.css';
 import { FrameSingleCityData } from '../../scenes/MainScene';
 import Team0WorkerSVG from '../../icons/city00.svg';
 import Team1WorkerSVG from '../../icons/city10.svg';
+import City0Group from '../../icons/city0group.svg';
 import { makeStyles } from '@material-ui/core';
 export type CityStatsCardProps = FrameSingleCityData & { cityid: string };
 
@@ -25,7 +26,7 @@ const CityStatsCard = ({
   const renderCitySVG = () => {
     let svg = Team1WorkerSVG;
     if (team === 0) {
-      svg = Team0WorkerSVG;
+      svg = City0Group;
     }
     return <img src={svg} />;
   };

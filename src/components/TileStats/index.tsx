@@ -22,6 +22,7 @@ const TileStats = ({
   cities,
   resources,
   empty,
+  roadLevel,
 }: TileStatsProps) => {
   const renderResourceSVG = () => {
     let svg = ResourceWood;
@@ -31,7 +32,7 @@ const TileStats = ({
       svg = ResourceCoal;
     }
     return (
-      <span>
+      <span className="resource-icon-wrapper">
         <img className="resource-icon" src={svg} />
       </span>
     );
@@ -49,26 +50,18 @@ const TileStats = ({
                 ({pos.x}, {pos.y})
               </span>
             </div>
-            {cityTile.length > 0 && (
-              <>
-                <div className="subtitle">City Info</div>
-                <Grid container className="CityStats">
-                  <CityStatsCard
-                    {...cities.get(cityTile[0].cityid)}
-                    cityid={cityTile[0].cityid}
-                  />
-                </Grid>
-              </>
+            <div className="subtitle">General</div>
+            {resources && (
+              <div className="resources">
+                <span className="resource-name">{resources.type}</span>{' '}
+                <span className="resource-amount">x{resources.amt}</span>
+                {renderResourceSVG()}{' '}
+              </div>
             )}
-            {resources && <div className="subtitle">Resources</div>}
-            <div className="resources">
-              {resources && (
-                <>
-                  <span className="resource-name">{resources.type}</span>{' '}
-                  {renderResourceSVG()}{' '}
-                  <span className="resource-amount">{resources.amt}</span>
-                </>
-              )}
+            <div className="roadlevel">
+              <p>
+                Road Level: <span>{roadLevel.toFixed(1)}/6.0</span>
+              </p>
             </div>
             {allunits.length > 0 && <div className="subtitle">Units:</div>}
             <Grid container className="UnitStats" spacing={1}>
@@ -80,15 +73,17 @@ const TileStats = ({
                 );
               })}
             </Grid>
-            {/* <Grid container className="CityTileStats">
-              {cityTile.length > 0 && (
-                <Grid item xs={12}>
-                  <p>City ID: {cityTile[0].cityid}</p>
-                  <p>Cooldown: {cityTile[0].cooldown}</p>
-                  <p>Team: {cityTile[0].team}</p>
+            {cityTile.length > 0 && (
+              <>
+                <div className="subtitle">City Info</div>
+                <Grid container className="CityStats">
+                  <CityStatsCard
+                    {...cities.get(cityTile[0].cityid)}
+                    cityid={cityTile[0].cityid}
+                  />
                 </Grid>
-              )}
-            </Grid> */}
+              </>
+            )}
           </>
         )}
       </LuxCard>
