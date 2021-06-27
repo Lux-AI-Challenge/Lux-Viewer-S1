@@ -20,6 +20,7 @@ import ZoomInOut from './ZoomInOut';
 import UploadSVG from '../icons/upload.svg';
 import { parseReplayData } from '../utils/replays';
 import debug_replay from '../scenes/sample_replay.json';
+import clientConfigs from './configs.json';
 export type GameComponentProps = {
   // replayData?: any;
 };
@@ -295,6 +296,10 @@ export const GameComponent = () => {
               sliderConfigs={sliderConfigs}
               handleSliderChange={handleSliderChange}
             />
+            <div id="version-number">
+              <strong>Version: </strong>
+              {clientConfigs.version}
+            </div>
             <div className="tile-stats-wrapper">
               {selectedTileData ? (
                 <TileStats

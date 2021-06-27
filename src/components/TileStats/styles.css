@@ -8,9 +8,14 @@
   padding: 1rem;
   margin-bottom: 1rem;
 }
+.TileStats .sub-header .coords-label {
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+}
 .TileStats .sub-header span {
   padding: 0.75rem;
   border-radius: 1rem;
+  display: inline-block;
   background-color: rgba(50, 61, 52, 0.1);
 }
 .TileStats .subtitle {

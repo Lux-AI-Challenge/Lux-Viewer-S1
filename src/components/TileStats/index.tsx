@@ -46,6 +46,7 @@ const TileStats = ({
         ) : (
           <>
             <div className="sub-header">
+              <div className="coords-label">Coordinates</div>
               <span>
                 ({pos.x}, {pos.y})
               </span>

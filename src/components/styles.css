@@ -209,3 +209,9 @@
   left: 50%;
   transform: translate(-50%, 0);
 }
+
+.Game #version-number {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+}
