@@ -16,10 +16,49 @@
 .GlobalStats .Carosel {
   box-shadow: none;
 }
-
+.GlobalStats .cityTilesLabel {
+  position: absolute;
+  left: -13px;
+  font-size: 0.85rem;
+  top: 13.1rem;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(50, 61, 52, 0.1) 51.04%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  width: 29rem;
+  height: 3rem;
+  line-height: 3rem;
+  z-index: 1;
+}
+.GlobalStats .storedFuelLabel {
+  position: absolute;
+  left: -13px;
+  font-size: 0.85rem;
+  top: 17.25rem;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(50, 61, 52, 0.1) 51.04%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  width: 29rem;
+  height: 3rem;
+  line-height: 3rem;
+  z-index: 1;
+}
+.GlobalStats .teamLabel {
+  text-align: center;
+  position: relative;
+  z-index: 10;
+}
 .GlobalStats .teamLabel .icons {
   align-items: center;
   display: flex;
+}
+.GlobalStats .teamLabel .icons img {
+  margin-right: 1rem;
 }
 .GlobalStats .teamLabel div {
   margin-bottom: 0.75rem;
@@ -28,6 +67,8 @@
 .GlobalStats .teamLabel .collection {
   align-items: center;
   display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
 }
 
 .GlobalStats .resource-graph {

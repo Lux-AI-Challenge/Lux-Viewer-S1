@@ -44,9 +44,11 @@ const GlobalStats = ({
     uranium: number;
   }>;
   const teams = [Unit.TEAM.A, Unit.TEAM.B];
+  const totalCityFuel = [0, 0];
   if (currentFrame) {
     currentFrame.cityData.forEach((val) => {
       numOfCities[val.team] += val.cityTilePositions.length;
+      totalCityFuel[val.team] += val.fuel;
     });
     teams.forEach((team) => {
       resourceCollectionPercents.push({
@@ -119,14 +121,17 @@ const GlobalStats = ({
     <div className="GlobalStats">
       <LuxCard title="Global Stats">
         <Grid container className="overall">
-          <Grid item xs={2} key={1000}></Grid>
+          <Grid item xs={1} key={1000}>
+            <div className="cityTilesLabel">Total CityTiles</div>
+            <div className="storedFuelLabel">Total City Fuel</div>
+          </Grid>
           <Grid item xs={5} key={0}>
             <div className="teamLabel">
               <div className="icons">
-                Team 0 <img src={Team0Worker} height={34} />
+                <img src={Team0Worker} height={30} /> Team 0
               </div>
-              <div>
-                Name: {teamDetails[0].name}
+              <div className="teamname">
+                {teamDetails[0].name}
                 {teamDetails[0].tournamentID &&
                   `, ID: ${teamDetails[0].tournamentID}`}
               </div>
@@ -134,17 +139,18 @@ const GlobalStats = ({
                 <img src={Team0City} height={44} /> {numOfCities[0]}
               </div>
               <div className="collection">
-                <img src={Resources} height={32} /> {numOfCities[0]}
+                <img src={Resources} height={32} /> {totalCityFuel[0]}
               </div>
             </div>
           </Grid>
+          <Grid item xs={1} key={1000}></Grid>
           <Grid item xs={5} key={1}>
             <div className="teamLabel">
               <div className="icons">
-                Team 1 <img src={Team1Worker} height={34} />
+                <img src={Team1Worker} height={30} /> Team 1
               </div>
-              <div>
-                Name: {teamDetails[1].name}
+              <div className="teamname">
+                {teamDetails[1].name}
                 {teamDetails[1].tournamentID &&
                   `, ID: ${teamDetails[1].tournamentID}`}
               </div>
@@ -152,7 +158,7 @@ const GlobalStats = ({
                 <img src={Team1City} height={44} /> {numOfCities[1]}
               </div>
               <div className="collection">
-                <img src={Resources} height={32} /> {numOfCities[0]}
+                <img src={Resources} height={32} /> {totalCityFuel[1]}
               </div>
             </div>
           </Grid>
