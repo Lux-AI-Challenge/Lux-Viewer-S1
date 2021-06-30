@@ -572,6 +572,8 @@ class MainScene extends Phaser.Scene {
         roadLevels[y][x] = cell.cooldown;
       });
     }
+    let errorscopy = [...this.currentTurnErrors];
+    this.currentTurnErrors = [];
 
     return {
       resourceData,
@@ -581,7 +583,7 @@ class MainScene extends Phaser.Scene {
       teamStates,
       annotations,
       roadLevels,
-      errors: this.currentTurnErrors,
+      errors: errorscopy,
     };
   }
 
@@ -773,6 +775,7 @@ class MainScene extends Phaser.Scene {
     if (!f) {
       return;
     }
+    console.log(`Errors on turn ${turn}`, f.errors);
     // destroy any old rendered images
     this.currentRenderedFramesImgs.forEach((img) => {
       img.destroy();
