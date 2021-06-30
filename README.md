@@ -16,6 +16,8 @@ serve dist
 
 And you should be able to navigate to http://localhost:5000 to use the visualizer, upload replays, and watch them, and begin to analyze matches!
 
+![](./game_replay.gif)
+
 ## Features
 
 - Click and drag or press the WASD keys to pan around the map
