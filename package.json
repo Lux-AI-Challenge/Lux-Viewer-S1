@@ -40,7 +40,7 @@
     "@material-ui/icons": "^4.11.2",
     "@types/classnames": "^2.2.10",
     "classnames": "^2.2.6",
-    "dimensions-ai": "^5.0.0",
+    "dimensions-ai": "^5.0.1",
     "fontsource-roboto": "^3.0.3",
     "phaser": "^3.24.1",
     "phaser3-plugin-isometric": "0.0.7",
