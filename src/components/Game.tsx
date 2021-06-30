@@ -54,9 +54,9 @@ export const GameComponent = () => {
   let scale =
     searchlist.length > 0 && searchlist[0].split('=')[0] === 'scale'
       ? parseFloat(searchlist[0].split('=')[1])
-      : 1;
+      : 1.5;
   if (isNaN(scale)) {
-    scale = 1;
+    scale = 1.5;
   }
   let zoom = 1 / scale;
   let scaleSize = scale / 10;
