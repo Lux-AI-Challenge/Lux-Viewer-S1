@@ -89,6 +89,7 @@ export type GameCreationConfigs = {
   replayData: object;
   handleUnitClicked: HandleUnitClicked;
   handleTileClicked: HandleTileClicked;
+  zoom: number;
 };
 
 type HandleUnitClicked = (unit: FrameSingleUnitData) => void;
@@ -632,12 +633,11 @@ class MainScene extends Phaser.Scene {
         const img = this.add
           .image(
             p[0],
-            p[1] - 10 * this.defaultScales.coal * this.overallScale,
+            p[1] - 60 * this.defaultScales.coal * this.overallScale,
             'coal'
           )
           .setDepth(getDepthByPos(new Position(x, y)))
           .setScale(this.defaultScales.coal * this.overallScale);
-        img.setY(img.y - 18);
         return img;
       }
       case Resource.Types.URANIUM: {

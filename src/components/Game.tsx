@@ -49,9 +49,20 @@ export const GameComponent = () => {
       main.speed = speed;
     }
   };
-  const [visualScale, _setVisualScale] = useState(0.5);
+  const url = new URL(window.location.href);
+  const searchlist = url.search.slice(1).split('&');
+  let scale =
+    searchlist.length > 0 && searchlist[0].split('=')[0] === 'scale'
+      ? parseFloat(searchlist[0].split('=')[1])
+      : 1;
+  if (isNaN(scale)) {
+    scale = 1;
+  }
+  let zoom = 1 / scale;
+  let scaleSize = scale / 10;
+  const [visualScale, _setVisualScale] = useState(scale / 4);
   const setVisualScale = (scale: number) => {
-    if (scale >= 0.25 && scale <= 2) {
+    if (scale >= scaleSize && scale <= 2) {
       _setVisualScale(scale);
     }
   };
@@ -174,6 +185,7 @@ export const GameComponent = () => {
       replayData: jsonReplayData,
       handleUnitClicked,
       handleTileClicked,
+      zoom,
     });
     setGame(newgame);
   };
@@ -207,7 +219,7 @@ export const GameComponent = () => {
       replay = parseReplayData(replay);
       loadGame(replay);
     }
-    // loadGame(debug_replay);
+    loadGame(debug_replay);
   }, []);
 
   /** when replay data is changed, create new game */
@@ -325,10 +337,10 @@ export const GameComponent = () => {
             <ZoomInOut
               className="zoom-in-out"
               handleZoomIn={() => {
-                setVisualScale(visualScale + 0.25);
+                setVisualScale(visualScale + scaleSize);
               }}
               handleZoomOut={() => {
-                setVisualScale(visualScale - 0.25);
+                setVisualScale(visualScale - scaleSize);
               }}
             />
             <div className="map-meta-wrapper">
