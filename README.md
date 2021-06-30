@@ -16,7 +16,16 @@ serve dist
 
 And you should be able to navigate to http://localhost:5000 to use the visualizer, upload replays, and watch them, and begin to analyze matches!
 
-# Development
+## Features
+
+- Click and drag or press the WASD keys to pan around the map
+- Zoom in or out of the map as necessary
+- Play back the movement of units smoothly
+- See statistics and graphs on your bots
+- Open the dev console on the browser to see any warnings/errors your agent encounters each turn
+- Toggle a debug mode that lets you visualize annotations your bot writes within the match
+
+## Development
 
 Run `npm run dev` to start server and go to http://localhost:3000/dist
 
