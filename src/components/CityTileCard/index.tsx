@@ -2,14 +2,19 @@ import CardContent from '@material-ui/core/CardContent';
 import Card from '@material-ui/core/Card';
 import React from 'react';
 import './styles.css';
-import { FrameSingleUnitData } from '../../scenes/MainScene';
-import Team0WorkerSVG from '../../icons/team0worker.svg';
-import Team1WorkerSVG from '../../icons/team1worker.svg';
+import {
+  FrameCityData,
+  FrameCityTileData,
+  FrameSingleUnitData,
+} from '../../scenes/MainScene';
+import Team0CitySVG from '../../icons/city00.svg';
+import Team1CitySVG from '../../icons/city10.svg';
 import Team0CartSVG from '../../icons/team0cart.svg';
 import Team1CartSVG from '../../icons/team1cart.svg';
 import { Unit } from '@lux-ai/2021-challenge/lib/es6/Unit';
 import { LinearProgress, makeStyles } from '@material-ui/core';
-export type UnitCardProps = FrameSingleUnitData;
+import { Position } from '@lux-ai/2021-challenge/lib/es6/GameMap/position';
+export type CityTileCardProps = { cityTiles: FrameCityTileData; pos: Position };
 
 const useStyles = makeStyles({
   progressa: {
@@ -19,49 +24,37 @@ const useStyles = makeStyles({
     backgroundColor: 'blue',
   },
 });
-const UnitCard = ({ cargo, pos, id, cooldown, team, type }: UnitCardProps) => {
+const CityTileCard = ({ cityTiles, pos }: CityTileCardProps) => {
+  let cityTile = cityTiles[0];
+  for (const ct of cityTiles) {
+    if (ct.pos.x === pos.x && ct.pos.y === pos.y) {
+      cityTile = ct;
+      break;
+    }
+  }
   const classes = useStyles();
   const renderUnitSVG = () => {
-    let svg = Team1WorkerSVG;
-    if (type === Unit.Type.WORKER) {
-      if (team === 0) {
-        svg = Team0WorkerSVG;
-      }
-    } else {
-      svg = Team1CartSVG;
-      if (team === 0) {
-        svg = Team0CartSVG;
-      }
+    let svg = Team1CitySVG;
+    if (cityTile.team === 0) {
+      svg = Team0CitySVG;
     }
-
     return <img src={svg} />;
   };
-  let maxCooldown = 4;
-  if (type == Unit.Type.CART) {
-    maxCooldown = 6;
-  }
+  const maxCooldown = 10;
   return (
-    <div className="UnitCard">
+    <div className="CityTileCard">
       <div className="unit-id">
-        <strong>ID:</strong> {id}
+        <strong>ID:</strong> N/A
       </div>
       <div className="worker-icon-wrapper">{renderUnitSVG()}</div>
       <div className="worker-data">
         <p>
-          <strong>Pos:</strong>{' '}
-          <span>
-            ({pos.x}, {pos.y})
-          </span>
+          <strong>ID of City:</strong> <span>{cityTile.cityid}</span>
         </p>
-        <p>
-          <strong>Wood:</strong> <span>{cargo.wood}</span>
-        </p>
-        <p>
-          <strong>Coal:</strong> <span>{cargo.coal}</span>
-        </p>
-        <p>
-          <strong>Uranium:</strong> <span>{cargo.uranium}</span>
-        </p>
+        <br />
+        <br />
+        <br />
+        <br />
       </div>
       <div className="cooldown-bar-wrapper">
         <div className="cooldown-value-wrapper">
@@ -69,20 +62,20 @@ const UnitCard = ({ cargo, pos, id, cooldown, team, type }: UnitCardProps) => {
             <strong>Cooldown:</strong>
           </span>{' '}
           <span className="cooldown-value">
-            {cooldown} / {maxCooldown}
+            {cityTile.cooldown} / {maxCooldown}
           </span>
         </div>
 
         <LinearProgress
           className={
-            (team === Unit.TEAM.A ? 'cooldown-a' : 'cooldown-b') +
+            (cityTile.team === Unit.TEAM.A ? 'cooldown-a' : 'cooldown-b') +
             ' cooldown-bar'
           }
           variant="determinate"
-          value={(cooldown * 100) / maxCooldown}
+          value={(cityTile.cooldown * 100) / maxCooldown}
         />
       </div>
     </div>
   );
 };
-export default UnitCard;
+export default CityTileCard;

@@ -67,9 +67,9 @@ export interface FrameSingleUnitData {
   id: string;
 }
 
-type FrameCityTileData = Array<FrameSingleCityTileData>;
+export type FrameCityTileData = Array<FrameSingleCityTileData>;
 
-type FrameSingleCityTileData = {
+export type FrameSingleCityTileData = {
   pos: Position;
   team: LUnit.TEAM;
   cityid: string;

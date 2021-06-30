@@ -1,0 +1,72 @@
+.CityTileCard {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  position: relative;
+}
+.CityTileCard .unit-id {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+.CityTileCard .unit-id:before {
+  content: '';
+  position: absolute;
+  margin-top: 18px;
+  background: rgba(50, 61, 52, 0.1);
+  height: 4px;
+  width: calc(100%);
+}
+.CityTileCard .worker-icon-wrapper {
+  display: inline-block;
+  width: 4rem;
+  margin-right: 1rem;
+}
+.CityTileCard .worker-icon-wrapper img {
+  width: 4rem;
+}
+.CityTileCard .worker-data {
+  display: inline-block;
+  width: 6rem;
+}
+.CityTileCard .worker-data p {
+  margin: 0px;
+  font-size: 0.85rem;
+  padding: 0.25rem;
+}
+.CityTileCard .worker-data p span {
+  float: right;
+}
+.CityTileCard .worker-data p:nth-child(even) {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(50, 61, 52, 0.1) 51.04%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+.CityTileCard .cooldown-bar-wrapper {
+  width: 100%;
+  margin-top: 1rem;
+}
+.CityTileCard .cooldown-value-wrapper {
+  margin-bottom: 0.25rem;
+}
+.CityTileCard .cooldown-bar {
+  width: 100%;
+  border-radius: 1rem;
+  height: 8px;
+  background-color: rgba(50, 61, 52, 0.2);
+}
+.CityTileCard .cooldown-title {
+  font-weight: 500;
+}
+.CityTileCard .cooldown-value {
+  float: right;
+}
+.CityTileCard .cooldown-b .MuiLinearProgress-barColorPrimary {
+  background-color: #f3a400;
+}
+.CityTileCard .cooldown-b .MuiLinearProgress-barColorPrimary {
+  background-color: #3686ff;
+}

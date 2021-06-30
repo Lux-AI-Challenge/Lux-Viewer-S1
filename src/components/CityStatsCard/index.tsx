@@ -33,7 +33,7 @@ const CityStatsCard = ({
   return (
     <div className="CityStatsCard">
       <div className="city-id">
-        <strong>ID:</strong> {cityid}
+        <strong>City ID:</strong> {cityid}
       </div>
       <div className="worker-icon-wrapper">{renderCitySVG()}</div>
       <div className="worker-data">

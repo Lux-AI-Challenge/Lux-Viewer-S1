@@ -10,6 +10,7 @@ import ResourceCoal from '../../icons/resource_coal.svg';
 import ResourceWood from '../../icons/resource_wood.svg';
 import { Resource } from '@lux-ai/2021-challenge/lib/es6/Resource';
 import CityStatsCard from '../CityStatsCard';
+import CityTileCard from '../CityTileCard';
 
 export type TileStatsProps = Partial<FrameTileData> & {
   cities?: FrameCityData;
@@ -68,6 +69,16 @@ const TileStats = ({
             )}
             {allunits.length > 0 && <div className="subtitle">Units:</div>}
             <Grid container className="UnitStats" spacing={1}>
+              {cityTile.length > 0 && (
+                <Grid
+                  item
+                  className="CityTileData"
+                  xs={6}
+                  key={cityTile[0].cityid}
+                >
+                  <CityTileCard cityTiles={cityTile} pos={pos} />
+                </Grid>
+              )}
               {allunits.map((v) => {
                 return (
                   <Grid item className="UnitData" xs={6} key={v.id}>
