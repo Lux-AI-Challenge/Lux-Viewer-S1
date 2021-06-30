@@ -1,14 +1,6 @@
 import { GameMap } from '@lux-ai/2021-challenge/lib/es6/GameMap';
 import { Position } from '@lux-ai/2021-challenge/lib/es6/GameMap/position';
 
-export const mapPosToPixels = (pos: Position): [number, number] => {
-  return mapCoordsToPixels(pos.x, pos.y);
-};
-
-export const mapCoordsToPixels = (x: number, y: number): [number, number] => {
-  return [x * 32 * 4 + 16, y * 32 * 4 + 16];
-};
-
 const angleFactor = 2.4;
 
 export const mapCoordsToIsometricPixels = (
