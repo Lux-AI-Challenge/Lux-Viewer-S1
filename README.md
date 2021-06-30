@@ -18,6 +18,10 @@ And you should be able to navigate to http://localhost:5000 to use the visualize
 
 ![](./game_replay.gif)
 
+If you would like to view replays in higher quality, add "?scale=2" to the end of the visualizer url. For lower quality you can set as low as "?scale=1". Scale ranges from 1 to 3 with the default being 1.5.
+
+e.g. http://localhost:5000/?scale=2 or https://2021vis.lux-ai.org/?scale=2
+
 ## Features
 
 - Click and drag or press the WASD keys to pan around the map
