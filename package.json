@@ -1,6 +1,6 @@
 {
   "name": "lux-viewer-2021",
-  "version": "1.1.0",
+  "version": "1.1.2",
   "description": "",
   "author": "Lux AI challenge",
   "main": "index.js",
@@ -35,6 +35,7 @@
     "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
+    "@lux-ai/2021-challenge": "^1.1.2",
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.11.2",
     "@types/classnames": "^2.2.10",
