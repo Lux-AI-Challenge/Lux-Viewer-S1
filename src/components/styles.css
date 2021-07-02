@@ -100,7 +100,7 @@
   display: flex;
   justify-content: center;
   margin-top: 0.5rem;
-  width: 41rem;
+  width: 36.85rem;
 }
 .Game .controller .replay-buttons .speed-display {
   width: 1rem;
@@ -215,6 +215,6 @@
   right: 1rem;
   top: 1rem;
   background-color: rgba(50, 61, 52, 0.1);
-  padding: 0.25rem;
+  padding: 0.5rem;
   border-radius: 1rem;
 }

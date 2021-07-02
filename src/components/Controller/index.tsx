@@ -37,7 +37,7 @@ const Controller = ({
   fileInput,
   running,
 }: ControllerProps) => {
-  const isNightTime = (turn % 40 > 30 || turn % 40 == 0) && turn !== 0;
+  const isNightTime = turn % 40 >= 30 && turn !== 0;
   return (
     <div className="controller">
       <div className="time-of-day">
@@ -112,14 +112,14 @@ const Controller = ({
           onChange={handleUpload}
           ref={fileInput}
         />
-        <IconButton
+        {/* <IconButton
           aria-label="upload"
           onClick={() => {
             fileInput.current.click();
           }}
         >
           <img className="upload-icon" src={UploadSVG} />
-        </IconButton>
+        </IconButton> */}
       </div>
     </div>
   );
