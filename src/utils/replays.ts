@@ -28,6 +28,7 @@ export const parseReplayData = (rawReplayData: any) => {
           tournamentID: '',
         },
       ],
+      version: rawReplayData.version,
     };
     console.log('PARSED REPLAY', replay);
     return replay;
