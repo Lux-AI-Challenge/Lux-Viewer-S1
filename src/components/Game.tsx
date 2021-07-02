@@ -176,6 +176,22 @@ export const GameComponent = () => {
 
   /** load game given json replay data */
   const loadGame = (jsonReplayData: any) => {
+    if (
+      jsonReplayData.version === undefined ||
+      jsonReplayData.version !== clientConfigs.version
+    ) {
+      if (jsonReplayData.version === undefined) {
+        alert(
+          `Replay file works on version 1.0.x but client is on version ${clientConfigs.version}. Download an older visualizer here: https://github.com/Lux-AI-Challenge/LuxViewer2021/releases`
+        );
+      } else {
+        const versionvals = jsonReplayData.version.split('.');
+        alert(
+          `Replay file works on version ${versionvals[0]}.${versionvals[1]}.x but client is on version ${clientConfigs.version}. Download an older visualizer here: https://github.com/Lux-AI-Challenge/LuxViewer2021/releases`
+        );
+      }
+      return;
+    }
     if (game) {
       game.destroy(true, false);
     }
@@ -293,6 +309,10 @@ export const GameComponent = () => {
             </div>
           </div>
         )}
+        <div id="version-number">
+          <strong>Version: </strong>
+          {clientConfigs.version}
+        </div>
         {isReady && (
           <div>
             <Controller
@@ -308,10 +328,7 @@ export const GameComponent = () => {
               sliderConfigs={sliderConfigs}
               handleSliderChange={handleSliderChange}
             />
-            <div id="version-number">
-              <strong>Version: </strong>
-              {clientConfigs.version}
-            </div>
+
             <div className="tile-stats-wrapper">
               {selectedTileData ? (
                 <TileStats
