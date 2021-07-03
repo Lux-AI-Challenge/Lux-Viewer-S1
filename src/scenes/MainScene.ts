@@ -569,7 +569,7 @@ class MainScene extends Phaser.Scene {
       let row = game.map.getRow(y);
       roadLevels.push([]);
       row.forEach((cell, x) => {
-        roadLevels[y][x] = cell.cooldown;
+        roadLevels[y][x] = cell.road;
       });
     }
     let errorscopy = [...this.currentTurnErrors];
