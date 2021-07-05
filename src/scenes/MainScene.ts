@@ -15,7 +15,12 @@ import {
 import { Position } from '@lux-ai/2021-challenge/lib/es6/GameMap/position';
 import { GameObjects } from 'phaser';
 import seedrandom from 'seedrandom';
-import { TEAM_A_COLOR, TEAM_B_COLOR } from './types';
+import {
+  TEAM_A_COLOR,
+  TEAM_A_COLOR_STR,
+  TEAM_B_COLOR,
+  TEAM_B_COLOR_STR,
+} from './types';
 import { Cell } from '@lux-ai/2021-challenge/lib/es6/GameMap/cell';
 
 type CommandsArray = Array<{
@@ -1066,7 +1071,7 @@ class MainScene extends Phaser.Scene {
                 .setDepth(getDepthByPos(new Position(x, y)) + 1);
             }
             break;
-          case Game.ACTIONS.DEBUG_ANNOTATION_LINE: {
+          case Game.ACTIONS.DEBUG_ANNOTATE_LINE: {
             if (strs.length === 5) {
               let x1 = parseInt(strs[1]);
               let y1 = parseInt(strs[2]);
@@ -1102,6 +1107,62 @@ class MainScene extends Phaser.Scene {
             }
             break;
           }
+          // case Game.ACTIONS.DEBUG_ANNOTATE_SIDETEXT: {
+          //   if (strs.length > 1) {
+          //     const message = cmd.command.split(' ').slice(1).join(" ");
+          //   }
+          // }
+          case Game.ACTIONS.DEBUG_ANNOTATE_TEXT: {
+            if (strs.length > 3) {
+              let x = parseInt(strs[1]);
+              let y = parseInt(strs[2]);
+              const message = cmd.command
+                .split(' ')
+                .slice(3, 4)
+                .join(' ')
+                .split("'")[1];
+              let fontsize = parseInt(strs[strs.length - 1]);
+              if (isNaN(x) || isNaN(y) || isNaN(fontsize)) {
+                return;
+              }
+              const p = mapCoordsToIsometricPixels(x, y, {
+                scale: this.overallScale,
+                width: this.mapWidth,
+                height: this.mapHeight,
+              });
+
+              let ypos = p[1] - 15 * this.overallScale;
+              let color = TEAM_B_COLOR_STR;
+              if (cmd.agentID === LUnit.TEAM.A) {
+                ypos = p[1] - 35 * this.overallScale;
+                color = TEAM_A_COLOR_STR;
+              }
+              const textobj = this.add
+                .text(
+                  p[0] -
+                    ((fontsize + 2) / 2) *
+                      this.overallScale *
+                      (message.length / 2),
+                  ypos,
+                  message,
+                  {
+                    fontSize: `${fontsize * this.overallScale}px`,
+                  }
+                )
+                .setDepth(10e5)
+                .setColor(color);
+              this.currentRenderedFramesText.push(textobj);
+              // this.graphics
+              //   .lineBetween(
+              //     p[0] - 0 * this.overallScale,
+              //     p[1] - 28 * this.overallScale,
+              //     p2[0] + 0 * this.overallScale,
+              //     p2[1] - 14 * this.overallScale
+              //   )
+              //   .setDepth(10e5);
+            }
+            break;
+          }
           default:
             return true;
         }
@@ -1126,7 +1187,9 @@ class MainScene extends Phaser.Scene {
         switch (strs[0]) {
           case Game.ACTIONS.DEBUG_ANNOTATE_CIRCLE:
           case Game.ACTIONS.DEBUG_ANNOTATE_X:
-          case Game.ACTIONS.DEBUG_ANNOTATION_LINE:
+          case Game.ACTIONS.DEBUG_ANNOTATE_LINE:
+          case Game.ACTIONS.DEBUG_ANNOTATE_SIDETEXT:
+          case Game.ACTIONS.DEBUG_ANNOTATE_TEXT:
             annotations.push(cmd);
             return false;
           default:
