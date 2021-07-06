@@ -328,7 +328,27 @@ export const GameComponent = () => {
               sliderConfigs={sliderConfigs}
               handleSliderChange={handleSliderChange}
             />
-
+            {debugOn && currentFrame.annotations.length > 0 && (
+              <div className="debug-sidetext">
+                <h4>Debug Text</h4>
+                {currentFrame.annotations
+                  .filter((v) => {
+                    return (
+                      v.command.length > 2 &&
+                      v.command.split(' ')[0] ===
+                        Game.ACTIONS.DEBUG_ANNOTATE_SIDETEXT
+                    );
+                  })
+                  .sort((v) => v.agentID)
+                  .map((v) => {
+                    return (
+                      <div className={`sidetext-${v.agentID}`}>
+                        {v.command.split(' ').slice(1).join(' ').split("'")[1]}
+                      </div>
+                    );
+                  })}
+              </div>
+            )}
             <div className="tile-stats-wrapper">
               {selectedTileData ? (
                 <TileStats

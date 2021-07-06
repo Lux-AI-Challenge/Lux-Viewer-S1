@@ -218,3 +218,24 @@
   padding: 0.5rem;
   border-radius: 1rem;
 }
+
+.Game .debug-sidetext {
+  position: absolute;
+  right: 30rem;
+  top: 4.5rem;
+  background-color: rgba(50, 61, 52, 0.1);
+  padding: 1rem;
+  border-radius: 1rem;
+  font-size: 1.1rem;
+  max-width: 10rem;
+}
+.Game .debug-sidetext h4 {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.Game .debug-sidetext .sidetext-0 {
+  color: #f3a400;
+}
+.Game .debug-sidetext .sidetext-1 {
+  color: #3686ff;
+}
