@@ -183,13 +183,19 @@ export const GameComponent = () => {
         alert(
           `Replay file works on version 1.0.x but client is on version ${clientConfigs.version}. Download an older visualizer here: https://github.com/Lux-AI-Challenge/LuxViewer2021/releases`
         );
+        return;
       } else {
         const versionvals = jsonReplayData.version.split('.');
-        alert(
-          `Replay file works on version ${versionvals[0]}.${versionvals[1]}.x but client is on version ${clientConfigs.version}. Download an older visualizer here: https://github.com/Lux-AI-Challenge/LuxViewer2021/releases`
-        );
+        if (
+          versionvals[0] !== clientConfigs.version[0] ||
+          versionvals[1] !== clientConfigs.version[2]
+        ) {
+          alert(
+            `Replay file works on version ${versionvals[0]}.${versionvals[1]}.x but client is on version ${clientConfigs.version}. Download an older visualizer here: https://github.com/Lux-AI-Challenge/LuxViewer2021/releases`
+          );
+          return;
+        }
       }
-      return;
     }
     if (game) {
       game.destroy(true, false);
