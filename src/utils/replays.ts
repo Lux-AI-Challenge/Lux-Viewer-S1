@@ -6,10 +6,12 @@ export const parseReplayData = (rawReplayData: any) => {
       let turnCommands = [];
       stepInfo.forEach(
         (step: { action: string[]; observation: { player: number } }) => {
-          let mappedActions = step.action.map((action) => {
-            return { command: action, agentID: step.observation.player };
-          });
-          turnCommands.push(...mappedActions);
+          if (step.action) {
+            let mappedActions = step.action.map((action) => {
+              return { command: action, agentID: step.observation.player };
+            });
+            turnCommands.push(...mappedActions);
+          }
         }
       );
       commands.push(turnCommands);
