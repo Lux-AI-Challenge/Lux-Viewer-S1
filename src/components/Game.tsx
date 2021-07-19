@@ -228,6 +228,10 @@ export const GameComponent = () => {
             setUploading(false);
             data = parseReplayData(data);
             loadGame(data);
+          })
+          .catch((err) => {
+            console.error(err);
+            alert(err);
           });
       }
     }
@@ -235,10 +239,42 @@ export const GameComponent = () => {
   useEffect(() => {
     //@ts-ignore
     if (window.kaggle) {
-      //@ts-ignore
-      let replay = window.kaggle.environment;
-      replay = parseReplayData(replay);
-      loadGame(replay);
+      // check if window.kaggle.environment is valid and usable
+      if (
+        //@ts-ignore
+        window.kaggle.environment &&
+        //@ts-ignore
+        window.kaggle.environment.steps.length > 1
+      ) {
+        console.log('Embedded kaggle replay detected, parsing it');
+        //@ts-ignore
+        let replay = window.kaggle.environment;
+        replay = parseReplayData(replay);
+        loadGame(replay);
+      } else {
+        console.log(
+          'Kaggle detected, but no replay, listening for postMessage'
+        );
+        // add this listener only once
+        window.addEventListener(
+          'message',
+          (event) => {
+            // Ensure the environment names match before updating.
+            try {
+              if (event.data.environment.name == 'lux_ai_2021') {
+                // updateContext(event.data);
+                let replay = event.data.environment;
+                replay = parseReplayData(replay);
+                loadGame(replay);
+              }
+            } catch (err) {
+              console.error('Could not parse game');
+              console.error(err);
+            }
+          },
+          false
+        );
+      }
     }
     // loadGame(debug_replay);
   }, []);
