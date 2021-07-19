@@ -174,26 +174,28 @@ export const GameComponent = () => {
   };
 
   /** load game given json replay data */
-  const loadGame = (jsonReplayData: any) => {
-    if (
-      jsonReplayData.version === undefined ||
-      jsonReplayData.version !== clientConfigs.version
-    ) {
-      if (jsonReplayData.version === undefined) {
-        alert(
-          `Replay file works on version 1.0.x but client is on version ${clientConfigs.version}. Download an older visualizer here: https://github.com/Lux-AI-Challenge/LuxViewer2021/releases`
-        );
-        return;
-      } else {
-        const versionvals = jsonReplayData.version.split('.');
-        if (
-          versionvals[0] !== clientConfigs.version[0] ||
-          versionvals[1] !== clientConfigs.version[2]
-        ) {
+  const loadGame = (jsonReplayData: any, skipVersionCheck = false) => {
+    if (!skipVersionCheck) {
+      if (
+        jsonReplayData.version === undefined ||
+        jsonReplayData.version !== clientConfigs.version
+      ) {
+        if (jsonReplayData.version === undefined) {
           alert(
-            `Replay file works on version ${versionvals[0]}.${versionvals[1]}.x but client is on version ${clientConfigs.version}. Download an older visualizer here: https://github.com/Lux-AI-Challenge/LuxViewer2021/releases`
+            `Replay file works on version 1.0.x but client is on version ${clientConfigs.version}. Download an older visualizer here: https://github.com/Lux-AI-Challenge/LuxViewer2021/releases`
           );
           return;
+        } else {
+          const versionvals = jsonReplayData.version.split('.');
+          if (
+            versionvals[0] !== clientConfigs.version[0] ||
+            versionvals[1] !== clientConfigs.version[2]
+          ) {
+            alert(
+              `Replay file works on version ${versionvals[0]}.${versionvals[1]}.x but client is on version ${clientConfigs.version}. Download an older visualizer here: https://github.com/Lux-AI-Challenge/LuxViewer2021/releases`
+            );
+            return;
+          }
         }
       }
     }
@@ -264,8 +266,10 @@ export const GameComponent = () => {
               if (event.data.environment.name == 'lux_ai_2021') {
                 // updateContext(event.data);
                 let replay = event.data.environment;
+                console.log('post message:');
+                console.log(event.data);
                 replay = parseReplayData(replay);
-                loadGame(replay);
+                loadGame(replay, true);
               }
             } catch (err) {
               console.error('Could not parse game');
