@@ -259,20 +259,17 @@ class MainScene extends Phaser.Scene {
     this.load.svg('tree1', `${base}/sprites/tree1.svg`);
     this.load.svg('tree0', `${base}/sprites/tree0.svg`);
     // city naming scheme
-    // city<team><variant><transparent? t : ''>
-    this.load.svg('city00', `${base}/sprites/city00.svg`);
-    this.load.svg('city01', `${base}/sprites/city01.svg`);
-    this.load.svg('city02', `${base}/sprites/city02.svg`);
-    this.load.svg('city02t', `${base}/sprites/city02t.svg`);
-    this.load.svg('city03', `${base}/sprites/city03.svg`);
-    this.load.svg('city03t', `${base}/sprites/city03t.svg`);
-
-    this.load.svg('city10', `${base}/sprites/city10.svg`);
-    this.load.svg('city11', `${base}/sprites/city11.svg`);
-    this.load.svg('city12', `${base}/sprites/city12.svg`);
-    this.load.svg('city12t', `${base}/sprites/city12t.svg`);
-    this.load.svg('city13', `${base}/sprites/city13.svg`);
-    this.load.svg('city13t', `${base}/sprites/city13t.svg`);
+    // city<team><variant><transparent? t : ''><night? night : ''>
+    const cityenums = ['00', '01', '02', '03', '10', '11', '12', '13'];
+    for (const v of cityenums) {
+      this.load.svg(`city${v}`, `${base}/sprites/city${v}.svg`);
+      this.load.svg(`city${v}night`, `${base}/sprites/city${v}night.svg`);
+      if (v[1] === '2' || v[1] === '3') {
+        // load transparent versions
+        this.load.svg(`city${v}t`, `${base}/sprites/city${v}t.svg`);
+        this.load.svg(`city${v}tnight`, `${base}/sprites/city${v}tnight.svg`);
+      }
+    }
 
     this.load.image('coal', `${base}/sprites/coal.svg`);
     this.load.svg('uranium', `${base}/sprites/uranium.svg`);
@@ -661,7 +658,11 @@ class MainScene extends Phaser.Scene {
     }
   }
 
-  addCityTile(data: FrameSingleCityTileData, tilesWithUnits: Set<number>) {
+  addCityTile(
+    data: FrameSingleCityTileData,
+    tilesWithUnits: Set<number>,
+    night = false
+  ) {
     const p = mapPosToIsometricPixels(data.pos, {
       scale: this.overallScale,
       width: this.mapWidth,
@@ -688,6 +689,9 @@ class MainScene extends Phaser.Scene {
       )
     ) {
       cityTileType += 't';
+    }
+    if (night) {
+      cityTileType += 'night';
     }
     const img = this.add
       .image(p[0], p[1], cityTileType)
@@ -781,6 +785,12 @@ class MainScene extends Phaser.Scene {
       return;
     }
     console.log(`Errors on turn ${turn}`, f.errors);
+
+    const dayLength = this.luxgame.configs.parameters.DAY_LENGTH;
+    const cycleLength =
+      dayLength + this.luxgame.configs.parameters.NIGHT_LENGTH;
+    const isnight = turn % cycleLength >= dayLength;
+
     // destroy any old rendered images
     this.currentRenderedFramesImgs.forEach((img) => {
       img.destroy();
@@ -944,7 +954,7 @@ class MainScene extends Phaser.Scene {
     this.graphics.lineStyle(3 * this.overallScale, 0x323d34, 1);
     this.graphics.fillStyle(0xe7ded1, 1);
     f.cityTileData.forEach((data) => {
-      const img = this.addCityTile(data, tilesWithUnits);
+      const img = this.addCityTile(data, tilesWithUnits, isnight);
       this.currentRenderedFramesImgs.push(img);
       const hash = hashMapCoords(data.pos);
       if (unitPosToCount.has(hash)) {
