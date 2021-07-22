@@ -32,9 +32,10 @@ export const parseReplayData = (rawReplayData: any) => {
       ],
       version: rawReplayData.version,
     };
-    replay.teamDetails[0].name = rawReplayData.info.TeamNames[0];
-    replay.teamDetails[1].name = rawReplayData.info.TeamNames[1];
-
+    if (rawReplayData.info.TeamNames) {
+      replay.teamDetails[0].name = rawReplayData.info.TeamNames[0];
+      replay.teamDetails[1].name = rawReplayData.info.TeamNames[1];
+    }
     console.log('Parsed Kaggle Replay meta', replay);
     console.log(`Read ${rawReplayData.steps.length} steps`);
     return replay;
