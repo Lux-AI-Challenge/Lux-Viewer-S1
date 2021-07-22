@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { IconButton, Slider } from '@material-ui/core';
 import ReplayButtonSVG from '../../icons/loading.svg';
+import PlayButtonSVG from '../../icons/play.svg';
 import PauseButtonSVG from '../../icons/pause.svg';
 import ArrowsSVG from '../../icons/arrows.svg';
 import UploadSVG from '../../icons/upload.svg';
 import DayTimeSVG from '../../icons/daytime.svg';
 import MoonSVG from '../../icons/moon.svg';
+import './index.css';
 
 export type ControllerProps = {
   turn: number;
@@ -39,7 +41,7 @@ const Controller = ({
 }: ControllerProps) => {
   const isNightTime = turn % 40 >= 30 && turn !== 0;
   return (
-    <div className="controller">
+    <div className="Controller">
       <div className="time-of-day">
         <img className="day-icon" src={isNightTime ? MoonSVG : DayTimeSVG} />
       </div>
@@ -86,13 +88,14 @@ const Controller = ({
             setRunning(!running);
           }}
         >
-          <div className="pause-circle">
-            {running ? (
-              <img className="pause-icon" src={PauseButtonSVG} />
-            ) : (
-              // {/*TODO: change this to play icon*/}
-              <div style={{ color: 'white', zIndex: 999 }}>{'>'}</div>
-            )}
+          <div className="pause-circle-2">
+            <div className="pause-circle">
+              {running ? (
+                <img className="pause-icon" src={PauseButtonSVG} />
+              ) : (
+                <img className="play-icon" src={PlayButtonSVG} />
+              )}
+            </div>
           </div>
         </IconButton>
         <IconButton

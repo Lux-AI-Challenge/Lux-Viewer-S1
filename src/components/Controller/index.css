@@ -1,0 +1,118 @@
+.Controller {
+  bottom: 2rem;
+  position: absolute;
+  width: 38rem;
+  left: calc(50% - 19rem);
+}
+.Controller .turn-label {
+  text-align: center;
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.Controller .slider {
+  width: 38rem;
+  vertical-align: middle;
+  color: #f4a300;
+}
+.Controller .slider .MuiSlider-thumb {
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+}
+.Controller .slider .MuiSlider-rail {
+  height: 4px;
+  background-color: white;
+  opacity: 1;
+}
+.Controller .slider .MuiSlider-track {
+  height: 4px;
+}
+.Controller .time-of-day {
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: -1.25rem;
+}
+.Controller .time-of-day img {
+  width: 2.5rem;
+  margin-bottom: 2rem;
+}
+/* .Controller .nighttime, .Controller .daytime {
+  display: inline-block;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.75rem;
+} */
+.Controller .day-icon {
+  margin: auto;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+.Controller .night-icon {
+  margin: auto;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+.Controller .replay-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
+  width: 36.85rem;
+}
+.Controller .replay-buttons .speed-display {
+  width: 1rem;
+  color: white;
+  vertical-align: middle;
+  align-items: center;
+  display: flex;
+  /* padding: 12px; */
+  margin-right: 1rem;
+}
+.Controller .replay-buttons img {
+  width: 1.25rem;
+  z-index: 5;
+}
+.Controller .MuiButtonBase-root {
+  margin-right: 1rem;
+}
+.Controller .replay-buttons .pause-button {
+  margin-right: 1.5rem;
+  margin-left: 0.5rem;
+}
+
+.Controller .replay-buttons .right-arrow-icon {
+  transform: rotate(180deg);
+}
+.Controller .replay-buttons .upload-icon {
+  width: 1.5rem;
+}
+
+.Controller .replay-buttons .pause-circle-2::before {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  height: 3.75rem;
+  width: 3.75rem;
+}
+.Controller .replay-buttons .pause-circle::before {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  background: white;
+  border-radius: 50%;
+  height: 3rem;
+  width: 3rem;
+}
+.Controller .replay-buttons .pause-circle,
+.Controller .replay-buttons .pause-circle-2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.Controller .replay-buttons .pause-circle img {
+  position: absolute;
+  width: 1rem;
+  margin-left: 1px;
+}

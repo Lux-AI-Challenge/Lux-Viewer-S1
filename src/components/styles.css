@@ -41,95 +41,6 @@
   top: 2rem;
 }
 
-.Game .controller {
-  bottom: 2rem;
-  position: absolute;
-  width: 38rem;
-  left: calc(50% - 19rem);
-}
-.Game .controller .turn-label {
-  text-align: center;
-  color: white;
-  font-weight: 600;
-  font-size: 1rem;
-  margin-bottom: 1rem;
-}
-
-.Game .controller .slider {
-  width: 38rem;
-  vertical-align: middle;
-  color: #f4a300;
-}
-.Game .controller .slider .MuiSlider-thumb {
-  width: 14px;
-  height: 14px;
-  margin-top: -5px;
-}
-.Game .controller .slider .MuiSlider-rail {
-  height: 4px;
-  background-color: white;
-  opacity: 1;
-}
-.Game .controller .slider .MuiSlider-track {
-  height: 4px;
-}
-.Game .controller .time-of-day {
-  color: rgba(255, 255, 255, 0.75);
-  margin-bottom: -1.25rem;
-}
-.Game .controller .time-of-day img {
-  width: 2.5rem;
-  margin-bottom: 2rem;
-}
-/* .Game .controller .nighttime, .Game .controller .daytime {
-  display: inline-block;
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 0.75rem;
-} */
-.Game .controller .day-icon {
-  margin: auto;
-  display: block;
-  margin-bottom: 0.25rem;
-}
-.Game .controller .night-icon {
-  margin: auto;
-  display: block;
-  margin-bottom: 0.25rem;
-}
-.Game .controller .replay-buttons {
-  display: flex;
-  justify-content: center;
-  margin-top: 0.5rem;
-  width: 36.85rem;
-}
-.Game .controller .replay-buttons .speed-display {
-  width: 1rem;
-  color: white;
-  vertical-align: middle;
-  align-items: center;
-  display: flex;
-  /* padding: 12px; */
-  margin-right: 1rem;
-}
-.Game .controller .replay-buttons img {
-  width: 1.25rem;
-  z-index: 5;
-}
-.Game .controller .MuiButtonBase-root {
-  margin-right: 1rem;
-}
-.Game .controller .replay-buttons .pause-button {
-  margin-right: 1.5rem;
-  margin-left: 0.5rem;
-}
-
-.Game .controller .replay-buttons .right-arrow-icon {
-  transform: rotate(180deg);
-}
-.Game .controller .replay-buttons .upload-icon {
-  width: 1.5rem;
-}
-
 .Game .upload-icon-no-replay {
   width: 3rem;
 }
@@ -156,21 +67,6 @@
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-}
-
-.Game .controller .replay-buttons .pause-circle::before {
-  content: '';
-  position: absolute;
-  z-index: 1;
-  background: rgba(26, 101, 255, 0.6);
-  border-radius: 50%;
-  height: 3rem;
-  width: 3rem;
-}
-.Game .controller .replay-buttons .pause-circle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .Game .phaser-wrapper {
