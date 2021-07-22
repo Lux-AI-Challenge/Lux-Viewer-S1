@@ -21,7 +21,6 @@ import {
   TEAM_B_COLOR,
   TEAM_B_COLOR_STR,
 } from './types';
-import { Cell } from '@lux-ai/2021-challenge/lib/es6/GameMap/cell';
 
 type CommandsArray = Array<{
   command: string;
@@ -201,16 +200,14 @@ class MainScene extends Phaser.Scene {
   /** relative scales for each of these svgs */
   defaultScales = {
     city: 0.4,
-    tree: 0.6,
+    tree: 0.4,
     worker: 0.16,
     cart: 0.6,
     block: 0.44,
-    tree0: 0.3,
-    tree1: 0.33,
-    uranium: 0.43,
+    uranium: 0.4,
     clouds: 0.7,
     road: 0.44,
-    coal: 0.35,
+    coal: 0.4,
   };
 
   /** playback speed */
@@ -240,7 +237,8 @@ class MainScene extends Phaser.Scene {
     this.load.image('cart0', `${base}/sprites/carts/cart0e.svg`);
     this.load.image('cart1', `${base}/sprites/carts/cart1e.svg`);
 
-    this.load.svg('block1', `${base}/ground.svg`);
+    this.load.svg('ground', `${base}/ground.svg`);
+    this.load.svg('groundnight', `${base}/groundnight.svg`);
 
     // generate 15 binary values 0001 to 1111 and load the path tiles
     for (let i = 1; i <= 15; i++) {
@@ -256,8 +254,6 @@ class MainScene extends Phaser.Scene {
     }
     this.load.svg(`path0000`, `${base}/sprites/paths/path1111.svg`);
 
-    this.load.svg('tree1', `${base}/sprites/tree1.svg`);
-    this.load.svg('tree0', `${base}/sprites/tree0.svg`);
     // city naming scheme
     // city<team><variant><transparent? t : ''><night? night : ''>
     const cityenums = ['00', '01', '02', '03', '10', '11', '12', '13'];
@@ -271,8 +267,11 @@ class MainScene extends Phaser.Scene {
       }
     }
 
-    this.load.image('coal', `${base}/sprites/coal.svg`);
-    this.load.svg('uranium', `${base}/sprites/uranium.svg`);
+    const resources = ['tree0', 'tree1', 'coal', 'uranium'];
+    for (const r of resources) {
+      this.load.svg(r, `${base}/sprites/${r}.svg`);
+      this.load.svg(`${r}night`, `${base}/sprites/${r}night.svg`);
+    }
 
     this.load.svg('cloud0', `${base}/sprites/cloud0.svg`);
     this.load.svg('cloud1', `${base}/sprites/cloud1.svg`);
@@ -606,7 +605,7 @@ class MainScene extends Phaser.Scene {
   /**
    * Paint in a resource tile to the current rendered frame
    */
-  addResourceTile(type: Resource.Types, x: number, y: number) {
+  addResourceTile(type: Resource.Types, x: number, y: number, night = false) {
     const p = mapCoordsToIsometricPixels(x, y, {
       scale: this.overallScale,
       width: this.mapWidth,
@@ -615,19 +614,16 @@ class MainScene extends Phaser.Scene {
     switch (type) {
       case Resource.Types.WOOD: {
         let treeType = 0;
-        let tscale = this.defaultScales.tree0;
+        let tscale = this.defaultScales.tree;
         const s = seedrandom('' + x * 10e5 + y);
-        let scaleFactor = 140;
         if (s() < 0.5) {
           treeType = 1;
-          tscale = this.defaultScales.tree1;
-          scaleFactor = 120;
         }
         const img = this.add
           .image(
             p[0] + 20 * tscale * this.overallScale,
-            p[1] - scaleFactor * tscale * this.overallScale,
-            'tree' + treeType
+            p[1] - 100 * tscale * this.overallScale,
+            'tree' + treeType + (night ? 'night' : '')
           )
           .setDepth(getDepthByPos(new Position(x, y)))
           .setScale(tscale * this.overallScale);
@@ -638,7 +634,7 @@ class MainScene extends Phaser.Scene {
           .image(
             p[0],
             p[1] - 60 * this.defaultScales.coal * this.overallScale,
-            'coal'
+            'coal' + (night ? 'night' : '')
           )
           .setDepth(getDepthByPos(new Position(x, y)))
           .setScale(this.defaultScales.coal * this.overallScale);
@@ -649,7 +645,7 @@ class MainScene extends Phaser.Scene {
           .image(
             p[0] - 22 * this.defaultScales.uranium * this.overallScale,
             p[1] - 62 * this.defaultScales.uranium * this.overallScale,
-            'uranium'
+            'uranium' + (night ? 'night' : '')
           )
           .setDepth(getDepthByPos(new Position(x, y)))
           .setScale(this.defaultScales.uranium * this.overallScale);
@@ -722,7 +718,7 @@ class MainScene extends Phaser.Scene {
     return img;
   }
 
-  addNormalFloorTile(pos: Position) {
+  addNormalFloorTile(pos: Position, night = false) {
     const ps = mapCoordsToIsometricPixels(pos.x, pos.y, {
       scale: this.overallScale,
       width: this.mapWidth,
@@ -730,7 +726,7 @@ class MainScene extends Phaser.Scene {
     });
 
     const img = this.add
-      .image(ps[0], ps[1], 'block1')
+      .image(ps[0], ps[1], 'ground' + (night ? 'night' : ''))
       .setScale(this.defaultScales.block * this.overallScale);
     img.setDepth(getDepthByPos(pos) / 100);
     return img;
@@ -791,6 +787,21 @@ class MainScene extends Phaser.Scene {
       dayLength + this.luxgame.configs.parameters.NIGHT_LENGTH;
     const isnight = turn % cycleLength >= dayLength;
 
+    this.floorImageTiles.forEach((img) => {
+      img.destroy();
+    });
+    this.floorImageTiles = new Map();
+    for (let y = 0; y < this.luxgame.map.height; y++) {
+      let row = this.luxgame.map.getRow(y);
+      row.forEach((cell) => {
+        const img = this.addNormalFloorTile(cell.pos, isnight);
+        this.floorImageTiles.set(
+          hashMapCoords(new Position(cell.pos.x, cell.pos.y)),
+          img
+        );
+      });
+    }
+
     // destroy any old rendered images
     this.currentRenderedFramesImgs.forEach((img) => {
       img.destroy();
@@ -802,7 +813,7 @@ class MainScene extends Phaser.Scene {
       img.destroy();
       let hash = hashMapCoords(pos);
       // let oldimg = this.floorImageTiles.get(hash);
-      let img2 = this.addNormalFloorTile(pos);
+      let img2 = this.addNormalFloorTile(pos, isnight);
       let old = this.floorImageTiles.get(hash);
       old.destroy();
       this.floorImageTiles.set(hash, img2);
@@ -853,7 +864,7 @@ class MainScene extends Phaser.Scene {
 
         // add the img_base because we use transparency on the roads and need something behind it
         const img_base = this.add
-          .image(p[0], p[1], 'block1')
+          .image(p[0], p[1], 'ground' + (isnight ? 'night' : ''))
           .setDepth(getDepthByPos(pos) / 100 + 0.5 / 1e7)
           .setScale(this.defaultScales.block * this.overallScale);
         const img = this.add
@@ -897,10 +908,22 @@ class MainScene extends Phaser.Scene {
       tilesWithUnits.add(hash);
     });
 
+    // this.game.config.transparent = '#2C2E33';
+    if (isnight) {
+      this.cameras.main.setBackgroundColor('#2C2E33');
+    } else {
+      this.cameras.main.setBackgroundColor('#00AFBD');
+    }
+
     const tilesWithResources: Set<number> = new Set();
     // paint in all resource tiles
     f.resourceData.forEach((data) => {
-      const img = this.addResourceTile(data.type, data.pos.x, data.pos.y);
+      const img = this.addResourceTile(
+        data.type,
+        data.pos.x,
+        data.pos.y,
+        isnight
+      );
       this.currentRenderedFramesImgs.push(img);
       tilesWithResources.add(hashMapCoords(data.pos));
     });

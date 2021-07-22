@@ -10,7 +10,8 @@
 #content canvas {
   position: absolute;
   top: 0;
-  margin-left: 15px;
+  /* margin-left: 15px; */
+  overflow: hidden;
 }
 
 .Game .zoom-in-out {
