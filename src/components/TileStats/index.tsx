@@ -87,7 +87,7 @@ const TileStats = ({
                 );
               })}
             </Grid>
-            {cityTile.length > 0 && (
+            {cityTile.length > 0 && cities.get(cityTile[0].cityid) && (
               <>
                 <div className="subtitle">City Info</div>
                 <Grid container className="CityStats">

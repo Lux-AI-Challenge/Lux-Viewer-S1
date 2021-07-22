@@ -43,7 +43,7 @@ export const GameComponent = () => {
   const [useKaggleReplay, setUseKaggleReplay] = useState(true);
   const [playbackSpeed, _setPlaybackSpeed] = useState(1);
   const setPlaybackSpeed = (speed: number) => {
-    if (speed >= 0.5 && speed <= 16) {
+    if (speed >= 0.5 && speed <= 32) {
       _setPlaybackSpeed(speed);
       main.speed = speed;
     }
