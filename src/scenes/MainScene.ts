@@ -200,7 +200,7 @@ class MainScene extends Phaser.Scene {
 
   /** relative scales for each of these svgs */
   defaultScales = {
-    city: 0.34,
+    city: 0.4,
     tree: 0.6,
     worker: 0.16,
     cart: 0.6,
@@ -702,16 +702,16 @@ class MainScene extends Phaser.Scene {
         break;
       case '02':
       case '03':
-        img.setY(img.y - 140 * this.defaultScales.city * this.overallScale);
+        img.setY(img.y - 120 * this.defaultScales.city * this.overallScale);
         img.setX(img.x + 10 * this.defaultScales.city * this.overallScale);
         break;
       case '10':
       case '11':
-        img.setY(img.y - 110 * this.defaultScales.city * this.overallScale);
+        img.setY(img.y - 100 * this.defaultScales.city * this.overallScale);
         break;
       case '12':
       case '13':
-        img.setY(img.y - 160 * this.defaultScales.city * this.overallScale);
+        img.setY(img.y - 140 * this.defaultScales.city * this.overallScale);
         break;
     }
 
