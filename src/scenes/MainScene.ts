@@ -70,6 +70,7 @@ export interface FrameSingleUnitData {
   type: LUnit.Type;
   cooldown: number;
   id: string;
+  commands: Array<{ turn: number; actions: string[] }>;
 }
 
 export type FrameCityTileData = Array<FrameSingleCityTileData>;
@@ -107,6 +108,7 @@ export type FrameTileData = {
     type: Resource.Types;
     amt: number;
   };
+  turn: number;
 };
 type HandleTileClicked = (data: FrameTileData) => void;
 
@@ -307,6 +309,7 @@ class MainScene extends Phaser.Scene {
       cityTile: cityTile,
       resources: resourceAtXY,
       roadLevel: f.roadLevels[v.y] ? f.roadLevels[v.y][v.x] : undefined,
+      turn: this.turn,
     });
     this.currentSelectedTilePos = clickedPos;
   }
@@ -525,6 +528,7 @@ class MainScene extends Phaser.Scene {
       ...Array.from(game.getTeamsUnits(LUnit.TEAM.A).values()),
       ...Array.from(game.getTeamsUnits(LUnit.TEAM.B).values()),
     ].forEach((unit) => {
+      const actions = this.unitActionsByUnitID.get(unit.id);
       unitData.set(unit.id, {
         team: unit.team,
         type: unit.type,
@@ -532,7 +536,11 @@ class MainScene extends Phaser.Scene {
         cargo: { ...unit.cargo },
         id: unit.id,
         pos: unit.pos,
+        commands: actions ? actions : [],
       });
+      // if (this.currentTurn === 10) {
+      //   console.log(unitData);
+      // }
     });
 
     const cityData: FrameCityData = new Map();
@@ -1181,6 +1189,14 @@ class MainScene extends Phaser.Scene {
     }
   }
 
+  // map unit id to all their actions
+  unitActionsByUnitID: Map<string, Array<{ turn: number; actions: string[] }>> =
+    new Map();
+  // id city tiles by <city_id_pos_hash>
+  cityTileActionsByPosition: Map<
+    string,
+    Array<{ turn: number; actions: string[] }>
+  > = new Map();
   async generateGameFrames(replayData) {
     while (this.currentTurn <= this.luxgame.configs.parameters.MAX_DAYS) {
       const commands = replayData.allCommands[
@@ -1192,9 +1208,65 @@ class MainScene extends Phaser.Scene {
       }
       const state: LuxMatchState = this.pseudomatch.state;
       const game = state.game;
+
       let annotations = [] as CommandsArray;
       let unannotated = commands.filter((cmd) => {
         const strs = cmd.command.split(' ');
+        if (strs.length === 0) return false;
+        switch (strs[0]) {
+          case Game.ACTIONS.BUILD_CART:
+          case Game.ACTIONS.RESEARCH:
+          case Game.ACTIONS.BUILD_WORKER:
+            if (strs.length < 3) break;
+            let x = parseInt(strs[1]);
+            let y = parseInt(strs[2]);
+            if (isNaN(x) || isNaN(y)) break;
+            const hash = hashMapCoords(new Position(x, y));
+            const cell = game.map.getCell(x, y);
+            if (cell.isCityTile()) {
+              const cityTile = cell.citytile;
+              const cityid = cityTile.cityid;
+              const citytileid = `${cityid}_${hash}`;
+              if (this.cityTileActionsByPosition.has(citytileid)) {
+                const curr = this.cityTileActionsByPosition.get(citytileid);
+                // cityTileActionsByPosition.set(citytileid, [
+                //   ...cityTileActionsByPosition.get(citytileid),
+                //   cmd.command,
+                // ]);
+                if (curr[curr.length - 1].turn === this.currentTurn) {
+                  curr[curr.length - 1].actions.push(cmd.command);
+                } else {
+                  curr.push({ turn: this.currentTurn, actions: [cmd.command] });
+                }
+              } else {
+                this.cityTileActionsByPosition.set(citytileid, [
+                  { turn: this.currentTurn, actions: [cmd.command] },
+                ]);
+              }
+            }
+            break;
+          case Game.ACTIONS.BUILD_CITY:
+          case Game.ACTIONS.MOVE:
+          case Game.ACTIONS.TRANSFER:
+          case Game.ACTIONS.PILLAGE:
+            if (strs.length < 2) break;
+            // note, this may not actually be a unit id if agent sent a bad command
+            if (this.unitActionsByUnitID.has(strs[1])) {
+              const curr = this.unitActionsByUnitID.get(strs[1]);
+              if (curr[curr.length - 1].turn === this.currentTurn) {
+                curr[curr.length - 1].actions.push(cmd.command);
+              } else {
+                curr.push({ turn: this.currentTurn, actions: [cmd.command] });
+              }
+            } else {
+              this.unitActionsByUnitID.set(strs[1], [
+                { turn: this.currentTurn, actions: [cmd.command] },
+              ]);
+            }
+            break;
+        }
+
+        // filter in/out annotation commands
         switch (strs[0]) {
           case Game.ACTIONS.DEBUG_ANNOTATE_CIRCLE:
           case Game.ACTIONS.DEBUG_ANNOTATE_X:

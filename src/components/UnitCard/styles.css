@@ -83,3 +83,55 @@
 .UnitCard .unit-history-button.MuiIconButton-root {
   padding: 0.6rem;
 }
+#unit-history-modal {
+  position: absolute !important;
+  inset: 50% 0% 0% 50% !important;
+}
+#unit-history-panel {
+  width: 50rem;
+  padding: 2rem;
+  background-color: rgba(0, 0, 0, 0.8);
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  border-radius: 1rem;
+}
+#unit-history-panel .command-row {
+  display: flex;
+  height: 2rem;
+  position: relative;
+  align-items: center;
+  margin: 0;
+}
+#unit-history-panel .command-row:nth-child(odd) {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+#unit-history-panel-title {
+  text-align: center;
+  font-weight: 700;
+}
+#unit-history-unit-icon-wrapper {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+#unit-history-unit-icon-wrapper img {
+  height: 3rem;
+}
+#unit-history-content {
+  max-height: 60vh;
+  overflow-y: scroll;
+}
+#unit-history-close-button {
+  background-color: #f9efe2;
+  position: absolute;
+  top: -1.25rem;
+  right: -1.25rem;
+  color: #002326;
+}
+#unit-history-close-button {
+  padding: 0.25rem;
+}
+#unit-history-close-button svg {
+  height: 2rem;
+  width: 2rem;
+  font-size: 2rem;
+}

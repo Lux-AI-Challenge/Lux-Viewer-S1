@@ -1,6 +1,6 @@
 import CardContent from '@material-ui/core/CardContent';
 import Card from '@material-ui/core/Card';
-import React from 'react';
+import React, { useState } from 'react';
 import './styles.css';
 import { FrameSingleUnitData } from '../../scenes/MainScene';
 import Team0WorkerSVG from '../../icons/team0worker.svg';
@@ -8,9 +8,15 @@ import Team1WorkerSVG from '../../icons/team1worker.svg';
 import Team0CartSVG from '../../icons/team0cart.svg';
 import Team1CartSVG from '../../icons/team1cart.svg';
 import InfoSVG from '../../icons/info.svg';
+import CloseIcon from '@material-ui/icons/Close';
 import { Unit } from '@lux-ai/2021-challenge/lib/es6/Unit';
-import { IconButton, LinearProgress, makeStyles } from '@material-ui/core';
-export type UnitCardProps = FrameSingleUnitData;
+import {
+  IconButton,
+  LinearProgress,
+  makeStyles,
+  Modal,
+} from '@material-ui/core';
+export type UnitCardProps = FrameSingleUnitData & { turn: number };
 
 const useStyles = makeStyles({
   progressa: {
@@ -20,8 +26,18 @@ const useStyles = makeStyles({
     backgroundColor: 'blue',
   },
 });
-const UnitCard = ({ cargo, pos, id, cooldown, team, type }: UnitCardProps) => {
+const UnitCard = ({
+  cargo,
+  pos,
+  id,
+  cooldown,
+  team,
+  type,
+  commands,
+  turn,
+}: UnitCardProps) => {
   const classes = useStyles();
+  const [historyPanelOpen, sethistoryPanelOpen] = useState(false);
   const renderUnitSVG = () => {
     let svg = Team1WorkerSVG;
     if (type === Unit.Type.WORKER) {
@@ -41,9 +57,48 @@ const UnitCard = ({ cargo, pos, id, cooldown, team, type }: UnitCardProps) => {
   if (type == Unit.Type.CART) {
     maxCooldown = 6;
   }
-  const openHistoryPanel = () => {};
+  const openHistoryPanel = () => {
+    sethistoryPanelOpen(true);
+  };
+  const handleCloseHistoryPanel = () => {
+    sethistoryPanelOpen(false);
+  };
   return (
     <div className="UnitCard">
+      <Modal
+        open={historyPanelOpen}
+        onClose={handleCloseHistoryPanel}
+        aria-labelledby="unit-history-panel-title"
+        id="unit-history-modal"
+        hideBackdrop
+      >
+        <div id="unit-history-panel">
+          <h2 id="unit-history-panel-title">Command History</h2>
+          <div id="unit-history-unit-icon-wrapper">{renderUnitSVG()}</div>
+          <IconButton
+            aria-label="close"
+            id="unit-history-close-button"
+            onClick={handleCloseHistoryPanel}
+          >
+            <CloseIcon />
+          </IconButton>
+          <div id="unit-history-content">
+            {commands
+              .filter((command) => command.turn <= turn)
+              .sort((a, b) => b.turn - a.turn)
+              .map((command) => {
+                const renders = command.actions.map((s) => {
+                  return (
+                    <p className="command-row">
+                      Turn: {command.turn} - {s}
+                    </p>
+                  );
+                });
+                return <>{renders}</>;
+              })}
+          </div>
+        </div>
+      </Modal>
       <div className="unit-id">
         <strong>ID:</strong> {id}
         <IconButton

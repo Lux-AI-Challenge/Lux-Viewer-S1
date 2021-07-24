@@ -24,6 +24,7 @@ const TileStats = ({
   resources,
   empty,
   roadLevel,
+  turn,
 }: TileStatsProps) => {
   const renderResourceSVG = () => {
     let svg = ResourceWood;
@@ -93,7 +94,7 @@ const TileStats = ({
               {allunits.map((v) => {
                 return (
                   <Grid item className="UnitData" xs={6} key={v.id}>
-                    <UnitCard {...v} />
+                    <UnitCard {...v} turn={turn} />
                   </Grid>
                 );
               })}
