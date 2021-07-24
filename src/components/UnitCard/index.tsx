@@ -7,8 +7,9 @@ import Team0WorkerSVG from '../../icons/team0worker.svg';
 import Team1WorkerSVG from '../../icons/team1worker.svg';
 import Team0CartSVG from '../../icons/team0cart.svg';
 import Team1CartSVG from '../../icons/team1cart.svg';
+import InfoSVG from '../../icons/info.svg';
 import { Unit } from '@lux-ai/2021-challenge/lib/es6/Unit';
-import { LinearProgress, makeStyles } from '@material-ui/core';
+import { IconButton, LinearProgress, makeStyles } from '@material-ui/core';
 export type UnitCardProps = FrameSingleUnitData;
 
 const useStyles = makeStyles({
@@ -40,10 +41,20 @@ const UnitCard = ({ cargo, pos, id, cooldown, team, type }: UnitCardProps) => {
   if (type == Unit.Type.CART) {
     maxCooldown = 6;
   }
+  const openHistoryPanel = () => {};
   return (
     <div className="UnitCard">
       <div className="unit-id">
         <strong>ID:</strong> {id}
+        <IconButton
+          aria-label="unit-history"
+          className="unit-history-button"
+          onClick={() => {
+            openHistoryPanel();
+          }}
+        >
+          <img className="unit-history-icon" src={InfoSVG}></img>
+        </IconButton>
       </div>
       <div className="worker-icon-wrapper">{renderUnitSVG()}</div>
       <div className="worker-data">

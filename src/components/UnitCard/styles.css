@@ -70,3 +70,16 @@
 .UnitCard .cooldown-b .MuiLinearProgress-barColorPrimary {
   background-color: #3686ff;
 }
+
+.UnitCard .unit-history-button {
+  position: absolute;
+  top: -0.5rem;
+  right: 0rem;
+}
+
+.UnitCard .unit-history-icon {
+  height: 1rem;
+}
+.UnitCard .unit-history-button.MuiIconButton-root {
+  padding: 0.6rem;
+}
