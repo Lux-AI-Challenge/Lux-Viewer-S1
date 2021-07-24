@@ -163,6 +163,7 @@ export const GameComponent = () => {
 
   /** handle the change of the slider to move turns */
   const handleSliderChange = (_event: any, newValue: number) => {
+    setRunning(false);
     moveToTurn(newValue);
   };
 
