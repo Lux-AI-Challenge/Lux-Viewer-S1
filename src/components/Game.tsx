@@ -1,5 +1,5 @@
 import 'phaser';
-import React, { useEffect, useState } from 'react';
+import React, { KeyboardEvent, useEffect, useState } from 'react';
 import MainScene, { Frame, FrameTileData } from '../scenes/MainScene';
 import { createGame } from '../game';
 import {
@@ -299,9 +299,32 @@ export const GameComponent = () => {
     } else if (window.innerWidth <= 1280) {
       el[0].style.fontSize = '8pt';
     }
-
     // loadGame(debug_replay);
   }, []);
+  useEffect(() => {
+    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
+      switch (event.key) {
+        case 'ArrowUp':
+          setPlaybackSpeed(playbackSpeed * 2);
+          break;
+        case 'ArrowDown':
+          setPlaybackSpeed(playbackSpeed / 2);
+          break;
+        case 'ArrowRight':
+          setRunning(false);
+          setTurn(turn + 1);
+          break;
+        case 'ArrowLeft':
+          setRunning(false);
+          setTurn(turn - 1);
+          break;
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [turn, playbackSpeed]);
 
   /** when replay data is changed, create new game */
   // useEffect(() => {
