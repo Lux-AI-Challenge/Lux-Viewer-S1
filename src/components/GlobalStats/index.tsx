@@ -117,6 +117,17 @@ const GlobalStats = ({
     },
   ];
 
+  const getResourceCollectedWidth = (team: number, rtype: string) => {
+    const total =
+      resourceCollectionPercents[0][rtype] +
+      resourceCollectionPercents[1][rtype];
+    if (total > 1) {
+      return (100 * resourceCollectionPercents[team][rtype]) / total;
+    } else {
+      return 100 * resourceCollectionPercents[team][rtype];
+    }
+  };
+
   return (
     <div className="GlobalStats">
       <LuxCard title="Global Stats">
@@ -179,21 +190,27 @@ const GlobalStats = ({
             </div>
             <div className="graph">
               {['wood', 'coal', 'uranium'].map((resourceType) => {
+                const total =
+                  resourceCollectionPercents[0][resourceType] +
+                  resourceCollectionPercents[1][resourceType];
                 return (
                   <div className={resourceType} key={resourceType}>
                     <div className="bgbar"></div>
                     <div
                       className="team1bar"
                       style={{
-                        width: `${
-                          resourceCollectionPercents[1][resourceType] * 100
-                        }%`,
-                        left: `${
-                          resourceCollectionPercents[0][resourceType] * 100
-                        }%`,
+                        width: `${getResourceCollectedWidth(1, resourceType)}%`,
+                        left: `${getResourceCollectedWidth(0, resourceType)}%`,
                       }}
                     >
-                      <span>
+                      <span
+                        style={{
+                          left:
+                            total < 0.5
+                              ? `${3 * (1 - total / 0.5)}rem`
+                              : 'auto',
+                        }}
+                      >
                         {(
                           resourceCollectionPercents[1][resourceType] * 100
                         ).toFixed(2)}
@@ -203,9 +220,7 @@ const GlobalStats = ({
                     <div
                       className="team0bar"
                       style={{
-                        width: `${
-                          resourceCollectionPercents[0][resourceType] * 100
-                        }%`,
+                        width: `${getResourceCollectedWidth(0, resourceType)}%`,
                         left: '0px',
                       }}
                     >
