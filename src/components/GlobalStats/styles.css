@@ -18,7 +18,7 @@
 }
 .GlobalStats .cityTilesLabel {
   position: absolute;
-  left: -13px;
+  left: -2.5rem;
   font-size: 0.85rem;
   top: 13.1rem;
   background: linear-gradient(
@@ -34,7 +34,7 @@
 }
 .GlobalStats .storedFuelLabel {
   position: absolute;
-  left: -13px;
+  left: -2.5rem;
   font-size: 0.85rem;
   top: 17.25rem;
   background: linear-gradient(

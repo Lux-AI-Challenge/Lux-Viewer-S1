@@ -270,6 +270,13 @@ export const GameComponent = () => {
                 console.log(event.data);
                 replay = parseReplayData(replay);
                 loadGame(replay, true);
+                const el = document.getElementsByTagName('html');
+                if (window.innerWidth * 0.65 <= 768) {
+                  el[0].style.fontSize = '6pt';
+                }
+                if (window.innerWidth * 0.65 <= 1280) {
+                  el[0].style.fontSize = '8pt';
+                }
               }
             } catch (err) {
               console.error('Could not parse game');
@@ -285,7 +292,7 @@ export const GameComponent = () => {
     if (window.innerWidth <= 768) {
       // set the font size of root html smaller since this is being viewed on the kaggle page
       el[0].style.fontSize = '6pt';
-    } else if (window.innerWidth <= 1024) {
+    } else if (window.innerWidth <= 1280) {
       el[0].style.fontSize = '8pt';
     }
 
