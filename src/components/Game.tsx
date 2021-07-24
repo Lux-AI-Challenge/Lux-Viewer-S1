@@ -181,7 +181,7 @@ export const GameComponent = () => {
       jsonReplayData.version === undefined ||
       jsonReplayData.version !== clientConfigs.version
     ) {
-      if (jsonReplayData.version === undefined) {
+      if (jsonReplayData.version === undefined && !skipVersionCheck) {
         alert('No version associated with replay data, cannot load');
         return;
       }
