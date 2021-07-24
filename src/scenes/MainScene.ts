@@ -232,8 +232,9 @@ class MainScene extends Phaser.Scene {
     let base = 'assets';
     // @ts-ignore;
     if (window.kaggle) {
-      console.log('Loading assets from lux');
-      base = 'https://2021vis.lux-ai.org/assets';
+      console.log('Loading assets from unpkg');
+      // base = 'https://2021vis.lux-ai.org/assets';
+      base = 'https://unpkg.com/lux-viewer-2021@latest/dist/assets';
     }
     this.load.image('worker0', `${base}/sprites/worker0w.svg`);
     this.load.image('worker1', `${base}/sprites/worker1w.svg`);
