@@ -56,6 +56,11 @@
 .GlobalStats .teamLabel div {
   margin-bottom: 0.75rem;
 }
+.GlobalStats .teamLabel .teamname {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .GlobalStats .teamLabel .houses,
 .GlobalStats .teamLabel .collection,
 .GlobalStats .teamLabel .researchPoints {
