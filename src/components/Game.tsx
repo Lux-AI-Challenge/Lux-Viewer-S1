@@ -175,28 +175,30 @@ export const GameComponent = () => {
 
   /** load game given json replay data */
   const loadGame = (jsonReplayData: any, skipVersionCheck = false) => {
-    if (!skipVersionCheck) {
+    if (
+      jsonReplayData.version === undefined ||
+      jsonReplayData.version !== clientConfigs.version
+    ) {
+      if (jsonReplayData.version === undefined) {
+        alert('No version associated with replay data, cannot load');
+        return;
+      }
+      const versionvals = jsonReplayData.version.split('.');
       if (
-        jsonReplayData.version === undefined ||
-        jsonReplayData.version !== clientConfigs.version
+        versionvals[0] !== clientConfigs.version[0] ||
+        versionvals[1] !== clientConfigs.version[2]
       ) {
-        if (jsonReplayData.version === undefined) {
+        if (skipVersionCheck) {
           alert(
-            `Replay file works on version 1.0.x but client is on version ${clientConfigs.version}. Download an older visualizer here: https://github.com/Lux-AI-Challenge/LuxViewer2021/releases`
+            `Replay file works on version ${versionvals[0]}.${versionvals[1]}.x but client is on version ${clientConfigs.version}. The visualizer will most likely not work correctly. Download an older visualizer here to watch the replay: https://github.com/Lux-AI-Challenge/LuxViewer2021/releases`
+          );
+        } else {
+          alert(
+            `Replay file works on version ${versionvals[0]}.${versionvals[1]}.x but client is on version ${clientConfigs.version}. Download an older visualizer here to watch the replay: https://github.com/Lux-AI-Challenge/LuxViewer2021/releases`
           );
           return;
-        } else {
-          const versionvals = jsonReplayData.version.split('.');
-          if (
-            versionvals[0] !== clientConfigs.version[0] ||
-            versionvals[1] !== clientConfigs.version[2]
-          ) {
-            alert(
-              `Replay file works on version ${versionvals[0]}.${versionvals[1]}.x but client is on version ${clientConfigs.version}. Download an older visualizer here: https://github.com/Lux-AI-Challenge/LuxViewer2021/releases`
-            );
-            return;
-          }
         }
+        return;
       }
     }
     if (game) {
