@@ -93,7 +93,7 @@ export type FrameSingleCityData = {
 
 export type GameCreationConfigs = {
   replayData: object;
-  handleUnitClicked: HandleUnitClicked;
+  handleTileHover: HandleTileClicked;
   handleTileClicked: HandleTileClicked;
   zoom: number;
 };
@@ -313,6 +313,34 @@ class MainScene extends Phaser.Scene {
     });
     this.currentSelectedTilePos = clickedPos;
   }
+  private onTilehover(v: Position) {
+    const f = this.frames[this.turn];
+    const unitDataAtXY: FrameUnitData = new Map();
+    const cityTile: FrameCityTileData = [];
+
+    // TODO: can be slow if we iterate entire unit list
+    f.unitData.forEach((unit) => {
+      if (unit.pos.x === v.x && unit.pos.y === v.y) {
+        unitDataAtXY.set(unit.id, unit);
+      }
+    });
+    f.cityTileData.forEach((ct) => {
+      if (ct.pos.x === v.x && ct.pos.y === v.y) {
+        cityTile.push(ct);
+      }
+    });
+    const resourceAtXY = f.resourceData.get(hashMapCoords(v));
+    const clickedPos = new Position(v.x, v.y);
+    this.handleTileHover({
+      pos: clickedPos,
+      units: unitDataAtXY,
+      cityTile: cityTile,
+      resources: resourceAtXY,
+      roadLevel: f.roadLevels[v.y] ? f.roadLevels[v.y][v.x] : undefined,
+      turn: this.turn,
+    });
+    this.currentSelectedTilePos = clickedPos;
+  }
 
   mapWidth: number = -1;
   mapHeight: number = -1;
@@ -352,6 +380,17 @@ class MainScene extends Phaser.Scene {
       });
     }
 
+    this.input.on(
+      Phaser.Input.Events.POINTER_MOVE,
+      (d: { worldX: number; worldY: number }) => {
+        const pos = mapIsometricPixelsToPosition(d.worldX, d.worldY, {
+          scale: this.overallScale,
+          width: this.mapWidth,
+          height: this.mapHeight,
+        });
+        this.onTilehover(pos);
+      }
+    );
     // add handler for clicking tiles
     this.input.on(
       Phaser.Input.Events.POINTER_DOWN,
@@ -361,6 +400,7 @@ class MainScene extends Phaser.Scene {
           width: this.mapWidth,
           height: this.mapHeight,
         });
+        // TODO: replace this instead with the outlined tile picture.
         const imageTile = this.floorImageTiles.get(hashMapCoords(pos));
         if (imageTile) {
           if (this.activeImageTile == null) {
@@ -600,15 +640,15 @@ class MainScene extends Phaser.Scene {
 
   public turn = 0;
 
-  public handleUnitClicked: HandleUnitClicked;
   public handleTileClicked: HandleTileClicked;
+  public handleTileHover: HandleTileClicked;
 
   public currentSelectedTilePos: Position = null;
 
   create(configs: GameCreationConfigs) {
     this.loadReplayData(configs.replayData);
-    this.handleUnitClicked = configs.handleUnitClicked;
     this.handleTileClicked = configs.handleTileClicked;
+    this.handleTileHover = configs.handleTileHover;
     this.events.emit('created');
   }
 

@@ -67,6 +67,7 @@ export const GameComponent = () => {
   };
   const [isReady, setReady] = useState(false);
   const [selectedTileData, setTileData] = useState<FrameTileData>(null);
+  const [hoveredTileData, setHoveredTileData] = useState<FrameTileData>(null);
   const [game, setGame] = useState<Phaser.Game>(null);
   const [main, setMain] = useState<MainScene>(null);
   const [configs, setConfigs] = useState<LuxMatchConfigs>(null);
@@ -209,8 +210,8 @@ export const GameComponent = () => {
     setReplayData(jsonReplayData);
     const newgame = createGame({
       replayData: jsonReplayData,
-      handleUnitClicked,
       handleTileClicked,
+      handleTileHover,
       zoom,
     });
     setGame(newgame);
@@ -315,11 +316,11 @@ export const GameComponent = () => {
   //   }
   // }, [replayData]);
 
-  const handleUnitClicked = (data) => {
-    console.log(data);
-  };
   const handleTileClicked = (data) => {
     setTileData(data);
+  };
+  const handleTileHover = (data) => {
+    setHoveredTileData(data);
   };
 
   const [debugOn, _setDebug] = useState(true);

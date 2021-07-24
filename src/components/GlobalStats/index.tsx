@@ -135,6 +135,7 @@ const GlobalStats = ({
           <Grid item xs={1} key={1000}>
             <div className="cityTilesLabel">Total CityTiles</div>
             <div className="storedFuelLabel">Total City Fuel</div>
+            <div className="researchPointsLabel">Research Points</div>
           </Grid>
           <Grid item xs={5} key={0}>
             <div className="teamLabel">
@@ -151,6 +152,9 @@ const GlobalStats = ({
               </div>
               <div className="collection">
                 <img src={Resources} /> {totalCityFuel[0]}
+              </div>
+              <div className="researchPoints">
+                {accumulatedStats[turn].researchPoints[0]}
               </div>
             </div>
           </Grid>
@@ -170,6 +174,9 @@ const GlobalStats = ({
               </div>
               <div className="collection">
                 <img src={Resources} /> {totalCityFuel[1]}
+              </div>
+              <div className="researchPoints">
+                {accumulatedStats[turn].researchPoints[1]}
               </div>
             </div>
           </Grid>
