@@ -128,7 +128,7 @@ const GlobalStats = ({
           <Grid item xs={5} key={0}>
             <div className="teamLabel">
               <div className="icons">
-                <img src={Team0Worker} height={30} /> Team 0
+                <img src={Team0Worker} /> Team 0
               </div>
               <div className="teamname">
                 {teamDetails[0].name}
@@ -136,10 +136,10 @@ const GlobalStats = ({
                   `, ID: ${teamDetails[0].tournamentID}`}
               </div>
               <div className="houses">
-                <img src={Team0City} height={44} /> {numOfCities[0]}
+                <img src={Team0City} /> {numOfCities[0]}
               </div>
               <div className="collection">
-                <img src={Resources} height={32} /> {totalCityFuel[0]}
+                <img src={Resources} /> {totalCityFuel[0]}
               </div>
             </div>
           </Grid>
@@ -147,7 +147,7 @@ const GlobalStats = ({
           <Grid item xs={5} key={1}>
             <div className="teamLabel">
               <div className="icons">
-                <img src={Team1Worker} height={30} /> Team 1
+                <img src={Team1Worker} /> Team 1
               </div>
               <div className="teamname">
                 {teamDetails[1].name}
@@ -155,10 +155,10 @@ const GlobalStats = ({
                   `, ID: ${teamDetails[1].tournamentID}`}
               </div>
               <div className="houses">
-                <img src={Team1City} height={44} /> {numOfCities[1]}
+                <img src={Team1City} /> {numOfCities[1]}
               </div>
               <div className="collection">
-                <img src={Resources} height={32} /> {totalCityFuel[1]}
+                <img src={Resources} /> {totalCityFuel[1]}
               </div>
             </div>
           </Grid>

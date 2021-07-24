@@ -59,6 +59,7 @@
 }
 .GlobalStats .teamLabel .icons img {
   margin-right: 1rem;
+  height: 2.3rem;
 }
 .GlobalStats .teamLabel div {
   margin-bottom: 0.75rem;
@@ -69,6 +70,10 @@
   display: flex;
   justify-content: center;
   margin-bottom: 1.5rem;
+}
+.GlobalStats .teamLabel .houses img,
+.GlobalStats .teamLabel .collection img {
+  height: 3rem;
 }
 
 .GlobalStats .resource-graph {
