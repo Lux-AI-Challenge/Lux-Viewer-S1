@@ -177,30 +177,25 @@ export const GameComponent = () => {
 
   /** load game given json replay data */
   const loadGame = (jsonReplayData: any, skipVersionCheck = false) => {
-    if (
-      jsonReplayData.version === undefined ||
-      jsonReplayData.version !== clientConfigs.version
-    ) {
-      if (jsonReplayData.version === undefined && !skipVersionCheck) {
-        alert('No version associated with replay data, cannot load');
-        return;
-      }
-      const versionvals = jsonReplayData.version.split('.');
+    if (!skipVersionCheck) {
       if (
-        versionvals[0] !== clientConfigs.version[0] ||
-        versionvals[1] !== clientConfigs.version[2]
+        jsonReplayData.version === undefined ||
+        jsonReplayData.version !== clientConfigs.version
       ) {
-        if (skipVersionCheck) {
+        if (jsonReplayData.version === undefined) {
+          alert('No version associated with replay data, cannot load');
+          return;
+        }
+        const versionvals = jsonReplayData.version.split('.');
+        if (
+          versionvals[0] !== clientConfigs.version[0] ||
+          versionvals[1] !== clientConfigs.version[2]
+        ) {
           alert(
             `Replay file works on version ${versionvals[0]}.${versionvals[1]}.x but client is on version ${clientConfigs.version}. The visualizer will most likely not work correctly. Download an older visualizer here to watch the replay: https://github.com/Lux-AI-Challenge/LuxViewer2021/releases`
           );
-        } else {
-          alert(
-            `Replay file works on version ${versionvals[0]}.${versionvals[1]}.x but client is on version ${clientConfigs.version}. Download an older visualizer here to watch the replay: https://github.com/Lux-AI-Challenge/LuxViewer2021/releases`
-          );
           return;
         }
-        return;
       }
     }
     if (game) {
@@ -312,11 +307,11 @@ export const GameComponent = () => {
           break;
         case 'ArrowRight':
           setRunning(false);
-          setTurn(turn + 1);
+          moveToTurn(turn + 1);
           break;
         case 'ArrowLeft':
           setRunning(false);
-          setTurn(turn - 1);
+          moveToTurn(turn - 1);
           break;
       }
     };
