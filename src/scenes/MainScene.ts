@@ -243,7 +243,8 @@ class MainScene extends Phaser.Scene {
     this.load.image('cart-0', `${base}/sprites/carts/cart0e.svg`);
     this.load.image('cart-1', `${base}/sprites/carts/cart1e.svg`);
 
-    this.load.svg('block1', `${base}/ground.svg`);
+    this.load.svg('ground', `${base}/ground.svg`);
+    this.load.svg('ground-outline', `${base}/ground-outline.svg`);
 
     // generate 15 binary values 0001 to 1111 and load the path tiles
     for (let i = 1; i <= 15; i++) {
@@ -295,6 +296,7 @@ class MainScene extends Phaser.Scene {
       const newkey = keyInfo.join('-') + '-outline';
       sprite.setTexture(newkey);
     }
+    this.toggleOutlineClickedTile();
   }
   untrackUnit() {
     if (this.currentTrackedUnitID) {
@@ -358,6 +360,41 @@ class MainScene extends Phaser.Scene {
   mapHeight: number = -1;
 
   /**
+   * render an outline around a clicked tile if imageTile is not null and valid
+   */
+  private toggleOutlineClickedTile(imageTile?: Phaser.GameObjects.Image) {
+    if (imageTile && !this.currentTrackedUnitID) {
+      if (this.activeImageTile == null) {
+        this.originalTileY = imageTile.y;
+        this.activeImageTile = imageTile;
+        // this.activeImageTile.setTint(0x86bfda);
+        // this.activeImageTile.setY(
+        //   this.originalTileY - 15 * this.overallScale
+        // );
+        this.activeImageTile.setTexture('ground-outline');
+      } else if (this.activeImageTile !== imageTile) {
+        this.activeImageTile.setY(this.originalTileY);
+        // this.activeImageTile.clearTint();
+        this.activeImageTile.setTexture('ground');
+        this.originalTileY = imageTile.y;
+        this.activeImageTile = imageTile;
+        // this.activeImageTile.setTint(0x86bfda);
+        // this.activeImageTile.setY(
+        //   this.originalTileY - 15 * this.overallScale
+        // );
+        this.activeImageTile.setTexture('ground-outline');
+      }
+    } else {
+      if (this.activeImageTile) {
+        this.activeImageTile.setY(this.originalTileY);
+        // this.activeImageTile.clearTint();
+        this.activeImageTile.setTexture('ground');
+      }
+      this.activeImageTile = null;
+    }
+  }
+
+  /**
    * Load replay data into game
    * and generate all relevant frames
    */
@@ -401,34 +438,11 @@ class MainScene extends Phaser.Scene {
           width: this.mapWidth,
           height: this.mapHeight,
         });
-        // TODO: replace this instead with the outlined tile picture.
-        const imageTile = this.floorImageTiles.get(hashMapCoords(pos));
-        if (imageTile) {
-          if (this.activeImageTile == null) {
-            this.originalTileY = imageTile.y;
-            this.activeImageTile = imageTile;
-            this.activeImageTile.setTint(0x86bfda);
-            this.activeImageTile.setY(
-              this.originalTileY - 15 * this.overallScale
-            );
-          } else if (this.activeImageTile !== imageTile) {
-            this.activeImageTile.setY(this.originalTileY);
-            this.activeImageTile.clearTint();
-            this.originalTileY = imageTile.y;
-            this.activeImageTile = imageTile;
-            this.activeImageTile.setTint(0x86bfda);
-            this.activeImageTile.setY(
-              this.originalTileY - 15 * this.overallScale
-            );
-          }
-        } else {
-          if (this.activeImageTile) {
-            this.activeImageTile.setY(this.originalTileY);
-            this.activeImageTile.clearTint();
-          }
-          this.activeImageTile = null;
-        }
         this.onTileClicked(pos);
+
+        const imageTile = this.floorImageTiles.get(hashMapCoords(pos));
+        // outline tile if it exists and we aren't tracking a unit
+        this.toggleOutlineClickedTile(imageTile);
       }
     );
 
@@ -446,19 +460,19 @@ class MainScene extends Phaser.Scene {
         if (this.hoverImageTile == null) {
           this.originalHoverImageTileY = imageTile.y;
           this.hoverImageTile = imageTile;
-          this.hoverImageTile.setTint(0x86bfda);
+          this.hoverImageTile.setTexture('ground-outline');
         } else if (this.hoverImageTile !== imageTile) {
           if (this.activeImageTile != this.hoverImageTile) {
-            this.hoverImageTile.clearTint();
+            this.hoverImageTile.setTexture('ground');
           }
           this.originalHoverImageTileY = imageTile.y;
           this.hoverImageTile = imageTile;
-          this.hoverImageTile.setTint(0x86bfda);
+          this.hoverImageTile.setTexture('ground-outline');
         }
       } else {
         if (this.hoverImageTile) {
           this.hoverImageTile.setY(this.originalHoverImageTileY);
-          this.hoverImageTile.clearTint();
+          this.hoverImageTile.setTexture('ground');
         }
         this.hoverImageTile = null;
       }
@@ -779,7 +793,7 @@ class MainScene extends Phaser.Scene {
     });
 
     const img = this.add
-      .image(ps[0], ps[1], 'block1')
+      .image(ps[0], ps[1], 'ground')
       .setScale(this.defaultScales.block * this.overallScale);
     img.setDepth(getDepthByPos(pos) / 100);
     return img;
