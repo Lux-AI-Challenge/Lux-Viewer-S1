@@ -27,7 +27,7 @@
 .TileStats .subtitle:before {
   content: '';
   position: absolute;
-  margin-top: 26px;
+  margin-top: 2rem;
   left: 10%;
   background: linear-gradient(
     90deg,
@@ -35,7 +35,7 @@
     rgba(50, 61, 52, 0.2) 51.04%,
     rgba(0, 0, 0, 0) 100%
   );
-  height: 4px;
+  height: 0.325rem;
   width: calc(80%);
 }
 .TileStats .resources {

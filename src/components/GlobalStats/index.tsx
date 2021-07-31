@@ -117,6 +117,17 @@ const GlobalStats = ({
     },
   ];
 
+  const getResourceCollectedWidth = (team: number, rtype: string) => {
+    const total =
+      resourceCollectionPercents[0][rtype] +
+      resourceCollectionPercents[1][rtype];
+    if (total > 1) {
+      return (100 * resourceCollectionPercents[team][rtype]) / total;
+    } else {
+      return 100 * resourceCollectionPercents[team][rtype];
+    }
+  };
+
   return (
     <div className="GlobalStats">
       <LuxCard title="Global Stats">
@@ -124,11 +135,12 @@ const GlobalStats = ({
           <Grid item xs={1} key={1000}>
             <div className="cityTilesLabel">Total CityTiles</div>
             <div className="storedFuelLabel">Total City Fuel</div>
+            <div className="researchPointsLabel">Research Points</div>
           </Grid>
           <Grid item xs={5} key={0}>
             <div className="teamLabel">
               <div className="icons">
-                <img src={Team0Worker} height={30} /> Team 0
+                <img src={Team0Worker} /> Team 0
               </div>
               <div className="teamname">
                 {teamDetails[0].name}
@@ -136,10 +148,13 @@ const GlobalStats = ({
                   `, ID: ${teamDetails[0].tournamentID}`}
               </div>
               <div className="houses">
-                <img src={Team0City} height={44} /> {numOfCities[0]}
+                <img src={Team0City} /> {numOfCities[0]}
               </div>
               <div className="collection">
-                <img src={Resources} height={32} /> {totalCityFuel[0]}
+                <img src={Resources} /> {totalCityFuel[0]}
+              </div>
+              <div className="researchPoints">
+                {accumulatedStats[turn].researchPoints[0]}
               </div>
             </div>
           </Grid>
@@ -147,7 +162,7 @@ const GlobalStats = ({
           <Grid item xs={5} key={1}>
             <div className="teamLabel">
               <div className="icons">
-                <img src={Team1Worker} height={30} /> Team 1
+                <img src={Team1Worker} /> Team 1
               </div>
               <div className="teamname">
                 {teamDetails[1].name}
@@ -155,10 +170,13 @@ const GlobalStats = ({
                   `, ID: ${teamDetails[1].tournamentID}`}
               </div>
               <div className="houses">
-                <img src={Team1City} height={44} /> {numOfCities[1]}
+                <img src={Team1City} /> {numOfCities[1]}
               </div>
               <div className="collection">
-                <img src={Resources} height={32} /> {totalCityFuel[1]}
+                <img src={Resources} /> {totalCityFuel[1]}
+              </div>
+              <div className="researchPoints">
+                {accumulatedStats[turn].researchPoints[1]}
               </div>
             </div>
           </Grid>
@@ -179,21 +197,27 @@ const GlobalStats = ({
             </div>
             <div className="graph">
               {['wood', 'coal', 'uranium'].map((resourceType) => {
+                const total =
+                  resourceCollectionPercents[0][resourceType] +
+                  resourceCollectionPercents[1][resourceType];
                 return (
                   <div className={resourceType} key={resourceType}>
                     <div className="bgbar"></div>
                     <div
                       className="team1bar"
                       style={{
-                        width: `${
-                          resourceCollectionPercents[1][resourceType] * 100
-                        }%`,
-                        left: `${
-                          resourceCollectionPercents[0][resourceType] * 100
-                        }%`,
+                        width: `${getResourceCollectedWidth(1, resourceType)}%`,
+                        left: `${getResourceCollectedWidth(0, resourceType)}%`,
                       }}
                     >
-                      <span>
+                      <span
+                        style={{
+                          left:
+                            total < 0.5
+                              ? `${3 * (1 - total / 0.5)}rem`
+                              : 'auto',
+                        }}
+                      >
                         {(
                           resourceCollectionPercents[1][resourceType] * 100
                         ).toFixed(2)}
@@ -203,9 +227,7 @@ const GlobalStats = ({
                     <div
                       className="team0bar"
                       style={{
-                        width: `${
-                          resourceCollectionPercents[0][resourceType] * 100
-                        }%`,
+                        width: `${getResourceCollectedWidth(0, resourceType)}%`,
                         left: '0px',
                       }}
                     >

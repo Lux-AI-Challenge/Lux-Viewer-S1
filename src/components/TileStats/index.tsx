@@ -24,6 +24,7 @@ const TileStats = ({
   resources,
   empty,
   roadLevel,
+  turn,
 }: TileStatsProps) => {
   const renderResourceSVG = () => {
     let svg = ResourceWood;
@@ -67,6 +68,17 @@ const TileStats = ({
                 </p>
               </div>
             )}
+            {cityTile.length > 0 && cities.get(cityTile[0].cityid) && (
+              <>
+                <div className="subtitle">City Info</div>
+                <Grid container className="CityStats">
+                  <CityStatsCard
+                    {...cities.get(cityTile[0].cityid)}
+                    cityid={cityTile[0].cityid}
+                  />
+                </Grid>
+              </>
+            )}
             {allunits.length > 0 && <div className="subtitle">Units:</div>}
             <Grid container className="UnitStats" spacing={1}>
               {cityTile.length > 0 && (
@@ -82,22 +94,11 @@ const TileStats = ({
               {allunits.map((v) => {
                 return (
                   <Grid item className="UnitData" xs={6} key={v.id}>
-                    <UnitCard {...v} />
+                    <UnitCard {...v} turn={turn} />
                   </Grid>
                 );
               })}
             </Grid>
-            {cityTile.length > 0 && cities.get(cityTile[0].cityid) && (
-              <>
-                <div className="subtitle">City Info</div>
-                <Grid container className="CityStats">
-                  <CityStatsCard
-                    {...cities.get(cityTile[0].cityid)}
-                    cityid={cityTile[0].cityid}
-                  />
-                </Grid>
-              </>
-            )}
           </>
         )}
       </LuxCard>

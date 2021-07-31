@@ -12,9 +12,9 @@
 .CityTileCard .unit-id:before {
   content: '';
   position: absolute;
-  margin-top: 18px;
+  margin-top: 1.38rem;
   background: rgba(50, 61, 52, 0.1);
-  height: 4px;
+  height: 0.325rem;
   width: calc(100%);
 }
 .CityTileCard .worker-icon-wrapper {

@@ -16,9 +16,11 @@
 .GlobalStats .Carosel {
   box-shadow: none;
 }
-.GlobalStats .cityTilesLabel {
+.GlobalStats .cityTilesLabel,
+.GlobalStats .storedFuelLabel,
+.GlobalStats .researchPointsLabel {
   position: absolute;
-  left: -13px;
+  left: -2.5rem;
   font-size: 0.85rem;
   top: 13.1rem;
   background: linear-gradient(
@@ -33,20 +35,10 @@
   z-index: 1;
 }
 .GlobalStats .storedFuelLabel {
-  position: absolute;
-  left: -13px;
-  font-size: 0.85rem;
   top: 17.25rem;
-  background: linear-gradient(
-    90deg,
-    rgba(0, 0, 0, 0) 0%,
-    rgba(50, 61, 52, 0.1) 51.04%,
-    rgba(0, 0, 0, 0) 100%
-  );
-  width: 29rem;
-  height: 3rem;
-  line-height: 3rem;
-  z-index: 1;
+}
+.GlobalStats .researchPointsLabel {
+  top: 21.4rem;
 }
 .GlobalStats .teamLabel {
   text-align: center;
@@ -59,16 +51,28 @@
 }
 .GlobalStats .teamLabel .icons img {
   margin-right: 1rem;
+  height: 2.3rem;
 }
 .GlobalStats .teamLabel div {
   margin-bottom: 0.75rem;
 }
+.GlobalStats .teamLabel .teamname {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .GlobalStats .teamLabel .houses,
-.GlobalStats .teamLabel .collection {
+.GlobalStats .teamLabel .collection,
+.GlobalStats .teamLabel .researchPoints {
   align-items: center;
   display: flex;
   justify-content: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
+  height: 3rem;
+}
+.GlobalStats .teamLabel .houses img,
+.GlobalStats .teamLabel .collection img {
+  height: 3rem;
 }
 
 .GlobalStats .resource-graph {

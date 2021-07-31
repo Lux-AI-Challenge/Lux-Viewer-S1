@@ -17,26 +17,26 @@
 .Game .zoom-in-out {
   position: absolute;
   top: 1.5rem;
-  left: 2rem;
+  left: 1rem;
 }
 
 .Game .global-stats {
   position: absolute;
   background-color: white;
   margin: auto;
-  left: 2rem;
+  right: 2rem;
   width: 16rem;
 }
 .Game .global-stats-wrapper {
   position: absolute;
-  left: 2rem;
+  right: 2.25rem;
   top: 8rem;
 }
 
 .Game .tile-stats-wrapper {
   position: absolute;
-  right: 2rem;
-  top: 2rem;
+  left: 2rem;
+  top: 8rem;
 }
 
 .Game .upload-icon-no-replay {

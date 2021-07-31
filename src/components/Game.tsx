@@ -1,5 +1,5 @@
 import 'phaser';
-import React, { useEffect, useState } from 'react';
+import React, { KeyboardEvent, useEffect, useState } from 'react';
 import MainScene, { Frame, FrameTileData } from '../scenes/MainScene';
 import { createGame } from '../game';
 import {
@@ -67,6 +67,7 @@ export const GameComponent = () => {
   };
   const [isReady, setReady] = useState(false);
   const [selectedTileData, setTileData] = useState<FrameTileData>(null);
+  const [hoveredTileData, setHoveredTileData] = useState<FrameTileData>(null);
   const [game, setGame] = useState<Phaser.Game>(null);
   const [main, setMain] = useState<MainScene>(null);
   const [configs, setConfigs] = useState<LuxMatchConfigs>(null);
@@ -163,6 +164,7 @@ export const GameComponent = () => {
 
   /** handle the change of the slider to move turns */
   const handleSliderChange = (_event: any, newValue: number) => {
+    setRunning(false);
     moveToTurn(newValue);
   };
 
@@ -181,21 +183,18 @@ export const GameComponent = () => {
         jsonReplayData.version !== clientConfigs.version
       ) {
         if (jsonReplayData.version === undefined) {
+          alert('No version associated with replay data, cannot load');
+          return;
+        }
+        const versionvals = jsonReplayData.version.split('.');
+        if (
+          versionvals[0] !== clientConfigs.version[0] ||
+          versionvals[1] !== clientConfigs.version[2]
+        ) {
           alert(
-            `Replay file works on version 1.0.x but client is on version ${clientConfigs.version}. Download an older visualizer here: https://github.com/Lux-AI-Challenge/LuxViewer2021/releases`
+            `Replay file works on version ${versionvals[0]}.${versionvals[1]}.x but client is on version ${clientConfigs.version}. The visualizer will most likely not work correctly. Download an older visualizer here to watch the replay: https://github.com/Lux-AI-Challenge/LuxViewer2021/releases`
           );
           return;
-        } else {
-          const versionvals = jsonReplayData.version.split('.');
-          if (
-            versionvals[0] !== clientConfigs.version[0] ||
-            versionvals[1] !== clientConfigs.version[2]
-          ) {
-            alert(
-              `Replay file works on version ${versionvals[0]}.${versionvals[1]}.x but client is on version ${clientConfigs.version}. Download an older visualizer here: https://github.com/Lux-AI-Challenge/LuxViewer2021/releases`
-            );
-            return;
-          }
         }
       }
     }
@@ -206,8 +205,8 @@ export const GameComponent = () => {
     setReplayData(jsonReplayData);
     const newgame = createGame({
       replayData: jsonReplayData,
-      handleUnitClicked,
       handleTileClicked,
+      handleTileHover,
       zoom,
     });
     setGame(newgame);
@@ -270,6 +269,13 @@ export const GameComponent = () => {
                 console.log(event.data);
                 replay = parseReplayData(replay);
                 loadGame(replay, true);
+                const el = document.getElementsByTagName('html');
+                if (window.innerWidth * 0.65 <= 768) {
+                  el[0].style.fontSize = '6pt';
+                }
+                if (window.innerWidth * 0.65 <= 1280) {
+                  el[0].style.fontSize = '8pt';
+                }
               }
             } catch (err) {
               console.error('Could not parse game');
@@ -280,8 +286,40 @@ export const GameComponent = () => {
         );
       }
     }
+    // change root font size depending on window size
+    const el = document.getElementsByTagName('html');
+    if (window.innerWidth <= 768) {
+      // set the font size of root html smaller since this is being viewed on the kaggle page
+      el[0].style.fontSize = '6pt';
+    } else if (window.innerWidth <= 1280) {
+      el[0].style.fontSize = '8pt';
+    }
     // loadGame(debug_replay);
   }, []);
+  useEffect(() => {
+    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
+      switch (event.key) {
+        case 'ArrowUp':
+          setPlaybackSpeed(playbackSpeed * 2);
+          break;
+        case 'ArrowDown':
+          setPlaybackSpeed(playbackSpeed / 2);
+          break;
+        case 'ArrowRight':
+          setRunning(false);
+          moveToTurn(turn + 1);
+          break;
+        case 'ArrowLeft':
+          setRunning(false);
+          moveToTurn(turn - 1);
+          break;
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [turn, playbackSpeed]);
 
   /** when replay data is changed, create new game */
   // useEffect(() => {
@@ -296,11 +334,11 @@ export const GameComponent = () => {
   //   }
   // }, [replayData]);
 
-  const handleUnitClicked = (data) => {
-    console.log(data);
-  };
   const handleTileClicked = (data) => {
     setTileData(data);
+  };
+  const handleTileHover = (data) => {
+    setHoveredTileData(data);
   };
 
   const [debugOn, _setDebug] = useState(true);
