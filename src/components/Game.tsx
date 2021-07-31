@@ -178,6 +178,7 @@ export const GameComponent = () => {
   /** track a unit by id */
   const trackUnit = (id: string) => {
     setTrackedUnitID(id);
+    main.untrackUnit();
     main.trackUnit(id);
   };
 
@@ -212,7 +213,7 @@ export const GameComponent = () => {
     const newgame = createGame({
       replayData: jsonReplayData,
       handleTileClicked,
-
+      handleUnitTracked,
       zoom,
     });
     setGame(newgame);
@@ -333,8 +334,12 @@ export const GameComponent = () => {
     };
   }, [turn, playbackSpeed, main, configs]);
 
-  const handleTileClicked = (data) => {
+  const handleTileClicked = (data: FrameTileData) => {
     setTileData(data);
+    // deal with unit tracking, which unfortunately has data fragmented between react and the phaser scene
+  };
+  const handleUnitTracked = (id: string) => {
+    setTrackedUnitID(id);
   };
 
   const [debugOn, _setDebug] = useState(true);

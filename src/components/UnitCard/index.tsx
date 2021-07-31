@@ -94,7 +94,7 @@ const UnitCard = ({
                     </p>
                   );
                 });
-                return <>{renders}</>;
+                return <div key={command.turn}>{renders}</div>;
               })}
           </div>
         </div>

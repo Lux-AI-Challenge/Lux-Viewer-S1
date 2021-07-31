@@ -94,6 +94,7 @@ export type FrameSingleCityData = {
 export type GameCreationConfigs = {
   replayData: object;
   handleTileClicked: HandleTileClicked;
+  handleUnitTracked: (id: string) => void;
   zoom: number;
 };
 
@@ -297,6 +298,7 @@ class MainScene extends Phaser.Scene {
       sprite.setTexture(newkey);
     }
     this.toggleOutlineClickedTile();
+    this.handleUnitTracked(id);
   }
   untrackUnit() {
     if (this.currentTrackedUnitID) {
@@ -306,6 +308,7 @@ class MainScene extends Phaser.Scene {
         sprite.setTexture(keyInfo.slice(0, 2).join('-'));
       }
       this.currentTrackedUnitID = null;
+      this.handleUnitTracked(null);
     }
   }
 
@@ -657,12 +660,14 @@ class MainScene extends Phaser.Scene {
 
   public handleTileClicked: HandleTileClicked;
   public handleTileHover: HandleTileClicked;
+  public handleUnitTracked: (id: string) => void;
 
   public currentSelectedTilePos: Position = null;
 
   create(configs: GameCreationConfigs) {
     this.loadReplayData(configs.replayData);
     this.handleTileClicked = configs.handleTileClicked;
+    this.handleUnitTracked = configs.handleUnitTracked;
     this.events.emit('created');
   }
 
@@ -986,11 +991,7 @@ class MainScene extends Phaser.Scene {
 
       if (this.currentTrackedUnitID === id) {
         // if this unit is being tracked, track it by clicking its tile and
-        // change the sprite
-        console.log('Clicking tile', data.pos);
         this.onTileClicked(data.pos);
-        // this.unitSprites.get(id).sprite.setTexture('worker-0-outline');
-        // this.addWorkerSprite(data.pos.x, data.pos.y, data.team, id, true);
       }
       const { sprite } = this.unitSprites.get(id);
 
@@ -1032,6 +1033,13 @@ class MainScene extends Phaser.Scene {
           .setScale(this.defaultScales.cart * this.overallScale);
       }
     });
+    if (
+      this.currentTrackedUnitID &&
+      !f.unitData.has(this.currentTrackedUnitID)
+    ) {
+      // untrack units if they disappear from board
+      this.untrackUnit();
+    }
 
     // iterate over all live city tiles and draw in unit counts
     this.graphics.clear();
