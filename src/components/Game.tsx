@@ -67,7 +67,6 @@ export const GameComponent = () => {
   };
   const [isReady, setReady] = useState(false);
   const [selectedTileData, setTileData] = useState<FrameTileData>(null);
-  const [hoveredTileData, setHoveredTileData] = useState<FrameTileData>(null);
   const [game, setGame] = useState<Phaser.Game>(null);
   const [main, setMain] = useState<MainScene>(null);
   const [configs, setConfigs] = useState<LuxMatchConfigs>(null);
@@ -206,7 +205,7 @@ export const GameComponent = () => {
     const newgame = createGame({
       replayData: jsonReplayData,
       handleTileClicked,
-      handleTileHover,
+
       zoom,
     });
     setGame(newgame);
@@ -307,11 +306,17 @@ export const GameComponent = () => {
           break;
         case 'ArrowRight':
           setRunning(false);
-          moveToTurn(turn + 1);
+          if (
+            turn < Math.min(configs.parameters.MAX_DAYS, main.frames.length - 1)
+          ) {
+            moveToTurn(turn + 1);
+          }
           break;
         case 'ArrowLeft':
           setRunning(false);
-          moveToTurn(turn - 1);
+          if (turn > 0) {
+            moveToTurn(turn - 1);
+          }
           break;
       }
     };
@@ -319,26 +324,10 @@ export const GameComponent = () => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [turn, playbackSpeed]);
-
-  /** when replay data is changed, create new game */
-  // useEffect(() => {
-  //   if (replayData) {
-  //     const newgame = createGame({
-  //       replayData: replayData,
-  //       handleUnitClicked,
-  //       handleTileClicked,
-  //     });
-  //     setGame(newgame);
-  //     setUploading(false);
-  //   }
-  // }, [replayData]);
+  }, [turn, playbackSpeed, main, configs]);
 
   const handleTileClicked = (data) => {
     setTileData(data);
-  };
-  const handleTileHover = (data) => {
-    setHoveredTileData(data);
   };
 
   const [debugOn, _setDebug] = useState(true);

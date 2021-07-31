@@ -93,12 +93,10 @@ export type FrameSingleCityData = {
 
 export type GameCreationConfigs = {
   replayData: object;
-  handleTileHover: HandleTileClicked;
   handleTileClicked: HandleTileClicked;
   zoom: number;
 };
 
-type HandleUnitClicked = (unit: FrameSingleUnitData) => void;
 export type FrameTileData = {
   pos: Position;
   units: Map<string, FrameSingleUnitData>;
@@ -204,7 +202,7 @@ class MainScene extends Phaser.Scene {
   defaultScales = {
     city: 0.4,
     tree: 0.6,
-    worker: 0.16,
+    worker: 0.496,
     cart: 0.6,
     block: 0.44,
     tree0: 0.3,
@@ -238,10 +236,12 @@ class MainScene extends Phaser.Scene {
       // base = 'https://2021vis.lux-ai.org/assets';
       base = 'https://unpkg.com/lux-viewer-2021@latest/dist/assets';
     }
-    this.load.image('worker0', `${base}/sprites/worker0w.svg`);
-    this.load.image('worker1', `${base}/sprites/worker1w.svg`);
-    this.load.image('cart0', `${base}/sprites/carts/cart0e.svg`);
-    this.load.image('cart1', `${base}/sprites/carts/cart1e.svg`);
+    this.load.image('worker-0', `${base}/sprites/worker0w.svg`);
+    this.load.image('worker-0-outline', `${base}/sprites/worker0w-outline.svg`);
+    this.load.image('worker-1', `${base}/sprites/worker1w.svg`);
+    this.load.image('worker-1-outline', `${base}/sprites/worker1w-outline.svg`);
+    this.load.image('cart-0', `${base}/sprites/carts/cart0e.svg`);
+    this.load.image('cart-1', `${base}/sprites/carts/cart1e.svg`);
 
     this.load.svg('block1', `${base}/ground.svg`);
 
@@ -282,6 +282,31 @@ class MainScene extends Phaser.Scene {
     this.load.svg('cloud2', `${base}/sprites/cloud2.svg`);
   }
 
+  currentTrackedUnitID: string = null;
+  /**
+   * track a unit by id
+   * highlights the unit as well as pseudo clicking that unit each turn
+   */
+  trackUnit(id: string) {
+    this.currentTrackedUnitID = id;
+    const { sprite } = this.unitSprites.get(id);
+    const keyInfo = sprite.texture.key.split('-');
+    if (keyInfo.length <= 2) {
+      const newkey = keyInfo.join('-') + '-outline';
+      sprite.setTexture(newkey);
+    }
+  }
+  untrackUnit() {
+    if (this.currentTrackedUnitID) {
+      const { sprite } = this.unitSprites.get(this.currentTrackedUnitID);
+      const keyInfo = sprite.texture.key.split('-');
+      if (keyInfo.length > 2) {
+        sprite.setTexture(keyInfo.slice(0, 2).join('-'));
+      }
+      this.currentTrackedUnitID = null;
+    }
+  }
+
   /**
    * Handle when a tile is clicked
    */
@@ -289,13 +314,28 @@ class MainScene extends Phaser.Scene {
     const f = this.frames[this.turn];
     const unitDataAtXY: FrameUnitData = new Map();
     const cityTile: FrameCityTileData = [];
-
     // TODO: can be slow if we iterate entire unit list
+    let clickedTileHasTrackedUnit = false;
+    let firstUnitID = null;
     f.unitData.forEach((unit) => {
       if (unit.pos.x === v.x && unit.pos.y === v.y) {
+        if (!firstUnitID) {
+          firstUnitID = unit.id;
+        }
+        if (unit.id === this.currentTrackedUnitID) {
+          clickedTileHasTrackedUnit = true;
+        }
         unitDataAtXY.set(unit.id, unit);
       }
     });
+    if (!clickedTileHasTrackedUnit) {
+      this.untrackUnit();
+      if (firstUnitID) {
+        // track first unit found if clicked tile does not have a currently tracked unit
+        this.trackUnit(firstUnitID);
+      }
+    }
+
     f.cityTileData.forEach((ct) => {
       if (ct.pos.x === v.x && ct.pos.y === v.y) {
         cityTile.push(ct);
@@ -304,34 +344,6 @@ class MainScene extends Phaser.Scene {
     const resourceAtXY = f.resourceData.get(hashMapCoords(v));
     const clickedPos = new Position(v.x, v.y);
     this.handleTileClicked({
-      pos: clickedPos,
-      units: unitDataAtXY,
-      cityTile: cityTile,
-      resources: resourceAtXY,
-      roadLevel: f.roadLevels[v.y] ? f.roadLevels[v.y][v.x] : undefined,
-      turn: this.turn,
-    });
-    this.currentSelectedTilePos = clickedPos;
-  }
-  private onTilehover(v: Position) {
-    const f = this.frames[this.turn];
-    const unitDataAtXY: FrameUnitData = new Map();
-    const cityTile: FrameCityTileData = [];
-
-    // TODO: can be slow if we iterate entire unit list
-    f.unitData.forEach((unit) => {
-      if (unit.pos.x === v.x && unit.pos.y === v.y) {
-        unitDataAtXY.set(unit.id, unit);
-      }
-    });
-    f.cityTileData.forEach((ct) => {
-      if (ct.pos.x === v.x && ct.pos.y === v.y) {
-        cityTile.push(ct);
-      }
-    });
-    const resourceAtXY = f.resourceData.get(hashMapCoords(v));
-    const clickedPos = new Position(v.x, v.y);
-    this.handleTileHover({
       pos: clickedPos,
       units: unitDataAtXY,
       cityTile: cityTile,
@@ -380,17 +392,6 @@ class MainScene extends Phaser.Scene {
       });
     }
 
-    this.input.on(
-      Phaser.Input.Events.POINTER_MOVE,
-      (d: { worldX: number; worldY: number }) => {
-        const pos = mapIsometricPixelsToPosition(d.worldX, d.worldY, {
-          scale: this.overallScale,
-          width: this.mapWidth,
-          height: this.mapHeight,
-        });
-        this.onTilehover(pos);
-      }
-    );
     // add handler for clicking tiles
     this.input.on(
       Phaser.Input.Events.POINTER_DOWN,
@@ -648,7 +649,6 @@ class MainScene extends Phaser.Scene {
   create(configs: GameCreationConfigs) {
     this.loadReplayData(configs.replayData);
     this.handleTileClicked = configs.handleTileClicked;
-    this.handleTileHover = configs.handleTileHover;
     this.events.emit('created');
   }
 
@@ -787,17 +787,29 @@ class MainScene extends Phaser.Scene {
 
   /**
    * Add worker sprite for use by any frame
+   *
+   * removes an existing one if id matches
    */
-  addWorkerSprite(x: number, y: number, team: LUnit.TEAM, id: string) {
+  addWorkerSprite(
+    x: number,
+    y: number,
+    team: LUnit.TEAM,
+    id: string,
+    outline = false
+  ) {
     const p = mapCoordsToIsometricPixels(x, y, {
       scale: this.overallScale,
       width: this.mapWidth,
       height: this.mapHeight,
     });
     const sprite = this.add
-      .sprite(p[0], p[1], 'worker' + team)
+      .sprite(p[0], p[1], 'worker-' + team + (outline ? '-outline' : ''))
       .setScale(this.defaultScales.worker * this.overallScale);
     sprite.setDepth(getDepthByPos(new Position(x, y)));
+    if (this.unitSprites.has(id)) {
+      const { sprite } = this.unitSprites.get(id);
+      sprite.destroy();
+    }
     this.unitSprites.set(id, { sprite, originalPosition: new Position(x, y) });
     return sprite;
   }
@@ -812,7 +824,7 @@ class MainScene extends Phaser.Scene {
       height: this.mapHeight,
     });
     const sprite = this.add
-      .sprite(p[0], p[1], 'cart' + team)
+      .sprite(p[0], p[1], 'cart-' + team)
       .setScale(this.defaultScales.cart * this.overallScale);
     sprite.setDepth(getDepthByPos(new Position(x, y)));
     this.unitSprites.set(id, { sprite, originalPosition: new Position(x, y) });
@@ -957,6 +969,15 @@ class MainScene extends Phaser.Scene {
     // iterate over all units in this frame / turn
     f.unitData.forEach((data) => {
       const id = data.id;
+
+      if (this.currentTrackedUnitID === id) {
+        // if this unit is being tracked, track it by clicking its tile and
+        // change the sprite
+        console.log('Clicking tile', data.pos);
+        this.onTileClicked(data.pos);
+        // this.unitSprites.get(id).sprite.setTexture('worker-0-outline');
+        // this.addWorkerSprite(data.pos.x, data.pos.y, data.team, id, true);
+      }
       const { sprite } = this.unitSprites.get(id);
 
       sprite.setVisible(true);
@@ -967,12 +988,12 @@ class MainScene extends Phaser.Scene {
       });
 
       // translate unit position depending on if there's a resource or city there
-      let newx = p[0] - 45 * this.defaultScales.worker * this.overallScale;
-      let newy = p[1] - 140 * this.defaultScales.worker * this.overallScale;
+      let newx = p[0] - 10 * this.defaultScales.worker * this.overallScale;
+      let newy = p[1] - 60 * this.defaultScales.worker * this.overallScale;
       if (visibleCityTiles.has(hashMapCoords(data.pos))) {
         newy = p[1] - 20 * this.defaultScales.worker * this.overallScale;
       } else if (tilesWithResources.has(hashMapCoords(data.pos))) {
-        newy = p[1] - 60 * this.defaultScales.worker * this.overallScale;
+        newy = p[1] - 20 * this.defaultScales.worker * this.overallScale;
       }
 
       // create smooth movement
@@ -1059,9 +1080,9 @@ class MainScene extends Phaser.Scene {
       }
     });
 
-    if (this.currentSelectedTilePos !== null) {
-      this.onTileClicked(this.currentSelectedTilePos);
-    }
+    // if (this.currentSelectedTilePos !== null) {
+    //   this.onTileClicked(this.currentSelectedTilePos);
+    // }
 
     // add annotations
     if (this.debug) {
