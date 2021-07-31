@@ -67,6 +67,7 @@ export const GameComponent = () => {
   };
   const [isReady, setReady] = useState(false);
   const [selectedTileData, setTileData] = useState<FrameTileData>(null);
+  const [trackedUnitID, setTrackedUnitID] = useState<string>(null);
   const [game, setGame] = useState<Phaser.Game>(null);
   const [main, setMain] = useState<MainScene>(null);
   const [configs, setConfigs] = useState<LuxMatchConfigs>(null);
@@ -172,6 +173,12 @@ export const GameComponent = () => {
     setTurn(turn);
     main.renderFrame(turn);
     setFrame(main.frames[turn]);
+  };
+
+  /** track a unit by id */
+  const trackUnit = (id: string) => {
+    setTrackedUnitID(id);
+    main.trackUnit(id);
   };
 
   /** load game given json replay data */
@@ -426,9 +433,15 @@ export const GameComponent = () => {
                 <TileStats
                   {...selectedTileData}
                   cities={currentFrame.cityData}
+                  trackUnit={trackUnit}
+                  trackedUnitID={trackedUnitID}
                 />
               ) : (
-                <TileStats empty />
+                <TileStats
+                  empty
+                  trackUnit={trackUnit}
+                  trackedUnitID={trackedUnitID}
+                />
               )}
             </div>
             <div className="global-stats-wrapper">

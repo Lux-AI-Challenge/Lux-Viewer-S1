@@ -87,9 +87,9 @@ const UnitCard = ({
               .filter((command) => command.turn <= turn)
               .sort((a, b) => b.turn - a.turn)
               .map((command) => {
-                const renders = command.actions.map((s) => {
+                const renders = command.actions.map((s, i) => {
                   return (
-                    <p className="command-row">
+                    <p className="command-row" key={`${i}-${s}`}>
                       Turn: {command.turn} - {s}
                     </p>
                   );

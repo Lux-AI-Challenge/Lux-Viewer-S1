@@ -87,3 +87,7 @@
 .TileStats .roadlevel p span {
   float: right;
 }
+
+.TileStats .tracked-unit-card .UnitCard {
+  border: 2px solid white;
+}

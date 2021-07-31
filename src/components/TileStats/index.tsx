@@ -15,6 +15,8 @@ import CityTileCard from '../CityTileCard';
 export type TileStatsProps = Partial<FrameTileData> & {
   cities?: FrameCityData;
   empty?: boolean;
+  trackUnit: (id: string) => void;
+  trackedUnitID: string;
 };
 const TileStats = ({
   pos,
@@ -25,6 +27,8 @@ const TileStats = ({
   empty,
   roadLevel,
   turn,
+  trackedUnitID,
+  trackUnit,
 }: TileStatsProps) => {
   const renderResourceSVG = () => {
     let svg = ResourceWood;
@@ -94,7 +98,16 @@ const TileStats = ({
               {allunits.map((v) => {
                 return (
                   <Grid item className="UnitData" xs={6} key={v.id}>
-                    <UnitCard {...v} turn={turn} />
+                    <div
+                      className={
+                        trackedUnitID === v.id ? 'tracked-unit-card' : ''
+                      }
+                      onClick={() => {
+                        trackUnit(v.id);
+                      }}
+                    >
+                      <UnitCard {...v} turn={turn} />
+                    </div>
                   </Grid>
                 );
               })}

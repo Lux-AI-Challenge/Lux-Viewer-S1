@@ -310,7 +310,7 @@ class MainScene extends Phaser.Scene {
   /**
    * Handle when a tile is clicked
    */
-  private onTileClicked(v: Position) {
+  private onTileClicked(v: Position, allowUnitTrack = true) {
     const f = this.frames[this.turn];
     const unitDataAtXY: FrameUnitData = new Map();
     const cityTile: FrameCityTileData = [];
@@ -328,7 +328,7 @@ class MainScene extends Phaser.Scene {
         unitDataAtXY.set(unit.id, unit);
       }
     });
-    if (!clickedTileHasTrackedUnit) {
+    if (!clickedTileHasTrackedUnit && allowUnitTrack) {
       this.untrackUnit();
       if (firstUnitID) {
         // track first unit found if clicked tile does not have a currently tracked unit
@@ -1080,9 +1080,9 @@ class MainScene extends Phaser.Scene {
       }
     });
 
-    // if (this.currentSelectedTilePos !== null) {
-    //   this.onTileClicked(this.currentSelectedTilePos);
-    // }
+    if (this.currentSelectedTilePos !== null && !this.currentTrackedUnitID) {
+      this.onTileClicked(this.currentSelectedTilePos, false);
+    }
 
     // add annotations
     if (this.debug) {
