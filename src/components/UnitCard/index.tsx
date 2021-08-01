@@ -84,7 +84,7 @@ const UnitCard = ({
           </IconButton>
           <div id="unit-history-content">
             {commands
-              .filter((command) => command.turn <= turn)
+              .filter((command) => command.turn < turn)
               .sort((a, b) => b.turn - a.turn)
               .map((command) => {
                 const renders = command.actions.map((s, i) => {

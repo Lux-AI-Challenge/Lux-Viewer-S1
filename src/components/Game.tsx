@@ -94,7 +94,7 @@ export const GameComponent = () => {
 
         setSliderConfigs({
           min: 0,
-          max: Math.min(configs.parameters.MAX_DAYS, main.frames.length - 1),
+          max: Math.min(configs.parameters.MAX_DAYS, main.frames.length),
           step: 1,
         });
         setReady(true);
@@ -176,6 +176,7 @@ export const GameComponent = () => {
   const moveToTurn = (turn: number) => {
     setTurn(turn);
     main.renderFrame(turn);
+
     setFrame(main.frames[turn]);
     //render the right bg color
     const colors = [
@@ -198,7 +199,7 @@ export const GameComponent = () => {
       turn % cycleLength >= dayLength - 5 &&
       turn % cycleLength < dayLength + 1
     ) {
-      idx = (turn % cycleLength) - (dayLength - 5) + 1;
+      idx = (turn % cycleLength) - (dayLength - 5);
     } else if (
       turn % cycleLength >= dayLength + 1 &&
       turn % cycleLength < cycleLength - 1

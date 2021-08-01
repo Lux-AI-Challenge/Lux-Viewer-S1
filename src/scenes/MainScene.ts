@@ -1150,16 +1150,35 @@ class MainScene extends Phaser.Scene {
     Array<{ turn: number; actions: string[] }>
   > = new Map();
   async generateGameFrames(replayData) {
-    while (this.currentTurn <= this.luxgame.configs.parameters.MAX_DAYS) {
+    while (this.currentTurn <= this.luxgame.configs.parameters.MAX_DAYS + 1) {
       const commands = replayData.allCommands[
         this.currentTurn
       ] as CommandsArray;
+      const state: LuxMatchState = this.pseudomatch.state;
+      const game = state.game;
+      // generate start of turn 0
+      const frame = this.createFrame(this.pseudomatch.state.game, []);
+      let stats: TurnStats = {
+        citiesOwned: [0, 0],
+        totalFuelGenerated: [
+          game.stats.teamStats[0].fuelGenerated,
+          game.stats.teamStats[1].fuelGenerated,
+        ],
+        researchPoints: [
+          game.state.teamStates[0].researchPoints,
+          game.state.teamStates[1].researchPoints,
+        ],
+      };
+      game.cities.forEach((city) => {
+        stats.citiesOwned[city.team] += city.citycells.length;
+      });
+
+      this.accumulatedStats.push(stats);
+      this.frames.push(frame);
       if (commands === undefined) {
         // we are done with match
         return;
       }
-      const state: LuxMatchState = this.pseudomatch.state;
-      const game = state.game;
 
       let annotations = [] as CommandsArray;
       let unannotated = commands.filter((cmd) => {
@@ -1188,7 +1207,10 @@ class MainScene extends Phaser.Scene {
                 if (curr[curr.length - 1].turn === this.currentTurn) {
                   curr[curr.length - 1].actions.push(cmd.command);
                 } else {
-                  curr.push({ turn: this.currentTurn, actions: [cmd.command] });
+                  curr.push({
+                    turn: this.currentTurn,
+                    actions: [cmd.command],
+                  });
                 }
               } else {
                 this.cityTileActionsByPosition.set(citytileid, [
@@ -1208,7 +1230,10 @@ class MainScene extends Phaser.Scene {
               if (curr[curr.length - 1].turn === this.currentTurn) {
                 curr[curr.length - 1].actions.push(cmd.command);
               } else {
-                curr.push({ turn: this.currentTurn, actions: [cmd.command] });
+                curr.push({
+                  turn: this.currentTurn,
+                  actions: [cmd.command],
+                });
               }
             } else {
               this.unitActionsByUnitID.set(strs[1], [
@@ -1260,31 +1285,31 @@ class MainScene extends Phaser.Scene {
         }
       });
 
-      const frame = this.createFrame(this.pseudomatch.state.game, annotations);
+      // const frame = this.createFrame(this.pseudomatch.state.game, annotations);
 
-      let stats: TurnStats = {
-        citiesOwned: [0, 0],
-        totalFuelGenerated: [
-          game.stats.teamStats[0].fuelGenerated,
-          game.stats.teamStats[1].fuelGenerated,
-        ],
-        researchPoints: [
-          game.state.teamStates[0].researchPoints,
-          game.state.teamStates[1].researchPoints,
-        ],
-      };
-      game.cities.forEach((city) => {
-        stats.citiesOwned[city.team] += city.citycells.length;
-      });
+      // let stats: TurnStats = {
+      //   citiesOwned: [0, 0],
+      //   totalFuelGenerated: [
+      //     game.stats.teamStats[0].fuelGenerated,
+      //     game.stats.teamStats[1].fuelGenerated,
+      //   ],
+      //   researchPoints: [
+      //     game.state.teamStates[0].researchPoints,
+      //     game.state.teamStates[1].researchPoints,
+      //   ],
+      // };
+      // game.cities.forEach((city) => {
+      //   stats.citiesOwned[city.team] += city.citycells.length;
+      // });
 
-      this.accumulatedStats.push(stats);
+      // this.accumulatedStats.push(stats);
 
-      // console.log(
-      //   { turn: this.currentTurn },
-      //   'frame size',
-      //   memorySizeOf(frame)
-      // );
-      this.frames.push(frame);
+      // // console.log(
+      // //   { turn: this.currentTurn },
+      // //   'frame size',
+      // //   memorySizeOf(frame)
+      // // );
+      // this.frames.push(frame);
       this.currentTurn++;
     }
   }

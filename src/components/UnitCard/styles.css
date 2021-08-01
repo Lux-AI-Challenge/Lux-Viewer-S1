@@ -102,7 +102,7 @@
   align-items: center;
   margin: 0;
 }
-#unit-history-panel .command-row:nth-child(odd) {
+#unit-history-panel #unit-history-content div:nth-child(odd) .command-row {
   background-color: rgba(255, 255, 255, 0.1);
 }
 #unit-history-panel-title {
