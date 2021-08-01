@@ -528,7 +528,7 @@ class MainScene extends Phaser.Scene {
       }
     });
 
-    generateClouds(this);
+    // generateClouds(this);
 
     this.generateGameFrames(replayData).then(() => {
       this.renderFrame(0);

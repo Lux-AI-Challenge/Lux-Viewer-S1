@@ -10,7 +10,9 @@
 #content canvas {
   position: absolute;
   top: 0;
-  margin-left: 15px;
+  margin: 0;
+  background-color: #00afbd;
+  transition: background-color linear 1s;
 }
 
 .Game .zoom-in-out {
