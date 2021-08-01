@@ -142,22 +142,24 @@ export const GameComponent = () => {
       // move to current turn to rerender all objects appropriately
       moveToTurn(turn);
       // TODO: do a on scale change instead inside main
-      main.floorImageTiles.forEach((tileImage, hash) => {
-        const pos = hashToMapPosition(hash);
-        const ps = mapCoordsToIsometricPixels(pos.x, pos.y, {
-          scale: main.overallScale,
-          width: main.mapWidth,
-          height: main.mapHeight,
+      main.floorImageTiles.forEach((info, hash) => {
+        [info.source, info.overlay].forEach((tileImage) => {
+          const pos = hashToMapPosition(hash);
+          const ps = mapCoordsToIsometricPixels(pos.x, pos.y, {
+            scale: main.overallScale,
+            width: main.mapWidth,
+            height: main.mapHeight,
+          });
+          tileImage.setScale(main.defaultScales.block * main.overallScale);
+          tileImage.setX(ps[0]);
+          tileImage.setY(ps[1]);
+          if (tileImage == main.activeImageTile) {
+            main.originalTileY = tileImage.y;
+          }
+          if (tileImage == main.hoverImageTile) {
+            main.originalHoverImageTileY = tileImage.y;
+          }
         });
-        tileImage.setScale(main.defaultScales.block * main.overallScale);
-        tileImage.setX(ps[0]);
-        tileImage.setY(ps[1]);
-        if (tileImage == main.activeImageTile) {
-          main.originalTileY = tileImage.y;
-        }
-        if (tileImage == main.hoverImageTile) {
-          main.originalHoverImageTileY = tileImage.y;
-        }
       });
     }
   }, [main, visualScale]);
