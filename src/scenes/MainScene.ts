@@ -634,7 +634,7 @@ class MainScene extends Phaser.Scene {
       let row = game.map.getRow(y);
       roadLevels.push([]);
       row.forEach((cell, x) => {
-        roadLevels[y][x] = cell.road;
+        roadLevels[y][x] = cell.getRoad();
       });
     }
     let errorscopy = [...this.currentTurnErrors];
@@ -740,20 +740,12 @@ class MainScene extends Phaser.Scene {
     // TODO: dont render, just replace textures with road textures
     f.roadLevels.forEach((row, y) => {
       row.forEach((level, x) => {
-        if (level < 1e-1) return;
-
         let pos = new Position(x, y);
         let hash = hashMapCoords(pos);
 
-        // if (visibleCityTiles.has(hash)) return;
+        if (visibleCityTiles.has(hash)) level = 0;
 
-        let { source, overlay, roadOverlay } = this.floorImageTiles.get(hash);
-        // oldimg.destroy();
-        const p = mapPosToIsometricPixels(pos, {
-          scale: this.overallScale,
-          width: this.mapWidth,
-          height: this.mapHeight,
-        });
+        let { roadOverlay } = this.floorImageTiles.get(hash);
 
         // // determine road to render by adjacency
         let adjacency = [false, false, false, false];
