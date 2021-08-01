@@ -195,7 +195,11 @@ class MainScene extends Phaser.Scene {
   map: Phaser.Tilemaps.Tilemap;
   floorImageTiles: Map<
     number,
-    { source: GameObjects.Image; overlay: GameObjects.Image }
+    {
+      source: GameObjects.Image;
+      overlay: GameObjects.Image;
+      roadOverlay: GameObjects.Image;
+    }
   > = new Map();
 
   activeImageTile: GameObjects.Image = null;
@@ -217,7 +221,6 @@ class MainScene extends Phaser.Scene {
     tree1: 0.43,
     uranium: 0.5,
     clouds: 0.7,
-    road: 0.44,
     coal: 0.43,
   };
 
@@ -265,9 +268,14 @@ class MainScene extends Phaser.Scene {
           str = '0' + str;
         }
       }
-      this.load.svg(`path${str}`, `${base}/sprites/paths/path${str}.svg`);
+      this.load.svg(`path${str}`, `${base}/sprites/paths/day/path${str}.svg`);
+      // this.load.svg(
+      //   `path${str}-night`,
+      //   `${base}/sprites/paths/night/path${str}.svg`
+      // );
     }
-    this.load.svg(`path0000`, `${base}/sprites/paths/path1111.svg`);
+    this.load.svg(`path0000`, `${base}/sprites/paths/day/path1111.svg`);
+    // this.load.svg(`path0000-night`, `${base}/sprites/paths/night/path1111.svg`);
 
     this.load.svg('tree1', `${base}/sprites/tree1.svg`);
     this.load.svg('tree0', `${base}/sprites/tree0.svg`);
@@ -438,10 +446,13 @@ class MainScene extends Phaser.Scene {
     for (let y = 0; y < height; y++) {
       let row = this.luxgame.map.getRow(y);
       row.forEach((cell) => {
-        const [img, img_overlay] = addNormalFloorTile(this, cell.pos);
+        const [img, img_overlay, roadOverlay] = addNormalFloorTile(
+          this,
+          cell.pos
+        );
         this.floorImageTiles.set(
           hashMapCoords(new Position(cell.pos.x, cell.pos.y)),
-          { source: img, overlay: img_overlay }
+          { source: img, overlay: img_overlay, roadOverlay }
         );
         if (cell.hasResource()) {
           this.globalStats.totalResources[cell.resource.type] +=
@@ -707,16 +718,6 @@ class MainScene extends Phaser.Scene {
     this.currentRenderedFramesText.forEach((txt) => {
       txt.destroy();
     });
-    // this.currentRenderedFramesRoads.forEach(({ img, pos }) => {
-    //   img.destroy();
-    //   let hash = hashMapCoords(pos);
-    //   // let oldimg = this.floorImageTiles.get(hash);
-    //   let [img2, img2_overlay] = this.addNormalFloorTile(pos);
-    //   let old = this.floorImageTiles.get(hash);
-    //   old.source.destroy();
-    //   old.overlay.destroy();
-    //   this.floorImageTiles.set(hash, { source: img2, overlay: img2_overlay });
-    // });
 
     // find all standing cities
     let visibleCityTiles: Set<number> = new Set();
@@ -740,38 +741,38 @@ class MainScene extends Phaser.Scene {
     f.roadLevels.forEach((row, y) => {
       row.forEach((level, x) => {
         if (level < 1e-1) return;
-        return;
+
         let pos = new Position(x, y);
         let hash = hashMapCoords(pos);
 
         // if (visibleCityTiles.has(hash)) return;
 
-        // let oldimg = this.floorImageTiles.get(hash);
+        let { source, overlay, roadOverlay } = this.floorImageTiles.get(hash);
         // oldimg.destroy();
-        // const p = mapPosToIsometricPixels(pos, {
-        //   scale: this.overallScale,
-        //   width: this.mapWidth,
-        //   height: this.mapHeight,
-        // });
+        const p = mapPosToIsometricPixels(pos, {
+          scale: this.overallScale,
+          width: this.mapWidth,
+          height: this.mapHeight,
+        });
 
         // // determine road to render by adjacency
-        // let adjacency = [false, false, false, false];
+        let adjacency = [false, false, false, false];
 
-        // let dirs = [
-        //   Game.DIRECTIONS.NORTH,
-        //   Game.DIRECTIONS.EAST,
-        //   Game.DIRECTIONS.SOUTH,
-        //   Game.DIRECTIONS.WEST,
-        // ];
-        // dirs.forEach((dir, i) => {
-        //   let newpos = pos.translate(dir, 1);
-        //   if (
-        //     f.roadLevels[newpos.y] !== undefined &&
-        //     f.roadLevels[newpos.y][newpos.x] > 0
-        //   ) {
-        //     adjacency[i] = true;
-        //   }
-        // });
+        let dirs = [
+          Game.DIRECTIONS.NORTH,
+          Game.DIRECTIONS.EAST,
+          Game.DIRECTIONS.SOUTH,
+          Game.DIRECTIONS.WEST,
+        ];
+        dirs.forEach((dir, i) => {
+          let newpos = pos.translate(dir, 1);
+          if (
+            f.roadLevels[newpos.y] !== undefined &&
+            f.roadLevels[newpos.y][newpos.x] > 0
+          ) {
+            adjacency[i] = true;
+          }
+        });
 
         // add the img_base because we use transparency on the roads and need something behind it
         // const img_base = this.add
@@ -783,9 +784,12 @@ class MainScene extends Phaser.Scene {
         //   .setDepth(getDepthByPos(pos) / 100 + 1 / 1e7)
         //   .setScale(this.defaultScales.road * this.overallScale)
         //   .setAlpha(Math.ceil(level) / 6);
+        roadOverlay.setTexture(getRoadType(adjacency));
+        roadOverlay.setAlpha(Math.ceil(level) / 6);
+
         // this.currentRenderedFramesRoads.push({ img, pos: pos });
         // this.currentRenderedFramesRoads.push({ img: img_base, pos: pos });
-        // this.floorImageTiles.set(hash, img);
+        // this.floorImageTiles.set(hash, { source, overlay, roadOverlay });
       });
     });
 
@@ -877,11 +881,11 @@ class MainScene extends Phaser.Scene {
       if (data.type === LUnit.Type.WORKER) {
         // add 1/10e5 to place this in front of cities
         sprite
-          .setDepth(getDepthByPos(data.pos) + 2e-1)
+          .setDepth(getDepthByPos(data.pos) + 5e-1)
           .setScale(this.defaultScales.worker * this.overallScale);
       } else {
         sprite
-          .setDepth(getDepthByPos(data.pos) + 2e-1)
+          .setDepth(getDepthByPos(data.pos) + 5e-1)
           .setScale(this.defaultScales.cart * this.overallScale);
       }
     });

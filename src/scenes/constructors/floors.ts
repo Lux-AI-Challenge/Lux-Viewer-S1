@@ -18,5 +18,10 @@ export const addNormalFloorTile = (scene: MainScene, pos: Position) => {
     .setScale(scene.defaultScales.block * scene.overallScale)
     .setAlpha(0);
   img_overlay.setDepth(getDepthByPos(pos) / 100 + 1e-1);
-  return [img, img_overlay];
+  const roadOverlay = scene.add
+    .image(ps[0], ps[1], 'path1111')
+    .setScale(scene.defaultScales.block * scene.overallScale)
+    .setAlpha(0);
+  roadOverlay.setDepth(getDepthByPos(pos) / 100 + 6e-1);
+  return [img, img_overlay, roadOverlay];
 };
