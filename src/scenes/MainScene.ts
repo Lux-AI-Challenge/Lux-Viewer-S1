@@ -22,6 +22,8 @@ import {
   TEAM_B_COLOR,
   TEAM_B_COLOR_STR,
 } from './types';
+import { generateClouds } from './constructors/clouds';
+import { addCartSprite, addWorkerSprite } from './constructors/units';
 
 type CommandsArray = Array<{
   command: string;
@@ -495,41 +497,7 @@ class MainScene extends Phaser.Scene {
       }
     });
 
-    // spawn in clouds
-    const map_edge_cloud_tolerance = -2;
-    for (let x = -100; x < 100; x += 9) {
-      for (let y = -100; y < 100; y += 9) {
-        if (
-          x < this.mapWidth - map_edge_cloud_tolerance &&
-          x > map_edge_cloud_tolerance &&
-          y < this.mapHeight - map_edge_cloud_tolerance &&
-          y > map_edge_cloud_tolerance
-        ) {
-          continue;
-        }
-        const s = seedrandom('' + x * 10e5 + y);
-        let cloudtype = 'cloud';
-        const p = s();
-        if (p < 0.33) {
-          cloudtype += '0';
-        } else if (p < 0.66) {
-          cloudtype += '1';
-        } else {
-          cloudtype += '2';
-        }
-        const pos = new Position(x + s() * 5 - 2.5, y + s() * 5 - 2.5);
-        const isopos = mapPosToIsometricPixels(pos, {
-          scale: this.overallScale,
-          width: this.mapWidth,
-          height: this.mapHeight,
-        });
-        const cloud = this.add
-          .sprite(isopos[0], isopos[1], cloudtype)
-          .setDepth(10e5)
-          .setScale(this.overallScale * this.defaultScales.clouds);
-        this.cloudSprites.push({ cloud, pos });
-      }
-    }
+    generateClouds(this);
 
     this.generateGameFrames(replayData).then(() => {
       this.renderFrame(0);
@@ -880,52 +848,6 @@ class MainScene extends Phaser.Scene {
       .setAlpha(0);
     img_overlay.setDepth(getDepthByPos(pos) / 100 + 1e-1);
     return [img, img_overlay];
-  }
-
-  /**
-   * Add worker sprite for use by any frame
-   *
-   * removes an existing one if id matches
-   */
-  addWorkerSprite(
-    x: number,
-    y: number,
-    team: LUnit.TEAM,
-    id: string,
-    outline = false
-  ) {
-    const p = mapCoordsToIsometricPixels(x, y, {
-      scale: this.overallScale,
-      width: this.mapWidth,
-      height: this.mapHeight,
-    });
-    const sprite = this.add
-      .sprite(p[0], p[1], 'worker-' + team + (outline ? '-outline' : ''))
-      .setScale(this.defaultScales.worker * this.overallScale);
-    sprite.setDepth(getDepthByPos(new Position(x, y)) + 2);
-    if (this.unitSprites.has(id)) {
-      const { sprite } = this.unitSprites.get(id);
-      sprite.destroy();
-    }
-    this.unitSprites.set(id, { sprite, originalPosition: new Position(x, y) });
-    return sprite;
-  }
-
-  /**
-   * Add cart sprite for use by any frame
-   */
-  addCartSprite(x: number, y: number, team: LUnit.TEAM, id: string) {
-    const p = mapCoordsToIsometricPixels(x, y, {
-      scale: this.overallScale,
-      width: this.mapWidth,
-      height: this.mapHeight,
-    });
-    const sprite = this.add
-      .sprite(p[0], p[1], 'cart-' + team)
-      .setScale(this.defaultScales.cart * this.overallScale);
-    sprite.setDepth(getDepthByPos(new Position(x, y)));
-    this.unitSprites.set(id, { sprite, originalPosition: new Position(x, y) });
-    return sprite;
   }
 
   currentRenderedFramesImgs: Array<GameObjects.Image> = [];
@@ -1470,27 +1392,19 @@ class MainScene extends Phaser.Scene {
         ...Array.from(game.getTeamsUnits(LUnit.TEAM.B).values()),
       ].forEach((unit) => {
         if (this.unitSprites.has(unit.id)) {
-          // const sprite = this.unitSprites.get(unit.id);
-          // const p = mapPosToPixels(unit.pos);
-          // this.tweens.add({
-          //   targets: sprite,
-          //   x: p[0],
-          //   y: p[1],
-          //   ease: 'Linear',
-          //   duration: 100,
-          //   repeat: 0,
-          //   yoyo: false,
-          // });
+          // skip
         } else {
           if (unit.type === LUnit.Type.WORKER) {
-            this.addWorkerSprite(
+            addWorkerSprite(
+              this,
               unit.pos.x,
               unit.pos.y,
               unit.team,
               unit.id
             ).setVisible(false);
           } else {
-            this.addCartSprite(
+            addCartSprite(
+              this,
               unit.pos.x,
               unit.pos.y,
               unit.team,
