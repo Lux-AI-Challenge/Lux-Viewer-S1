@@ -142,22 +142,26 @@ export const GameComponent = () => {
       // move to current turn to rerender all objects appropriately
       moveToTurn(turn);
       // TODO: do a on scale change instead inside main
-      main.floorImageTiles.forEach((tileImage, hash) => {
-        const pos = hashToMapPosition(hash);
-        const ps = mapCoordsToIsometricPixels(pos.x, pos.y, {
-          scale: main.overallScale,
-          width: main.mapWidth,
-          height: main.mapHeight,
-        });
-        tileImage.setScale(main.defaultScales.block * main.overallScale);
-        tileImage.setX(ps[0]);
-        tileImage.setY(ps[1]);
-        if (tileImage == main.activeImageTile) {
-          main.originalTileY = tileImage.y;
-        }
-        if (tileImage == main.hoverImageTile) {
-          main.originalHoverImageTileY = tileImage.y;
-        }
+      main.floorImageTiles.forEach((info, hash) => {
+        [info.source, info.overlay, info.roadOverlay].forEach(
+          (tileImage, i) => {
+            const pos = hashToMapPosition(hash);
+            const ps = mapCoordsToIsometricPixels(pos.x, pos.y, {
+              scale: main.overallScale,
+              width: main.mapWidth,
+              height: main.mapHeight,
+            });
+            tileImage.setScale(main.defaultScales.block * main.overallScale);
+            tileImage.setX(ps[0]);
+            tileImage.setY(ps[1]);
+            if (tileImage == main.activeImageTile) {
+              main.originalTileY = tileImage.y;
+            }
+            if (tileImage == main.hoverImageTile) {
+              main.originalHoverImageTileY = tileImage.y;
+            }
+          }
+        );
       });
     }
   }, [main, visualScale]);
@@ -173,6 +177,43 @@ export const GameComponent = () => {
     setTurn(turn);
     main.renderFrame(turn);
     setFrame(main.frames[turn]);
+    //render the right bg color
+    const colors = [
+      '00AFBD',
+      '438D91',
+      '846D68',
+      'A55D53',
+      '704A60',
+      '4D3D59',
+      '2C2E33',
+    ];
+    const canvasWrapper = document
+      .getElementById('content')
+      .getElementsByTagName('canvas')[0];
+    const dayLength = main.luxgame.configs.parameters.DAY_LENGTH;
+    const cycleLength =
+      dayLength + main.luxgame.configs.parameters.NIGHT_LENGTH;
+    let idx = 0;
+    if (
+      turn % cycleLength >= dayLength - 5 &&
+      turn % cycleLength < dayLength + 1
+    ) {
+      idx = (turn % cycleLength) - (dayLength - 5) + 1;
+    } else if (
+      turn % cycleLength >= dayLength + 1 &&
+      turn % cycleLength < cycleLength - 1
+    ) {
+      idx = 6;
+    } else if (turn % cycleLength >= cycleLength - 1) {
+      idx = 5;
+    } else if (turn % cycleLength < 5 && turn > 5) {
+      idx = 6 - ((turn % cycleLength) + 2);
+    }
+    console.log({ canvasWrapper });
+    canvasWrapper.style.transition = `background-color linear ${
+      1 / main.speed
+    }s`;
+    canvasWrapper.style.backgroundColor = `#${colors[idx]}`;
   };
 
   /** track a unit by id */

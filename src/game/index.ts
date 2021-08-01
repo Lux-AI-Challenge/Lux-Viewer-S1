@@ -10,8 +10,9 @@ export const config: Phaser.Types.Core.GameConfig = {
   zoom: 1,
   render: {
     pixelArt: false,
+    transparent: true,
+    antialias: true,
   },
-  backgroundColor: '#00AFBD',
   scene: [],
 };
 
@@ -25,8 +26,8 @@ export const createGame = (
   console.log(max);
   let zoom = gameCreationConfigs.zoom;
   config.zoom = zoom;
-  config.height = document.documentElement.clientHeight * (1 / zoom) - 30;
-  config.width = max * (1 / zoom) - 30;
+  config.height = document.documentElement.clientHeight * (1 / zoom); // - 30;
+  config.width = max * (1 / zoom); // - 30;
   const game = new Phaser.Game(config);
   console.log({ config });
 

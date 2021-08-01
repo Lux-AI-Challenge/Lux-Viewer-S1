@@ -2,10 +2,11 @@ import { LuxMatchState } from '@lux-ai/2021-challenge/lib/es6/types';
 import { LuxDesignLogic } from '@lux-ai/2021-challenge/lib/es6/logic';
 import { Game } from '@lux-ai/2021-challenge/lib/es6/Game';
 import { Resource } from '@lux-ai/2021-challenge/lib/es6/Resource';
-import { Unit as LUnit } from '@lux-ai/2021-challenge/lib/es6/Unit/index';
+import { Unit as LUnit, Unit } from '@lux-ai/2021-challenge/lib/es6/Unit/index';
 
 import {
   getDepthByPos,
+  getNightTransitionTween,
   getRoadType,
   hashMapCoords,
   mapCoordsToIsometricPixels,
@@ -21,7 +22,11 @@ import {
   TEAM_B_COLOR,
   TEAM_B_COLOR_STR,
 } from './types';
-import { Cell } from '@lux-ai/2021-challenge/lib/es6/GameMap/cell';
+import { generateClouds } from './constructors/clouds';
+import { addCartSprite, addWorkerSprite } from './constructors/units';
+import { addCityTile } from './constructors/city';
+import { addResourceTile } from './constructors/resource';
+import { addNormalFloorTile } from './constructors/floors';
 
 type CommandsArray = Array<{
   command: string;
@@ -188,7 +193,14 @@ class MainScene extends Phaser.Scene {
   currentTurnErrors: Array<string> = [];
 
   map: Phaser.Tilemaps.Tilemap;
-  floorImageTiles: Map<number, GameObjects.Image> = new Map();
+  floorImageTiles: Map<
+    number,
+    {
+      source: GameObjects.Image;
+      overlay: GameObjects.Image;
+      roadOverlay: GameObjects.Image;
+    }
+  > = new Map();
 
   activeImageTile: GameObjects.Image = null;
   originalTileY = 0;
@@ -202,16 +214,14 @@ class MainScene extends Phaser.Scene {
   /** relative scales for each of these svgs */
   defaultScales = {
     city: 0.4,
-    tree: 0.6,
     worker: 0.496,
-    cart: 0.6,
+    cart: 0.56,
     block: 0.44,
-    tree0: 0.3,
-    tree1: 0.33,
-    uranium: 0.43,
+    tree0: 0.43,
+    tree1: 0.43,
+    uranium: 0.5,
     clouds: 0.7,
-    road: 0.44,
-    coal: 0.35,
+    coal: 0.43,
   };
 
   /** playback speed */
@@ -241,10 +251,19 @@ class MainScene extends Phaser.Scene {
     this.load.image('worker-0-outline', `${base}/sprites/worker0w-outline.svg`);
     this.load.image('worker-1', `${base}/sprites/worker1w.svg`);
     this.load.image('worker-1-outline', `${base}/sprites/worker1w-outline.svg`);
-    this.load.image('cart-0', `${base}/sprites/carts/cart0e.svg`);
-    this.load.image('cart-1', `${base}/sprites/carts/cart1e.svg`);
+    this.load.image('cart-0', `${base}/sprites/carts/cart0w.svg`);
+    this.load.image('cart-1', `${base}/sprites/carts/cart1w.svg`);
+    this.load.image(
+      'cart-0-outline',
+      `${base}/sprites/carts/cart0w-outline.svg`
+    );
+    this.load.image(
+      'cart-1-outline',
+      `${base}/sprites/carts/cart1w-outline.svg`
+    );
 
     this.load.svg('ground', `${base}/ground.svg`);
+    this.load.svg('ground-night', `${base}/groundnight.svg`);
     this.load.svg('ground-outline', `${base}/ground-outline.svg`);
 
     // generate 15 binary values 0001 to 1111 and load the path tiles
@@ -257,27 +276,42 @@ class MainScene extends Phaser.Scene {
           str = '0' + str;
         }
       }
-      this.load.svg(`path${str}`, `${base}/sprites/paths/path${str}.svg`);
+      this.load.svg(`path${str}`, `${base}/sprites/paths/day/path${str}.svg`);
+      // this.load.svg(
+      //   `path${str}-night`,
+      //   `${base}/sprites/paths/night/path${str}.svg`
+      // );
     }
-    this.load.svg(`path0000`, `${base}/sprites/paths/path1111.svg`);
+    this.load.svg(`path0000`, `${base}/sprites/paths/day/path1111.svg`);
+    // this.load.svg(`path0000-night`, `${base}/sprites/paths/night/path1111.svg`);
 
     this.load.svg('tree1', `${base}/sprites/tree1.svg`);
     this.load.svg('tree0', `${base}/sprites/tree0.svg`);
+    this.load.svg('tree1-night', `${base}/sprites/tree1night.svg`);
+    this.load.svg('tree0-night', `${base}/sprites/tree0night.svg`);
     // city naming scheme
     // city<team><variant><transparent? t : ''><night? night : ''>
     const cityenums = ['00', '01', '02', '03', '10', '11', '12', '13'];
     for (const v of cityenums) {
-      this.load.svg(`city${v}`, `${base}/sprites/city${v}.svg`);
-      this.load.svg(`city${v}night`, `${base}/sprites/city${v}night.svg`);
+      this.load.svg(`city${v}`, `${base}/sprites/cities/city${v}.svg`);
+      this.load.svg(
+        `city${v}night`,
+        `${base}/sprites/cities/city${v}night.svg`
+      );
       if (v[1] === '2' || v[1] === '3') {
         // load transparent versions
-        this.load.svg(`city${v}t`, `${base}/sprites/city${v}t.svg`);
-        this.load.svg(`city${v}tnight`, `${base}/sprites/city${v}tnight.svg`);
+        this.load.svg(`city${v}t`, `${base}/sprites/cities/city${v}t.svg`);
+        this.load.svg(
+          `city${v}tnight`,
+          `${base}/sprites/cities/city${v}tnight.svg`
+        );
       }
     }
 
     this.load.image('coal', `${base}/sprites/coal.svg`);
     this.load.svg('uranium', `${base}/sprites/uranium.svg`);
+    this.load.image('coal-night', `${base}/sprites/coalnight.svg`);
+    this.load.svg('uranium-night', `${base}/sprites/uraniumnight.svg`);
 
     this.load.svg('cloud0', `${base}/sprites/cloud0.svg`);
     this.load.svg('cloud1', `${base}/sprites/cloud1.svg`);
@@ -420,10 +454,13 @@ class MainScene extends Phaser.Scene {
     for (let y = 0; y < height; y++) {
       let row = this.luxgame.map.getRow(y);
       row.forEach((cell) => {
-        const img = this.addNormalFloorTile(cell.pos);
+        const [img, img_overlay, roadOverlay] = addNormalFloorTile(
+          this,
+          cell.pos
+        );
         this.floorImageTiles.set(
           hashMapCoords(new Position(cell.pos.x, cell.pos.y)),
-          img
+          { source: img, overlay: img_overlay, roadOverlay }
         );
         if (cell.hasResource()) {
           this.globalStats.totalResources[cell.resource.type] +=
@@ -441,11 +478,20 @@ class MainScene extends Phaser.Scene {
           width: this.mapWidth,
           height: this.mapHeight,
         });
+        if (
+          pos.x < 0 ||
+          pos.y < 0 ||
+          pos.x >= this.mapWidth ||
+          pos.y >= this.mapHeight
+        ) {
+          // off map
+          this.toggleOutlineClickedTile(undefined);
+        } else {
+          const imageTile = this.floorImageTiles.get(hashMapCoords(pos)).source;
+          // outline tile if it exists and we aren't tracking a unit
+          this.toggleOutlineClickedTile(imageTile);
+        }
         this.onTileClicked(pos);
-
-        const imageTile = this.floorImageTiles.get(hashMapCoords(pos));
-        // outline tile if it exists and we aren't tracking a unit
-        this.toggleOutlineClickedTile(imageTile);
       }
     );
 
@@ -458,7 +504,8 @@ class MainScene extends Phaser.Scene {
         width: this.mapWidth,
         height: this.mapHeight,
       });
-      const imageTile = this.floorImageTiles.get(hashMapCoords(pos));
+      // TODO: make outline just a outline svg?
+      const imageTile = this.floorImageTiles.get(hashMapCoords(pos)).source;
       if (imageTile) {
         if (this.hoverImageTile == null) {
           this.originalHoverImageTileY = imageTile.y;
@@ -481,41 +528,7 @@ class MainScene extends Phaser.Scene {
       }
     });
 
-    // spawn in clouds
-    const map_edge_cloud_tolerance = -2;
-    for (let x = -100; x < 100; x += 9) {
-      for (let y = -100; y < 100; y += 9) {
-        if (
-          x < this.mapWidth - map_edge_cloud_tolerance &&
-          x > map_edge_cloud_tolerance &&
-          y < this.mapHeight - map_edge_cloud_tolerance &&
-          y > map_edge_cloud_tolerance
-        ) {
-          continue;
-        }
-        const s = seedrandom('' + x * 10e5 + y);
-        let cloudtype = 'cloud';
-        const p = s();
-        if (p < 0.33) {
-          cloudtype += '0';
-        } else if (p < 0.66) {
-          cloudtype += '1';
-        } else {
-          cloudtype += '2';
-        }
-        const pos = new Position(x + s() * 5 - 2.5, y + s() * 5 - 2.5);
-        const isopos = mapPosToIsometricPixels(pos, {
-          scale: this.overallScale,
-          width: this.mapWidth,
-          height: this.mapHeight,
-        });
-        const cloud = this.add
-          .sprite(isopos[0], isopos[1], cloudtype)
-          .setDepth(10e5)
-          .setScale(this.overallScale * this.defaultScales.clouds);
-        this.cloudSprites.push({ cloud, pos });
-      }
-    }
+    // generateClouds(this);
 
     this.generateGameFrames(replayData).then(() => {
       this.renderFrame(0);
@@ -638,7 +651,7 @@ class MainScene extends Phaser.Scene {
       let row = game.map.getRow(y);
       roadLevels.push([]);
       row.forEach((cell, x) => {
-        roadLevels[y][x] = cell.road;
+        roadLevels[y][x] = cell.getRoad();
       });
     }
     let errorscopy = [...this.currentTurnErrors];
@@ -671,183 +684,27 @@ class MainScene extends Phaser.Scene {
     this.events.emit('created');
   }
 
-  /**
-   * Paint in a resource tile to the current rendered frame
-   */
-  addResourceTile(type: Resource.Types, x: number, y: number) {
-    const p = mapCoordsToIsometricPixels(x, y, {
-      scale: this.overallScale,
-      width: this.mapWidth,
-      height: this.mapHeight,
-    });
-    switch (type) {
-      case Resource.Types.WOOD: {
-        let treeType = 0;
-        let tscale = this.defaultScales.tree0;
-        const s = seedrandom('' + x * 10e5 + y);
-        let scaleFactor = 140;
-        if (s() < 0.5) {
-          treeType = 1;
-          tscale = this.defaultScales.tree1;
-          scaleFactor = 120;
-        }
-        const img = this.add
-          .image(
-            p[0] + 20 * tscale * this.overallScale,
-            p[1] - scaleFactor * tscale * this.overallScale,
-            'tree' + treeType
-          )
-          .setDepth(getDepthByPos(new Position(x, y)))
-          .setScale(tscale * this.overallScale);
-        return img;
-      }
-      case Resource.Types.COAL: {
-        const img = this.add
-          .image(
-            p[0],
-            p[1] - 60 * this.defaultScales.coal * this.overallScale,
-            'coal'
-          )
-          .setDepth(getDepthByPos(new Position(x, y)))
-          .setScale(this.defaultScales.coal * this.overallScale);
-        return img;
-      }
-      case Resource.Types.URANIUM: {
-        const img = this.add
-          .image(
-            p[0] - 22 * this.defaultScales.uranium * this.overallScale,
-            p[1] - 62 * this.defaultScales.uranium * this.overallScale,
-            'uranium'
-          )
-          .setDepth(getDepthByPos(new Position(x, y)))
-          .setScale(this.defaultScales.uranium * this.overallScale);
-        return img;
-      }
-    }
-  }
-
-  addCityTile(
-    data: FrameSingleCityTileData,
-    tilesWithUnits: Set<number>,
-    night = false
-  ) {
-    const p = mapPosToIsometricPixels(data.pos, {
-      scale: this.overallScale,
-      width: this.mapWidth,
-      height: this.mapHeight,
-    });
-    let cityTileType = 'city' + data.team;
-
-    const s = seedrandom('' + data.pos.x * 10e3 + data.pos.y);
-    let variant = '0';
-    const rngp = s();
-    if (rngp < 0.125) {
-      variant = '2';
-    } else if (rngp < 0.5) {
-      variant = '1';
-    } else if (rngp < 0.625) {
-      variant = '3';
-    }
-    cityTileType += variant;
-    // make tile transparent if there's a unit behind it and its a tall building (type 2 or 3)
+  determineNightTransitionAlphas(turn): [number, number] {
+    const dayLength = this.luxgame.configs.parameters.DAY_LENGTH;
+    const cycleLength =
+      dayLength + this.luxgame.configs.parameters.NIGHT_LENGTH;
     if (
-      (variant === '2' || variant === '3') &&
-      tilesWithUnits.has(
-        hashMapCoords(new Position(data.pos.x - 1, data.pos.y - 1))
-      )
+      turn % cycleLength >= dayLength - 5 &&
+      turn % cycleLength < cycleLength - 1
     ) {
-      cityTileType += 't';
+      return [
+        Math.max(((turn % cycleLength) - dayLength + 4) / 6, 0),
+        ((turn % cycleLength) - dayLength + 5) / 6,
+      ];
+    } else if (turn % cycleLength >= cycleLength - 1) {
+      return [1, 5 / 6];
+    } else if (turn % cycleLength <= 5 && turn > 5) {
+      return [
+        Math.min(1 - ((turn % cycleLength) + 1) / 6, 1),
+        1 - ((turn % cycleLength) + 2) / 6,
+      ];
     }
-    if (night) {
-      cityTileType += 'night';
-    }
-    const img = this.add
-      .image(p[0], p[1], cityTileType)
-      .setDepth(getDepthByPos(data.pos))
-      .setScale(this.defaultScales.city * this.overallScale);
-
-    switch (data.team + variant) {
-      case '00':
-      case '01':
-        img.setY(img.y - 80 * this.defaultScales.city * this.overallScale);
-        img.setX(img.x + 10 * this.defaultScales.city * this.overallScale);
-        break;
-      case '02':
-      case '03':
-        img.setY(img.y - 120 * this.defaultScales.city * this.overallScale);
-        img.setX(img.x + 10 * this.defaultScales.city * this.overallScale);
-        break;
-      case '10':
-      case '11':
-        img.setY(img.y - 100 * this.defaultScales.city * this.overallScale);
-        break;
-      case '12':
-      case '13':
-        img.setY(img.y - 140 * this.defaultScales.city * this.overallScale);
-        break;
-    }
-
-    return img;
-  }
-
-  addNormalFloorTile(pos: Position) {
-    const ps = mapCoordsToIsometricPixels(pos.x, pos.y, {
-      scale: this.overallScale,
-      width: this.mapWidth,
-      height: this.mapHeight,
-    });
-
-    const img = this.add
-      .image(ps[0], ps[1], 'ground')
-      .setScale(this.defaultScales.block * this.overallScale);
-    img.setDepth(getDepthByPos(pos) / 100);
-    return img;
-  }
-
-  /**
-   * Add worker sprite for use by any frame
-   *
-   * removes an existing one if id matches
-   */
-  addWorkerSprite(
-    x: number,
-    y: number,
-    team: LUnit.TEAM,
-    id: string,
-    outline = false
-  ) {
-    const p = mapCoordsToIsometricPixels(x, y, {
-      scale: this.overallScale,
-      width: this.mapWidth,
-      height: this.mapHeight,
-    });
-    const sprite = this.add
-      .sprite(p[0], p[1], 'worker-' + team + (outline ? '-outline' : ''))
-      .setScale(this.defaultScales.worker * this.overallScale);
-    sprite.setDepth(getDepthByPos(new Position(x, y)));
-    if (this.unitSprites.has(id)) {
-      const { sprite } = this.unitSprites.get(id);
-      sprite.destroy();
-    }
-    this.unitSprites.set(id, { sprite, originalPosition: new Position(x, y) });
-    return sprite;
-  }
-
-  /**
-   * Add cart sprite for use by any frame
-   */
-  addCartSprite(x: number, y: number, team: LUnit.TEAM, id: string) {
-    const p = mapCoordsToIsometricPixels(x, y, {
-      scale: this.overallScale,
-      width: this.mapWidth,
-      height: this.mapHeight,
-    });
-    const sprite = this.add
-      .sprite(p[0], p[1], 'cart-' + team)
-      .setScale(this.defaultScales.cart * this.overallScale);
-    sprite.setDepth(getDepthByPos(new Position(x, y)));
-    this.unitSprites.set(id, { sprite, originalPosition: new Position(x, y) });
-    return sprite;
+    return [0, 0];
   }
 
   currentRenderedFramesImgs: Array<GameObjects.Image> = [];
@@ -878,15 +735,6 @@ class MainScene extends Phaser.Scene {
     this.currentRenderedFramesText.forEach((txt) => {
       txt.destroy();
     });
-    this.currentRenderedFramesRoads.forEach(({ img, pos }) => {
-      img.destroy();
-      let hash = hashMapCoords(pos);
-      // let oldimg = this.floorImageTiles.get(hash);
-      let img2 = this.addNormalFloorTile(pos);
-      let old = this.floorImageTiles.get(hash);
-      old.destroy();
-      this.floorImageTiles.set(hash, img2);
-    });
 
     // find all standing cities
     let visibleCityTiles: Set<number> = new Set();
@@ -894,25 +742,29 @@ class MainScene extends Phaser.Scene {
       visibleCityTiles.add(hashMapCoords(data.pos));
     });
 
+    // render night textures and transitions if necessary
+    let [startAlpha, endAlpha] = this.determineNightTransitionAlphas(turn);
+    this.floorImageTiles.forEach((value) => {
+      value.overlay.setAlpha(startAlpha);
+      // value.source.setAlpha(1 - startAlpha);
+      // this.tweens.add(getNightTransitionTween(value.source, this.speed, 1 - startAlpha));
+      this.tweens.add(
+        getNightTransitionTween(value.overlay, this.speed, endAlpha)
+      );
+    });
+
     // render roads
+    // TODO: dont render, just replace textures with road textures
     f.roadLevels.forEach((row, y) => {
       row.forEach((level, x) => {
-        if (level < 1e-1) return;
-
         let pos = new Position(x, y);
         let hash = hashMapCoords(pos);
 
-        // if (visibleCityTiles.has(hash)) return;
+        if (visibleCityTiles.has(hash)) level = 0;
 
-        let oldimg = this.floorImageTiles.get(hash);
-        oldimg.destroy();
-        const p = mapPosToIsometricPixels(pos, {
-          scale: this.overallScale,
-          width: this.mapWidth,
-          height: this.mapHeight,
-        });
+        let { roadOverlay } = this.floorImageTiles.get(hash);
 
-        // determine road to render by adjacency
+        // // determine road to render by adjacency
         let adjacency = [false, false, false, false];
 
         let dirs = [
@@ -932,18 +784,21 @@ class MainScene extends Phaser.Scene {
         });
 
         // add the img_base because we use transparency on the roads and need something behind it
-        const img_base = this.add
-          .image(p[0], p[1], 'block1')
-          .setDepth(getDepthByPos(pos) / 100 + 0.5 / 1e7)
-          .setScale(this.defaultScales.block * this.overallScale);
-        const img = this.add
-          .image(p[0], p[1], getRoadType(adjacency))
-          .setDepth(getDepthByPos(pos) / 100 + 1 / 1e7)
-          .setScale(this.defaultScales.road * this.overallScale)
-          .setAlpha(Math.ceil(level) / 6);
-        this.currentRenderedFramesRoads.push({ img, pos: pos });
-        this.currentRenderedFramesRoads.push({ img: img_base, pos: pos });
-        this.floorImageTiles.set(hash, img);
+        // const img_base = this.add
+        //   .image(p[0], p[1], 'ground')
+        //   .setDepth(getDepthByPos(pos) / 100 + 0.5 / 1e7)
+        //   .setScale(this.defaultScales.block * this.overallScale);
+        // const img = this.add
+        //   .image(p[0], p[1], getRoadType(adjacency))
+        //   .setDepth(getDepthByPos(pos) / 100 + 1 / 1e7)
+        //   .setScale(this.defaultScales.road * this.overallScale)
+        //   .setAlpha(Math.ceil(level) / 6);
+        roadOverlay.setTexture(getRoadType(adjacency));
+        roadOverlay.setAlpha(Math.ceil(level) / 6);
+
+        // this.currentRenderedFramesRoads.push({ img, pos: pos });
+        // this.currentRenderedFramesRoads.push({ img: img_base, pos: pos });
+        // this.floorImageTiles.set(hash, { source, overlay, roadOverlay });
       });
     });
 
@@ -980,9 +835,19 @@ class MainScene extends Phaser.Scene {
     const tilesWithResources: Set<number> = new Set();
     // paint in all resource tiles
     f.resourceData.forEach((data) => {
-      const img = this.addResourceTile(data.type, data.pos.x, data.pos.y);
+      const [img, img_overlay] = addResourceTile(
+        this,
+        data.type,
+        data.pos.x,
+        data.pos.y
+      );
       this.currentRenderedFramesImgs.push(img);
+      this.currentRenderedFramesImgs.push(img_overlay);
       tilesWithResources.add(hashMapCoords(data.pos));
+      img_overlay.setAlpha(startAlpha);
+      this.tweens.add(
+        getNightTransitionTween(img_overlay, this.speed, endAlpha)
+      );
     });
 
     // iterate over all units in this frame / turn
@@ -1004,6 +869,9 @@ class MainScene extends Phaser.Scene {
 
       // translate unit position depending on if there's a resource or city there
       let newx = p[0] - 10 * this.defaultScales.worker * this.overallScale;
+      if (data.type === Unit.Type.CART) {
+        newx = p[0];
+      }
       let newy = p[1] - 60 * this.defaultScales.worker * this.overallScale;
       if (visibleCityTiles.has(hashMapCoords(data.pos))) {
         newy = p[1] - 20 * this.defaultScales.worker * this.overallScale;
@@ -1025,11 +893,11 @@ class MainScene extends Phaser.Scene {
       if (data.type === LUnit.Type.WORKER) {
         // add 1/10e5 to place this in front of cities
         sprite
-          .setDepth(getDepthByPos(data.pos) + 1 / 10e5)
+          .setDepth(getDepthByPos(data.pos) + 5e-1)
           .setScale(this.defaultScales.worker * this.overallScale);
       } else {
         sprite
-          .setDepth(getDepthByPos(data.pos) + 1 / 10e5)
+          .setDepth(getDepthByPos(data.pos) + 5e-1)
           .setScale(this.defaultScales.cart * this.overallScale);
       }
     });
@@ -1046,8 +914,9 @@ class MainScene extends Phaser.Scene {
     this.graphics.lineStyle(3 * this.overallScale, 0x323d34, 1);
     this.graphics.fillStyle(0xe7ded1, 1);
     f.cityTileData.forEach((data) => {
-      const img = this.addCityTile(data, tilesWithUnits, isnight);
+      const [img, img_overlay] = addCityTile(this, data, tilesWithUnits, turn);
       this.currentRenderedFramesImgs.push(img);
+      this.currentRenderedFramesImgs.push(img_overlay);
       const hash = hashMapCoords(data.pos);
       if (unitPosToCount.has(hash)) {
         let c = unitPosToCount.get(hash);
@@ -1369,27 +1238,19 @@ class MainScene extends Phaser.Scene {
         ...Array.from(game.getTeamsUnits(LUnit.TEAM.B).values()),
       ].forEach((unit) => {
         if (this.unitSprites.has(unit.id)) {
-          // const sprite = this.unitSprites.get(unit.id);
-          // const p = mapPosToPixels(unit.pos);
-          // this.tweens.add({
-          //   targets: sprite,
-          //   x: p[0],
-          //   y: p[1],
-          //   ease: 'Linear',
-          //   duration: 100,
-          //   repeat: 0,
-          //   yoyo: false,
-          // });
+          // skip
         } else {
           if (unit.type === LUnit.Type.WORKER) {
-            this.addWorkerSprite(
+            addWorkerSprite(
+              this,
               unit.pos.x,
               unit.pos.y,
               unit.team,
               unit.id
             ).setVisible(false);
           } else {
-            this.addCartSprite(
+            addCartSprite(
+              this,
               unit.pos.x,
               unit.pos.y,
               unit.team,
