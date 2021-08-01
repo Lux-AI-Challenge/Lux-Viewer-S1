@@ -2,7 +2,7 @@ import { LuxMatchState } from '@lux-ai/2021-challenge/lib/es6/types';
 import { LuxDesignLogic } from '@lux-ai/2021-challenge/lib/es6/logic';
 import { Game } from '@lux-ai/2021-challenge/lib/es6/Game';
 import { Resource } from '@lux-ai/2021-challenge/lib/es6/Resource';
-import { Unit as LUnit } from '@lux-ai/2021-challenge/lib/es6/Unit/index';
+import { Unit as LUnit, Unit } from '@lux-ai/2021-challenge/lib/es6/Unit/index';
 
 import {
   getDepthByPos,
@@ -215,7 +215,7 @@ class MainScene extends Phaser.Scene {
   defaultScales = {
     city: 0.4,
     worker: 0.496,
-    cart: 0.6,
+    cart: 0.56,
     block: 0.44,
     tree0: 0.43,
     tree1: 0.43,
@@ -251,8 +251,16 @@ class MainScene extends Phaser.Scene {
     this.load.image('worker-0-outline', `${base}/sprites/worker0w-outline.svg`);
     this.load.image('worker-1', `${base}/sprites/worker1w.svg`);
     this.load.image('worker-1-outline', `${base}/sprites/worker1w-outline.svg`);
-    this.load.image('cart-0', `${base}/sprites/carts/cart0e.svg`);
-    this.load.image('cart-1', `${base}/sprites/carts/cart1e.svg`);
+    this.load.image('cart-0', `${base}/sprites/carts/cart0w.svg`);
+    this.load.image('cart-1', `${base}/sprites/carts/cart1w.svg`);
+    this.load.image(
+      'cart-0-outline',
+      `${base}/sprites/carts/cart0w-outline.svg`
+    );
+    this.load.image(
+      'cart-1-outline',
+      `${base}/sprites/carts/cart1w-outline.svg`
+    );
 
     this.load.svg('ground', `${base}/ground.svg`);
     this.load.svg('ground-night', `${base}/groundnight.svg`);
@@ -470,11 +478,20 @@ class MainScene extends Phaser.Scene {
           width: this.mapWidth,
           height: this.mapHeight,
         });
+        if (
+          pos.x < 0 ||
+          pos.y < 0 ||
+          pos.x >= this.mapWidth ||
+          pos.y >= this.mapHeight
+        ) {
+          // off map
+          this.toggleOutlineClickedTile(undefined);
+        } else {
+          const imageTile = this.floorImageTiles.get(hashMapCoords(pos)).source;
+          // outline tile if it exists and we aren't tracking a unit
+          this.toggleOutlineClickedTile(imageTile);
+        }
         this.onTileClicked(pos);
-
-        const imageTile = this.floorImageTiles.get(hashMapCoords(pos)).source;
-        // outline tile if it exists and we aren't tracking a unit
-        this.toggleOutlineClickedTile(imageTile);
       }
     );
 
@@ -852,6 +869,9 @@ class MainScene extends Phaser.Scene {
 
       // translate unit position depending on if there's a resource or city there
       let newx = p[0] - 10 * this.defaultScales.worker * this.overallScale;
+      if (data.type === Unit.Type.CART) {
+        newx = p[0];
+      }
       let newy = p[1] - 60 * this.defaultScales.worker * this.overallScale;
       if (visibleCityTiles.has(hashMapCoords(data.pos))) {
         newy = p[1] - 20 * this.defaultScales.worker * this.overallScale;
