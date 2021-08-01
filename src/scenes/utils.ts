@@ -110,7 +110,7 @@ export const getNightTransitionTween = (
     targets: sprite,
     alpha,
     ease: 'Linear',
-    duration: 640 / speed,
+    duration: 1000 / speed,
     repeat: 0,
     yoyo: false,
   };

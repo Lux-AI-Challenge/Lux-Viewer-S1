@@ -660,15 +660,20 @@ class MainScene extends Phaser.Scene {
     const dayLength = this.luxgame.configs.parameters.DAY_LENGTH;
     const cycleLength =
       dayLength + this.luxgame.configs.parameters.NIGHT_LENGTH;
-    if (turn % cycleLength >= dayLength - 5) {
+    if (
+      turn % cycleLength >= dayLength - 5 &&
+      turn % cycleLength < cycleLength - 1
+    ) {
       return [
-        Math.max(((turn % cycleLength) - dayLength + 4) / 5, 0),
-        ((turn % cycleLength) - dayLength + 5) / 5,
+        Math.max(((turn % cycleLength) - dayLength + 4) / 6, 0),
+        ((turn % cycleLength) - dayLength + 5) / 6,
       ];
+    } else if (turn % cycleLength >= cycleLength - 1) {
+      return [1, 5 / 6];
     } else if (turn % cycleLength <= 5 && turn > 5) {
       return [
-        Math.min(1 - ((turn % cycleLength) - 1) / 5, 1),
-        1 - (turn % cycleLength) / 5,
+        Math.min(1 - ((turn % cycleLength) + 1) / 6, 1),
+        1 - ((turn % cycleLength) + 2) / 6,
       ];
     }
     return [0, 0];
