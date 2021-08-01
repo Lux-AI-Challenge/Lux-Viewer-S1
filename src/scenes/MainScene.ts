@@ -24,6 +24,9 @@ import {
 } from './types';
 import { generateClouds } from './constructors/clouds';
 import { addCartSprite, addWorkerSprite } from './constructors/units';
+import { addCityTile } from './constructors/city';
+import { addResourceTile } from './constructors/resource';
+import { addNormalFloorTile } from './constructors/floors';
 
 type CommandsArray = Array<{
   command: string;
@@ -435,7 +438,7 @@ class MainScene extends Phaser.Scene {
     for (let y = 0; y < height; y++) {
       let row = this.luxgame.map.getRow(y);
       row.forEach((cell) => {
-        const [img, img_overlay] = this.addNormalFloorTile(cell.pos);
+        const [img, img_overlay] = addNormalFloorTile(this, cell.pos);
         this.floorImageTiles.set(
           hashMapCoords(new Position(cell.pos.x, cell.pos.y)),
           { source: img, overlay: img_overlay }
@@ -653,201 +656,22 @@ class MainScene extends Phaser.Scene {
     this.events.emit('created');
   }
 
-  /**
-   * Paint in a resource tile to the current rendered frame
-   */
-  addResourceTile(type: Resource.Types, x: number, y: number) {
-    const p = mapCoordsToIsometricPixels(x, y, {
-      scale: this.overallScale,
-      width: this.mapWidth,
-      height: this.mapHeight,
-    });
-    switch (type) {
-      case Resource.Types.WOOD: {
-        let treeType = 0;
-        let tscale = this.defaultScales.tree0;
-        const s = seedrandom('' + x * 10e5 + y);
-        let scaleFactor = 90;
-        if (s() < 0.5) {
-          treeType = 1;
-          tscale = this.defaultScales.tree1;
-          scaleFactor = 90;
-        }
-        const img = this.add
-          .image(
-            p[0] + 20 * tscale * this.overallScale,
-            p[1] - scaleFactor * tscale * this.overallScale,
-            'tree' + treeType
-          )
-          .setDepth(getDepthByPos(new Position(x, y)))
-          .setScale(tscale * this.overallScale);
-        const img_overlay = this.add
-          .image(
-            p[0] + 20 * tscale * this.overallScale,
-            p[1] - scaleFactor * tscale * this.overallScale,
-            'tree' + treeType + '-night'
-          )
-          .setDepth(getDepthByPos(new Position(x, y)))
-          .setScale(tscale * this.overallScale);
-        return [img, img_overlay];
-      }
-      case Resource.Types.COAL: {
-        const img = this.add
-          .image(
-            p[0],
-            p[1] - 60 * this.defaultScales.coal * this.overallScale,
-            'coal'
-          )
-          .setDepth(getDepthByPos(new Position(x, y)))
-          .setScale(this.defaultScales.coal * this.overallScale);
-        const img_overlay = this.add
-          .image(
-            p[0],
-            p[1] - 60 * this.defaultScales.coal * this.overallScale,
-            'coal-night'
-          )
-          .setDepth(getDepthByPos(new Position(x, y)))
-          .setScale(this.defaultScales.coal * this.overallScale);
-        return [img, img_overlay];
-      }
-      case Resource.Types.URANIUM: {
-        const img = this.add
-          .image(
-            p[0] - 22 * this.defaultScales.uranium * this.overallScale,
-            p[1] - 62 * this.defaultScales.uranium * this.overallScale,
-            'uranium'
-          )
-          .setDepth(getDepthByPos(new Position(x, y)))
-          .setScale(this.defaultScales.uranium * this.overallScale);
-        const img_overlay = this.add
-          .image(
-            p[0] - 22 * this.defaultScales.uranium * this.overallScale,
-            p[1] - 62 * this.defaultScales.uranium * this.overallScale,
-            'uranium-night'
-          )
-          .setDepth(getDepthByPos(new Position(x, y)))
-          .setScale(this.defaultScales.uranium * this.overallScale);
-        return [img, img_overlay];
-      }
-    }
-  }
-
-  private determineNightTransitionAlphas(turn): [number, number] {
+  determineNightTransitionAlphas(turn): [number, number] {
     const dayLength = this.luxgame.configs.parameters.DAY_LENGTH;
     const cycleLength =
       dayLength + this.luxgame.configs.parameters.NIGHT_LENGTH;
-    const isnight = turn % cycleLength >= dayLength;
-
-    if (turn % cycleLength >= 25) {
-      // if turn is 20, we start at alpha 0
-      // 25 -> 0.2
-      // ...
-      // 30 -> 1
+    if (turn % cycleLength >= dayLength - 5) {
       return [
-        Math.max(((turn % cycleLength) - 26) / 5, 0),
-        ((turn % cycleLength) - 25) / 5,
+        Math.max(((turn % cycleLength) - dayLength + 4) / 5, 0),
+        ((turn % cycleLength) - dayLength + 5) / 5,
+      ];
+    } else if (turn % cycleLength <= 5 && turn > 5) {
+      return [
+        Math.min(1 - ((turn % cycleLength) - 1) / 5, 1),
+        1 - (turn % cycleLength) / 5,
       ];
     }
-
-    if (isnight) return [0, 1];
     return [0, 0];
-  }
-
-  addCityTile(
-    data: FrameSingleCityTileData,
-    tilesWithUnits: Set<number>,
-    turn = 0
-  ) {
-    const p = mapPosToIsometricPixels(data.pos, {
-      scale: this.overallScale,
-      width: this.mapWidth,
-      height: this.mapHeight,
-    });
-    let cityTileType = 'city' + data.team;
-
-    const s = seedrandom('' + data.pos.x * 10e3 + data.pos.y);
-    let variant = '0';
-    const rngp = s();
-    if (rngp < 0.125) {
-      variant = '2';
-    } else if (rngp < 0.5) {
-      variant = '1';
-    } else if (rngp < 0.625) {
-      variant = '3';
-    }
-    cityTileType += variant;
-    // make tile transparent if there's a unit behind it and its a tall building (type 2 or 3)
-    if (
-      (variant === '2' || variant === '3') &&
-      tilesWithUnits.has(
-        hashMapCoords(new Position(data.pos.x - 1, data.pos.y - 1))
-      )
-    ) {
-      cityTileType += 't';
-    }
-
-    // handle determining alpha for night version
-
-    let [startAlpha, endAlpha] = this.determineNightTransitionAlphas(turn);
-
-    const img = this.add
-      .image(p[0], p[1], cityTileType)
-      .setDepth(getDepthByPos(data.pos))
-      .setScale(this.defaultScales.city * this.overallScale);
-    let ny = img.y;
-    let nx = img.x;
-    const img_overlay = this.add
-      .image(p[0], p[1], cityTileType + 'night')
-      .setDepth(getDepthByPos(data.pos) + 1e-1)
-      .setScale(this.defaultScales.city * this.overallScale)
-      .setAlpha(startAlpha);
-    this.tweens.add(getNightTransitionTween(img_overlay, this.speed, endAlpha));
-
-    switch (data.team + variant) {
-      case '00':
-      case '01':
-        ny = img.y - 80 * this.defaultScales.city * this.overallScale;
-        nx = img.x + 10 * this.defaultScales.city * this.overallScale;
-        break;
-      case '02':
-      case '03':
-        ny = img.y - 120 * this.defaultScales.city * this.overallScale;
-        nx = img.x + 10 * this.defaultScales.city * this.overallScale;
-        break;
-      case '10':
-      case '11':
-        ny = img.y - 100 * this.defaultScales.city * this.overallScale;
-        break;
-      case '12':
-      case '13':
-        ny = img.y - 140 * this.defaultScales.city * this.overallScale;
-        break;
-    }
-    img.setY(ny);
-    img.setX(nx);
-    img_overlay.setY(ny);
-    img_overlay.setX(nx);
-
-    return [img, img_overlay];
-  }
-
-  addNormalFloorTile(pos: Position) {
-    const ps = mapCoordsToIsometricPixels(pos.x, pos.y, {
-      scale: this.overallScale,
-      width: this.mapWidth,
-      height: this.mapHeight,
-    });
-
-    const img = this.add
-      .image(ps[0], ps[1], 'ground')
-      .setScale(this.defaultScales.block * this.overallScale);
-    img.setDepth(getDepthByPos(pos) / 100);
-    const img_overlay = this.add
-      .image(ps[0], ps[1], 'ground-night')
-      .setScale(this.defaultScales.block * this.overallScale)
-      .setAlpha(0);
-    img_overlay.setDepth(getDepthByPos(pos) / 100 + 1e-1);
-    return [img, img_overlay];
   }
 
   currentRenderedFramesImgs: Array<GameObjects.Image> = [];
@@ -993,7 +817,8 @@ class MainScene extends Phaser.Scene {
     const tilesWithResources: Set<number> = new Set();
     // paint in all resource tiles
     f.resourceData.forEach((data) => {
-      const [img, img_overlay] = this.addResourceTile(
+      const [img, img_overlay] = addResourceTile(
+        this,
         data.type,
         data.pos.x,
         data.pos.y
@@ -1068,7 +893,7 @@ class MainScene extends Phaser.Scene {
     this.graphics.lineStyle(3 * this.overallScale, 0x323d34, 1);
     this.graphics.fillStyle(0xe7ded1, 1);
     f.cityTileData.forEach((data) => {
-      const [img, img_overlay] = this.addCityTile(data, tilesWithUnits, turn);
+      const [img, img_overlay] = addCityTile(this, data, tilesWithUnits, turn);
       this.currentRenderedFramesImgs.push(img);
       this.currentRenderedFramesImgs.push(img_overlay);
       const hash = hashMapCoords(data.pos);
