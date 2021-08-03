@@ -87,36 +87,48 @@ const TileStats = ({
             )}
             {allunits.length > 0 && <div className="subtitle">Units:</div>}
             <Grid container className="UnitStats" spacing={1}>
+              {allunits
+                .sort((a, b) => {
+                  if (a.id === trackedUnitID) {
+                    return -1;
+                  } else if (b.id === trackedUnitID) {
+                    return 1;
+                  }
+                  return 0;
+                })
+                .map((v) => {
+                  return (
+                    <Grid item className="UnitData" xs={6} key={v.id}>
+                      <div
+                        className={
+                          trackedUnitID === v.id ? 'tracked-unit-card' : ''
+                        }
+                        onClick={() => {
+                          if (trackedUnitID === v.id) {
+                            untrackUnit(v.id);
+                          } else {
+                            trackUnit(v.id);
+                          }
+                        }}
+                      >
+                        <UnitCard {...v} turn={turn} />
+                      </div>
+                    </Grid>
+                  );
+                })}
+            </Grid>
+            <Grid container>
+              <Grid item xs={2}></Grid>
               {cityTile.length > 0 && (
                 <Grid
                   item
                   className="CityTileData"
-                  xs={6}
+                  xs={8}
                   key={cityTile[0].cityid}
                 >
                   <CityTileCard cityTiles={cityTile} pos={pos} />
                 </Grid>
               )}
-              {allunits.map((v) => {
-                return (
-                  <Grid item className="UnitData" xs={6} key={v.id}>
-                    <div
-                      className={
-                        trackedUnitID === v.id ? 'tracked-unit-card' : ''
-                      }
-                      onClick={() => {
-                        if (trackedUnitID === v.id) {
-                          untrackUnit(v.id);
-                        } else {
-                          trackUnit(v.id);
-                        }
-                      }}
-                    >
-                      <UnitCard {...v} turn={turn} />
-                    </div>
-                  </Grid>
-                );
-              })}
             </Grid>
           </>
         )}

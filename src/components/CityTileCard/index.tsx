@@ -44,18 +44,9 @@ const CityTileCard = ({ cityTiles, pos }: CityTileCardProps) => {
   return (
     <div className="CityTileCard">
       <div className="unit-id">
-        <strong>ID:</strong> N/A
+        <strong>ID of City:</strong> {cityTile.cityid}
       </div>
       <div className="worker-icon-wrapper">{renderUnitSVG()}</div>
-      <div className="worker-data">
-        <p>
-          <strong>ID of City:</strong> <span>{cityTile.cityid}</span>
-        </p>
-        <br />
-        <br />
-        <br />
-        <br />
-      </div>
       <div className="cooldown-bar-wrapper">
         <div className="cooldown-value-wrapper">
           <span className="cooldown-title">

@@ -46,8 +46,7 @@
   );
 }
 .CityTileCard .cooldown-bar-wrapper {
-  width: 100%;
-  margin-top: 1rem;
+  width: calc(100% - 5rem);
 }
 .CityTileCard .cooldown-value-wrapper {
   margin-bottom: 0.25rem;

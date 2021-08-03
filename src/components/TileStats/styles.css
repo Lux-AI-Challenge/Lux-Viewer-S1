@@ -1,3 +1,7 @@
+.TileStats {
+  overflow-y: scroll;
+  max-height: calc(100vh - 8rem);
+}
 .TileStats .LuxCard {
   width: 24rem;
 }
@@ -28,10 +32,9 @@
   margin-bottom: 1.5rem;
 }
 .TileStats .subtitle:before {
+  transform: translate(10%, 2rem);
+  display: block;
   content: '';
-  position: absolute;
-  margin-top: 2rem;
-  left: 10%;
   background: linear-gradient(
     90deg,
     rgba(0, 0, 0, 0) 0%,
