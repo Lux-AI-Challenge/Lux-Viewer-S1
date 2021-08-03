@@ -103,15 +103,19 @@ const TileStats = ({
                         className={
                           trackedUnitID === v.id ? 'tracked-unit-card' : ''
                         }
-                        onClick={() => {
-                          if (trackedUnitID === v.id) {
-                            untrackUnit(v.id);
-                          } else {
-                            trackUnit(v.id);
-                          }
-                        }}
+                        // onClick={}
                       >
-                        <UnitCard {...v} turn={turn} />
+                        <UnitCard
+                          {...v}
+                          turn={turn}
+                          onClick={() => {
+                            if (trackedUnitID === v.id) {
+                              untrackUnit(v.id);
+                            } else {
+                              trackUnit(v.id);
+                            }
+                          }}
+                        />
                       </div>
                     </Grid>
                   );

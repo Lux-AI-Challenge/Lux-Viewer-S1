@@ -14,7 +14,10 @@ import {
   makeStyles,
   Modal,
 } from '@material-ui/core';
-export type UnitCardProps = FrameSingleUnitData & { turn: number };
+export type UnitCardProps = FrameSingleUnitData & {
+  turn: number;
+  onClick?: () => void;
+};
 
 const useStyles = makeStyles({
   progressa: {
@@ -33,6 +36,7 @@ const UnitCard = ({
   type,
   commands,
   turn,
+  onClick,
 }: UnitCardProps) => {
   const classes = useStyles();
   const [historyPanelOpen, sethistoryPanelOpen] = useState(false);
@@ -109,42 +113,44 @@ const UnitCard = ({
           <img className="unit-history-icon" src={InfoSVG}></img>
         </IconButton>
       </div>
-      <div className="worker-icon-wrapper">{renderUnitSVG()}</div>
-      <div className="worker-data">
-        <p>
-          <strong>Pos:</strong>{' '}
-          <span>
-            ({pos.x}, {pos.y})
-          </span>
-        </p>
-        <p>
-          <strong>Wood:</strong> <span>{cargo.wood}</span>
-        </p>
-        <p>
-          <strong>Coal:</strong> <span>{cargo.coal}</span>
-        </p>
-        <p>
-          <strong>Uranium:</strong> <span>{cargo.uranium}</span>
-        </p>
-      </div>
-      <div className="cooldown-bar-wrapper">
-        <div className="cooldown-value-wrapper">
-          <span className="cooldown-title">
-            <strong>Cooldown:</strong>
-          </span>{' '}
-          <span className="cooldown-value">
-            {cooldown} / {maxCooldown}
-          </span>
+      <div onClick={onClick}>
+        <div className="worker-icon-wrapper">{renderUnitSVG()}</div>
+        <div className="worker-data">
+          <p>
+            <strong>Pos:</strong>{' '}
+            <span>
+              ({pos.x}, {pos.y})
+            </span>
+          </p>
+          <p>
+            <strong>Wood:</strong> <span>{cargo.wood}</span>
+          </p>
+          <p>
+            <strong>Coal:</strong> <span>{cargo.coal}</span>
+          </p>
+          <p>
+            <strong>Uranium:</strong> <span>{cargo.uranium}</span>
+          </p>
         </div>
+        <div className="cooldown-bar-wrapper">
+          <div className="cooldown-value-wrapper">
+            <span className="cooldown-title">
+              <strong>Cooldown:</strong>
+            </span>{' '}
+            <span className="cooldown-value">
+              {cooldown} / {maxCooldown}
+            </span>
+          </div>
 
-        <LinearProgress
-          className={
-            (team === Unit.TEAM.A ? 'cooldown-a' : 'cooldown-b') +
-            ' cooldown-bar'
-          }
-          variant="determinate"
-          value={(cooldown * 100) / maxCooldown}
-        />
+          <LinearProgress
+            className={
+              (team === Unit.TEAM.A ? 'cooldown-a' : 'cooldown-b') +
+              ' cooldown-bar'
+            }
+            variant="determinate"
+            value={(cooldown * 100) / maxCooldown}
+          />
+        </div>
       </div>
     </div>
   );
