@@ -334,7 +334,11 @@ class MainScene extends Phaser.Scene {
     this.toggleOutlineClickedTile();
     this.handleUnitTracked(id);
   }
-  untrackUnit() {
+  /**
+   * untrack units if tracking any.
+   * @param trackTileUnderneath - default false. if true, will auto track tile under untracked unit
+   */
+  untrackUnit(trackTileUnderneath = false) {
     if (this.currentTrackedUnitID) {
       const { sprite } = this.unitSprites.get(this.currentTrackedUnitID);
       const keyInfo = sprite.texture.key.split('-');
@@ -343,6 +347,14 @@ class MainScene extends Phaser.Scene {
       }
       this.currentTrackedUnitID = null;
       this.handleUnitTracked(null);
+    }
+    if (trackTileUnderneath) {
+      if (this.currentSelectedTilePos) {
+        this.toggleOutlineClickedTile(
+          this.floorImageTiles.get(hashMapCoords(this.currentSelectedTilePos))
+            .source
+        );
+      }
     }
   }
 
@@ -405,7 +417,7 @@ class MainScene extends Phaser.Scene {
   /**
    * render an outline around a clicked tile if imageTile is not null and valid
    */
-  private toggleOutlineClickedTile(imageTile?: Phaser.GameObjects.Image) {
+  toggleOutlineClickedTile(imageTile?: Phaser.GameObjects.Image) {
     if (imageTile && !this.currentTrackedUnitID) {
       if (this.activeImageTile == null) {
         this.originalTileY = imageTile.y;

@@ -1,12 +1,15 @@
 .TileStats .LuxCard {
   width: 24rem;
 }
+.TileStats .LuxCard .title {
+  margin-bottom: 0;
+}
 .TileStats .sub-header {
   font-weight: 500;
   font-size: 1.75rem;
   text-align: center;
   padding: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0rem;
 }
 .TileStats .sub-header .coords-label {
   font-size: 0.85rem;
@@ -89,5 +92,5 @@
 }
 
 .TileStats .tracked-unit-card .UnitCard {
-  border: 2px solid white;
+  background-color: rgba(255, 255, 255, 0.1);
 }

@@ -16,6 +16,7 @@ export type TileStatsProps = Partial<FrameTileData> & {
   cities?: FrameCityData;
   empty?: boolean;
   trackUnit: (id: string) => void;
+  untrackUnit: (id: string) => void;
   trackedUnitID: string;
 };
 const TileStats = ({
@@ -28,6 +29,7 @@ const TileStats = ({
   roadLevel,
   turn,
   trackedUnitID,
+  untrackUnit,
   trackUnit,
 }: TileStatsProps) => {
   const renderResourceSVG = () => {
@@ -103,7 +105,11 @@ const TileStats = ({
                         trackedUnitID === v.id ? 'tracked-unit-card' : ''
                       }
                       onClick={() => {
-                        trackUnit(v.id);
+                        if (trackedUnitID === v.id) {
+                          untrackUnit(v.id);
+                        } else {
+                          trackUnit(v.id);
+                        }
                       }}
                     >
                       <UnitCard {...v} turn={turn} />

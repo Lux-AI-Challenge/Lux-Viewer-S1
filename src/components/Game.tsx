@@ -13,7 +13,11 @@ import {
 import './styles.css';
 import { LuxMatchConfigs, Game } from '@lux-ai/2021-challenge/lib/es6';
 import TileStats from './TileStats';
-import { hashToMapPosition, mapCoordsToIsometricPixels } from '../scenes/utils';
+import {
+  hashMapCoords,
+  hashToMapPosition,
+  mapCoordsToIsometricPixels,
+} from '../scenes/utils';
 import GlobalStats from './GlobalStats';
 import Controller from './Controller';
 import ZoomInOut from './ZoomInOut';
@@ -222,6 +226,10 @@ export const GameComponent = () => {
     setTrackedUnitID(id);
     main.untrackUnit();
     main.trackUnit(id);
+  };
+  const untrackUnit = (id: string) => {
+    setTrackedUnitID(null);
+    main.untrackUnit(true);
   };
 
   /** load game given json replay data */
@@ -481,6 +489,7 @@ export const GameComponent = () => {
                   {...selectedTileData}
                   cities={currentFrame.cityData}
                   trackUnit={trackUnit}
+                  untrackUnit={untrackUnit}
                   trackedUnitID={trackedUnitID}
                 />
               )}
