@@ -112,6 +112,8 @@
   background-color: rgba(50, 61, 52, 0.1);
   padding: 0.5rem;
   border-radius: 1rem;
+  height: 1.5rem;
+  line-height: 1.5rem;
 }
 
 .Game .debug-sidetext {
@@ -133,4 +135,14 @@
 }
 .Game .debug-sidetext .sidetext-1 {
   color: #3686ff;
+}
+.Game .warnings-button {
+  position: absolute;
+  top: 1rem;
+  right: 10rem;
+  background-color: rgba(255, 255, 255, 0.25);
+  border-radius: 1rem;
+  color: white;
+  font-weight: 500;
+  width: 14rem;
 }

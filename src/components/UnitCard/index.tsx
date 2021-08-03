@@ -1,5 +1,3 @@
-import CardContent from '@material-ui/core/CardContent';
-import Card from '@material-ui/core/Card';
 import React, { useState } from 'react';
 import './styles.css';
 import { FrameSingleUnitData } from '../../scenes/MainScene';

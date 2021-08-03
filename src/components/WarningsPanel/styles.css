@@ -1,0 +1,57 @@
+.WarningsModal .warnings-button {
+  position: absolute;
+  top: 0rem;
+  right: 0rem;
+}
+
+.WarningsModal .warnings-icon {
+  height: 1rem;
+}
+.WarningsModal .warnings-button.MuiIconButton-root {
+  padding: 0.6rem;
+}
+#warnings-modal {
+  position: absolute !important;
+  inset: 50% 0% 0% 50% !important;
+}
+#warnings-panel {
+  width: 50rem;
+  padding: 2rem;
+  background-color: rgba(0, 0, 0, 0.8);
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  border-radius: 1rem;
+}
+#warnings-panel .command-row {
+  display: flex;
+  height: 2rem;
+  position: relative;
+  align-items: center;
+  margin: 0;
+}
+#warnings-panel #warnings-content div:nth-child(odd) .command-row {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+#warnings-panel-title {
+  text-align: center;
+  font-weight: 700;
+}
+#warnings-content {
+  max-height: 60vh;
+  overflow-y: scroll;
+}
+#warnings-close-button {
+  background-color: #f9efe2;
+  position: absolute;
+  top: -1.25rem;
+  right: -1.25rem;
+  color: #002326;
+}
+#warnings-close-button {
+  padding: 0.25rem;
+}
+#warnings-close-button svg {
+  height: 2rem;
+  width: 2rem;
+  font-size: 2rem;
+}

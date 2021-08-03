@@ -24,6 +24,7 @@ import ZoomInOut from './ZoomInOut';
 import UploadSVG from '../icons/upload.svg';
 import { parseReplayData } from '../utils/replays';
 import clientConfigs from './configs.json';
+import WarningsPanel from './WarningsPanel';
 export type GameComponentProps = {
   // replayData?: any;
 };
@@ -70,6 +71,7 @@ export const GameComponent = () => {
     }
   };
   const [isReady, setReady] = useState(false);
+  const [warningsPanelOpen, setWarningsPanelOpen] = useState(false);
   const [selectedTileData, setTileData] = useState<FrameTileData>(null);
   const [trackedUnitID, setTrackedUnitID] = useState<string>(null);
   const [game, setGame] = useState<Phaser.Game>(null);
@@ -483,6 +485,22 @@ export const GameComponent = () => {
                   })}
               </div>
             )}
+            <Button
+              className="warnings-button"
+              onClick={() => {
+                setWarningsPanelOpen(true);
+              }}
+            >
+              Warnings
+            </Button>
+            <WarningsPanel
+              panelOpen={warningsPanelOpen}
+              closePanel={() => {
+                setWarningsPanelOpen(false);
+              }}
+              turn={turn}
+              warnings={currentFrame.errors}
+            />
             <div className="tile-stats-wrapper">
               {selectedTileData && (
                 <TileStats
