@@ -100,7 +100,7 @@ export const GameComponent = () => {
 
         setSliderConfigs({
           min: 0,
-          max: Math.min(configs.parameters.MAX_DAYS, main.frames.length),
+          max: Math.min(configs.parameters.MAX_DAYS, main.frames.length - 1),
           step: 1,
         });
         setReady(true);
@@ -167,6 +167,24 @@ export const GameComponent = () => {
               main.originalHoverImageTileY = tileImage.y;
             }
           }
+        );
+      });
+      const ps = mapCoordsToIsometricPixels(
+        main.mapWidth / 2,
+        main.mapWidth / 2,
+        {
+          scale: main.overallScale,
+          width: main.mapWidth,
+          height: main.mapHeight,
+        }
+      );
+      [main.islandbaseImage, main.islandbaseNightImage].forEach((tileImage) => {
+        tileImage.setX(ps[0]);
+        let f = 32.3;
+        if (main.mapWidth <= 16) f = 31.7;
+        tileImage.setY(ps[1] + main.overallScale * main.mapWidth * f);
+        tileImage.setScale(
+          main.defaultScales.islandBase * main.overallScale * main.mapWidth
         );
       });
     }
@@ -415,6 +433,15 @@ export const GameComponent = () => {
       </FormGroup>
     );
   };
+  let sidetextAnnotations = [];
+  if (currentFrame && currentFrame.annotations) {
+    sidetextAnnotations = currentFrame.annotations.filter((v) => {
+      return (
+        v.command.length > 2 &&
+        v.command.split(' ')[0] === Game.ACTIONS.DEBUG_ANNOTATE_SIDETEXT
+      );
+    });
+  }
   return (
     <div className="Game">
       <ThemeProvider theme={theme}>
@@ -464,17 +491,10 @@ export const GameComponent = () => {
               sliderConfigs={sliderConfigs}
               handleSliderChange={handleSliderChange}
             />
-            {debugOn && currentFrame.annotations.length > 0 && (
+            {debugOn && sidetextAnnotations.length > 0 && (
               <div className="debug-sidetext">
                 <h4>Debug Text</h4>
-                {currentFrame.annotations
-                  .filter((v) => {
-                    return (
-                      v.command.length > 2 &&
-                      v.command.split(' ')[0] ===
-                        Game.ACTIONS.DEBUG_ANNOTATE_SIDETEXT
-                    );
-                  })
+                {sidetextAnnotations
                   .sort((v) => v.agentID)
                   .map((v) => {
                     return (

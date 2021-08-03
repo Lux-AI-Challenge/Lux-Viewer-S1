@@ -75,7 +75,7 @@ const UnitCard = ({
         hideBackdrop
       >
         <div id="unit-history-panel">
-          <h2 id="unit-history-panel-title">Command History</h2>
+          <h2 id="unit-history-panel-title">Command History for {id}</h2>
           <div id="unit-history-unit-icon-wrapper">{renderUnitSVG()}</div>
           <IconButton
             aria-label="close"
@@ -101,18 +101,18 @@ const UnitCard = ({
           </div>
         </div>
       </Modal>
-      <div className="unit-id">
+      <div className="unit-id" onClick={onClick}>
         <strong>ID:</strong> {id}
-        <IconButton
-          aria-label="unit-history"
-          className="unit-history-button"
-          onClick={() => {
-            openHistoryPanel();
-          }}
-        >
-          <img className="unit-history-icon" src={InfoSVG}></img>
-        </IconButton>
       </div>
+      <IconButton
+        aria-label="unit-history"
+        className="unit-history-button"
+        onClick={() => {
+          openHistoryPanel();
+        }}
+      >
+        <img className="unit-history-icon" src={InfoSVG}></img>
+      </IconButton>
       <div onClick={onClick}>
         <div className="worker-icon-wrapper">{renderUnitSVG()}</div>
         <div className="worker-data">
