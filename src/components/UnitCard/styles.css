@@ -122,7 +122,7 @@
 }
 #unit-history-content {
   max-height: 60vh;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 #unit-history-close-button {
   background-color: #f9efe2;

@@ -38,7 +38,7 @@
 }
 #warnings-content {
   max-height: 60vh;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 #warnings-close-button {
   background-color: #f9efe2;

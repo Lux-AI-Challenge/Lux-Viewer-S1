@@ -491,7 +491,7 @@ export const GameComponent = () => {
                 setWarningsPanelOpen(true);
               }}
             >
-              Warnings
+              Warnings ({currentFrame.errors.length})
             </Button>
             <WarningsPanel
               panelOpen={warningsPanelOpen}
