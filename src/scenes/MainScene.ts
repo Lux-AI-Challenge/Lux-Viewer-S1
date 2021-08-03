@@ -114,7 +114,7 @@ export type FrameTileData = {
   };
   turn: number;
 };
-type HandleTileClicked = (data: FrameTileData) => void;
+type HandleTileClicked = (data?: FrameTileData) => void;
 
 export interface StaticGlobalStats {
   totalResources: {
@@ -350,6 +350,12 @@ class MainScene extends Phaser.Scene {
    * Handle when a tile is clicked
    */
   private onTileClicked(v: Position, allowUnitTrack = true) {
+    if (v === null) {
+      this.handleTileClicked();
+      this.currentSelectedTilePos = null;
+      this.untrackUnit();
+      return;
+    }
     const f = this.frames[this.turn];
     const unitDataAtXY: FrameUnitData = new Map();
     const cityTile: FrameCityTileData = [];
@@ -485,13 +491,14 @@ class MainScene extends Phaser.Scene {
           pos.y >= this.mapHeight
         ) {
           // off map
+          this.onTileClicked(null);
           this.toggleOutlineClickedTile(undefined);
         } else {
+          this.onTileClicked(pos);
           const imageTile = this.floorImageTiles.get(hashMapCoords(pos)).source;
           // outline tile if it exists and we aren't tracking a unit
           this.toggleOutlineClickedTile(imageTile);
         }
-        this.onTileClicked(pos);
       }
     );
 
@@ -504,27 +511,44 @@ class MainScene extends Phaser.Scene {
         width: this.mapWidth,
         height: this.mapHeight,
       });
-      // TODO: make outline just a outline svg?
-      const imageTile = this.floorImageTiles.get(hashMapCoords(pos)).source;
-      if (imageTile) {
-        if (this.hoverImageTile == null) {
-          this.originalHoverImageTileY = imageTile.y;
-          this.hoverImageTile = imageTile;
-          this.hoverImageTile.setTexture('ground-outline');
-        } else if (this.hoverImageTile !== imageTile) {
-          if (this.activeImageTile != this.hoverImageTile) {
-            this.hoverImageTile.setTexture('ground');
-          }
-          this.originalHoverImageTileY = imageTile.y;
-          this.hoverImageTile = imageTile;
-          this.hoverImageTile.setTexture('ground-outline');
-        }
-      } else {
-        if (this.hoverImageTile) {
+      if (
+        pos.x < 0 ||
+        pos.y < 0 ||
+        pos.x >= this.mapWidth ||
+        pos.y >= this.mapHeight
+      ) {
+        // out of map
+        if (
+          this.hoverImageTile &&
+          this.activeImageTile !== this.hoverImageTile
+        ) {
           this.hoverImageTile.setY(this.originalHoverImageTileY);
           this.hoverImageTile.setTexture('ground');
         }
         this.hoverImageTile = null;
+      } else {
+        // TODO: make outline just a outline svg?
+        const imageTile = this.floorImageTiles.get(hashMapCoords(pos)).source;
+        if (imageTile) {
+          if (this.hoverImageTile == null) {
+            this.originalHoverImageTileY = imageTile.y;
+            this.hoverImageTile = imageTile;
+            this.hoverImageTile.setTexture('ground-outline');
+          } else if (this.hoverImageTile !== imageTile) {
+            if (this.activeImageTile != this.hoverImageTile) {
+              this.hoverImageTile.setTexture('ground');
+            }
+            this.originalHoverImageTileY = imageTile.y;
+            this.hoverImageTile = imageTile;
+            this.hoverImageTile.setTexture('ground-outline');
+          }
+        } else {
+          if (this.hoverImageTile) {
+            this.hoverImageTile.setY(this.originalHoverImageTileY);
+            this.hoverImageTile.setTexture('ground');
+          }
+          this.hoverImageTile = null;
+        }
       }
     });
 

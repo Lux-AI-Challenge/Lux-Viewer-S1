@@ -476,16 +476,10 @@ export const GameComponent = () => {
               </div>
             )}
             <div className="tile-stats-wrapper">
-              {selectedTileData ? (
+              {selectedTileData && (
                 <TileStats
                   {...selectedTileData}
                   cities={currentFrame.cityData}
-                  trackUnit={trackUnit}
-                  trackedUnitID={trackedUnitID}
-                />
-              ) : (
-                <TileStats
-                  empty
                   trackUnit={trackUnit}
                   trackedUnitID={trackedUnitID}
                 />
