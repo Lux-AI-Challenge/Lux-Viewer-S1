@@ -116,6 +116,22 @@ const GlobalStats = ({
         />
       ),
     },
+    {
+      title: 'Unit Count',
+      graph: (
+        <Graph
+          data={slicedAccStats.map((v, i) => {
+            return {
+              name: `${i}`,
+              team0: v.unitCounts[0],
+              team1: v.unitCounts[1],
+            };
+          })}
+          xlabel="Turn #"
+          ylabel="Unit Count"
+        />
+      ),
+    },
   ];
 
   const getResourceCollectedWidth = (team: number, rtype: string) => {

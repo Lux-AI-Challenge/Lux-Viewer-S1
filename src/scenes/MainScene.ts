@@ -134,6 +134,9 @@ export interface TurnStats {
   researchPoints: {
     [x in LUnit.TEAM]: number;
   };
+  unitCounts: {
+    [x in LUnit.TEAM]: number;
+  };
 }
 
 class MainScene extends Phaser.Scene {
@@ -1222,6 +1225,10 @@ class MainScene extends Phaser.Scene {
           game.state.teamStates[0].researchPoints,
           game.state.teamStates[1].researchPoints,
         ],
+        unitCounts: [
+          game.state.teamStates[0].units.size,
+          game.state.teamStates[1].units.size,
+        ]
       };
       game.cities.forEach((city) => {
         stats.citiesOwned[city.team] += city.citycells.length;
