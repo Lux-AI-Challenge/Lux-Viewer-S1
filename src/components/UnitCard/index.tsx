@@ -1,15 +1,23 @@
-import CardContent from '@material-ui/core/CardContent';
-import Card from '@material-ui/core/Card';
-import React from 'react';
+import React, { useState } from 'react';
 import './styles.css';
 import { FrameSingleUnitData } from '../../scenes/MainScene';
 import Team0WorkerSVG from '../../icons/team0worker.svg';
 import Team1WorkerSVG from '../../icons/team1worker.svg';
 import Team0CartSVG from '../../icons/team0cart.svg';
 import Team1CartSVG from '../../icons/team1cart.svg';
+import InfoSVG from '../../icons/info.svg';
+import CloseIcon from '@material-ui/icons/Close';
 import { Unit } from '@lux-ai/2021-challenge/lib/es6/Unit';
-import { LinearProgress, makeStyles } from '@material-ui/core';
-export type UnitCardProps = FrameSingleUnitData;
+import {
+  IconButton,
+  LinearProgress,
+  makeStyles,
+  Modal,
+} from '@material-ui/core';
+export type UnitCardProps = FrameSingleUnitData & {
+  turn: number;
+  onClick?: () => void;
+};
 
 const useStyles = makeStyles({
   progressa: {
@@ -19,8 +27,19 @@ const useStyles = makeStyles({
     backgroundColor: 'blue',
   },
 });
-const UnitCard = ({ cargo, pos, id, cooldown, team, type }: UnitCardProps) => {
+const UnitCard = ({
+  cargo,
+  pos,
+  id,
+  cooldown,
+  team,
+  type,
+  commands,
+  turn,
+  onClick,
+}: UnitCardProps) => {
   const classes = useStyles();
+  const [historyPanelOpen, sethistoryPanelOpen] = useState(false);
   const renderUnitSVG = () => {
     let svg = Team1WorkerSVG;
     if (type === Unit.Type.WORKER) {
@@ -40,47 +59,98 @@ const UnitCard = ({ cargo, pos, id, cooldown, team, type }: UnitCardProps) => {
   if (type == Unit.Type.CART) {
     maxCooldown = 6;
   }
+  const openHistoryPanel = () => {
+    sethistoryPanelOpen(true);
+  };
+  const handleCloseHistoryPanel = () => {
+    sethistoryPanelOpen(false);
+  };
   return (
     <div className="UnitCard">
-      <div className="unit-id">
+      <Modal
+        open={historyPanelOpen}
+        onClose={handleCloseHistoryPanel}
+        aria-labelledby="unit-history-panel-title"
+        id="unit-history-modal"
+        hideBackdrop
+      >
+        <div id="unit-history-panel">
+          <h2 id="unit-history-panel-title">Command History for {id}</h2>
+          <div id="unit-history-unit-icon-wrapper">{renderUnitSVG()}</div>
+          <IconButton
+            aria-label="close"
+            id="unit-history-close-button"
+            onClick={handleCloseHistoryPanel}
+          >
+            <CloseIcon />
+          </IconButton>
+          <div id="unit-history-content">
+            {commands
+              .filter((command) => command.turn < turn)
+              .sort((a, b) => b.turn - a.turn)
+              .map((command) => {
+                const renders = command.actions.map((s, i) => {
+                  return (
+                    <p className="command-row" key={`${i}-${s}`}>
+                      Turn: {command.turn} - {s}
+                    </p>
+                  );
+                });
+                return <div key={command.turn}>{renders}</div>;
+              })}
+          </div>
+        </div>
+      </Modal>
+      <div className="unit-id" onClick={onClick}>
         <strong>ID:</strong> {id}
       </div>
-      <div className="worker-icon-wrapper">{renderUnitSVG()}</div>
-      <div className="worker-data">
-        <p>
-          <strong>Pos:</strong>{' '}
-          <span>
-            ({pos.x}, {pos.y})
-          </span>
-        </p>
-        <p>
-          <strong>Wood:</strong> <span>{cargo.wood}</span>
-        </p>
-        <p>
-          <strong>Coal:</strong> <span>{cargo.coal}</span>
-        </p>
-        <p>
-          <strong>Uranium:</strong> <span>{cargo.uranium}</span>
-        </p>
-      </div>
-      <div className="cooldown-bar-wrapper">
-        <div className="cooldown-value-wrapper">
-          <span className="cooldown-title">
-            <strong>Cooldown:</strong>
-          </span>{' '}
-          <span className="cooldown-value">
-            {cooldown} / {maxCooldown}
-          </span>
+      <IconButton
+        aria-label="unit-history"
+        className="unit-history-button"
+        onClick={() => {
+          openHistoryPanel();
+        }}
+      >
+        <img className="unit-history-icon" src={InfoSVG}></img>
+      </IconButton>
+      <div onClick={onClick}>
+        <div className="worker-icon-wrapper">{renderUnitSVG()}</div>
+        <div className="worker-data">
+          <p>
+            <strong>Pos:</strong>{' '}
+            <span>
+              ({pos.x}, {pos.y})
+            </span>
+          </p>
+          <p>
+            <strong>Wood:</strong> <span>{cargo.wood}</span>
+          </p>
+          <p>
+            <strong>Coal:</strong> <span>{cargo.coal}</span>
+          </p>
+          <p>
+            <strong>Uranium:</strong> <span>{cargo.uranium}</span>
+          </p>
         </div>
+        <div className="cooldown-bar-wrapper">
+          <div className="cooldown-value-wrapper">
+            <span className="cooldown-title">
+              <strong>Cooldown:</strong>
+            </span>{' '}
+            <span className="cooldown-value">
+              {cooldown} / {maxCooldown}
+            </span>
+          </div>
 
-        <LinearProgress
-          className={
-            (team === Unit.TEAM.A ? 'cooldown-a' : 'cooldown-b') +
-            ' cooldown-bar'
-          }
-          variant="determinate"
-          value={(cooldown * 100) / maxCooldown}
-        />
+          <LinearProgress
+            className={
+              (team === Unit.TEAM.A ? 'cooldown-a' : 'cooldown-b') +
+              ' cooldown-bar'
+            }
+            variant="determinate"
+            value={(cooldown * 100) / maxCooldown}
+          />
+        </div>
       </div>
     </div>
   );

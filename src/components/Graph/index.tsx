@@ -48,6 +48,7 @@ const Graph = ({ data, ylabel, xlabel }: GraphProps) => {
               angle: -90,
               position: 'insideLeft',
               fill: '#f9efe2',
+              color: 'f9efe2',
             }}
           ></YAxis>
           <Tooltip labelStyle={{ color: '#323D34' }} />

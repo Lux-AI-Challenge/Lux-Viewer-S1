@@ -1,38 +1,38 @@
-<svg width="253" height="253" viewBox="0 0 253 253" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M253 188.128L104 252.605V132.605L253 188.128Z" fill="#5C6017"/>
-<path d="M103.867 13.7773L104.574 252.249L0 191.75L103.867 13.7773Z" fill="#80B93C"/>
-<path d="M103.866 13.7783V252.249L208.439 191.751L103.866 13.7783Z" fill="#3B5A12"/>
-<mask id="mask0" mask-type="alpha" maskUnits="userSpaceOnUse" x="0" y="13" width="104" height="240">
-<path d="M103.867 13.7773V252.248L0 192.103L103.867 13.7773Z" fill="#80B93C"/>
+<svg width="197" height="198" viewBox="0 0 197 198" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M197 147.46L80.9802 198V103.94L197 147.46Z" fill="#5C6017"/>
+<path d="M80.8769 10.7991L81.4271 197.72L0 150.3L80.8769 10.7991Z" fill="#80B93C"/>
+<path d="M80.8752 10.7999V197.721L162.302 150.3L80.8752 10.7999Z" fill="#3B5A12"/>
+<mask id="mask0" mask-type="alpha" maskUnits="userSpaceOnUse" x="0" y="10" width="81" height="188">
+<path d="M80.8769 10.7991V197.72L0 150.576L80.8769 10.7991Z" fill="#80B93C"/>
 </mask>
 <g mask="url(#mask0)">
 <g filter="url(#filter0_d)">
-<path d="M103.633 -30.7373V100.961L53.9766 72.486L103.633 -30.7373Z" fill="#97CB6F"/>
+<path d="M80.6945 -24.093V79.1366L42.0288 56.8166L80.6945 -24.093Z" fill="#97CB6F"/>
 </g>
 </g>
-<mask id="mask1" mask-type="alpha" maskUnits="userSpaceOnUse" x="103" y="13" width="106" height="240">
-<path d="M103.866 13.7773V252.248L208.439 191.749L103.866 13.7773Z" fill="#354F13"/>
+<mask id="mask1" mask-type="alpha" maskUnits="userSpaceOnUse" x="80" y="10" width="83" height="188">
+<path d="M80.8752 10.7991V197.72L162.302 150.299L80.8752 10.7991Z" fill="#354F13"/>
 </mask>
 <g mask="url(#mask1)">
 <g filter="url(#filter1_d)">
-<path d="M103.628 -30.7373V100.961L153.285 72.486L103.628 -30.7373Z" fill="#5C8A2E"/>
+<path d="M80.6909 -24.093V79.1366L119.357 56.8166L80.6909 -24.093Z" fill="#5C8A2E"/>
 </g>
 </g>
-<path d="M103.633 0V100.963L53.9766 72.4874L103.633 0Z" fill="#80B93C"/>
-<path d="M103.632 0V100.963L153.289 72.4871L103.632 0Z" fill="#3B5A12"/>
+<path d="M80.695 0V79.1377L42.0293 56.8178L80.695 0Z" fill="#80B93C"/>
+<path d="M80.6946 0V79.1376L119.36 56.8176L80.6946 0Z" fill="#3B5A12"/>
 <defs>
-<filter id="filter0_d" x="46.9766" y="-30.7373" width="63.6569" height="145.699" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<filter id="filter0_d" x="35.0288" y="-24.093" width="52.6657" height="117.23" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
 <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
 <feOffset dy="7"/>
 <feGaussianBlur stdDeviation="3.5"/>
 <feColorMatrix type="matrix" values="0 0 0 0 0.435294 0 0 0 0 0.623529 0 0 0 0 0.262745 0 0 0 1 0"/>
 <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
 <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
 </filter>
-<filter id="filter1_d" x="96.6289" y="-30.7373" width="63.6569" height="145.699" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<filter id="filter1_d" x="73.6909" y="-24.093" width="52.6657" height="117.23" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
 <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
 <feOffset dy="7"/>
 <feGaussianBlur stdDeviation="3.5"/>
 <feColorMatrix type="matrix" values="0 0 0 0 0.164706 0 0 0 0 0.247059 0 0 0 0 0.0470588 0 0 0 1 0"/>

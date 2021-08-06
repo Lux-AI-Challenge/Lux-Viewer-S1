@@ -4,6 +4,10 @@
   margin-bottom: 2rem;
   flex-wrap: wrap;
   position: relative;
+  padding: 0.5rem;
+  border-radius: 1rem;
+  transition: all 0.3s;
+  cursor: pointer;
 }
 .UnitCard .unit-id {
   width: 100%;
@@ -12,14 +16,14 @@
 .UnitCard .unit-id:before {
   content: '';
   position: absolute;
-  margin-top: 18px;
+  margin-top: 1.38rem;
   background: rgba(50, 61, 52, 0.1);
-  height: 4px;
-  width: calc(100%);
+  height: 0.325rem;
+  width: calc(100% - 1rem);
 }
 .UnitCard .worker-icon-wrapper {
   display: inline-block;
-  width: 4rem;
+  width: 3.5rem;
   margin-right: 1rem;
 }
 .UnitCard .worker-icon-wrapper img {
@@ -69,4 +73,73 @@
 }
 .UnitCard .cooldown-b .MuiLinearProgress-barColorPrimary {
   background-color: #3686ff;
+}
+
+.UnitCard .unit-history-button {
+  position: absolute;
+  top: 0rem;
+  right: 0rem;
+}
+
+.UnitCard .unit-history-icon {
+  height: 1rem;
+}
+.UnitCard .unit-history-button.MuiIconButton-root {
+  padding: 0.6rem;
+}
+#unit-history-modal {
+  position: absolute !important;
+  z-index: 1300;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%);
+  bottom: auto !important;
+  right: auto !important;
+}
+#unit-history-panel {
+  width: 50rem;
+  padding: 2rem;
+  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(0, 0, 0, 0.8);
+  border-radius: 1rem;
+}
+#unit-history-panel .command-row {
+  display: flex;
+  height: 2rem;
+  position: relative;
+  align-items: center;
+  margin: 0;
+}
+#unit-history-panel #unit-history-content div:nth-child(odd) .command-row {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+#unit-history-panel-title {
+  text-align: center;
+  font-weight: 700;
+}
+#unit-history-unit-icon-wrapper {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+#unit-history-unit-icon-wrapper img {
+  height: 3rem;
+}
+#unit-history-content {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+#unit-history-close-button {
+  background-color: #f9efe2;
+  position: absolute;
+  top: -1.25rem;
+  right: -1.25rem;
+  color: #002326;
+}
+#unit-history-close-button {
+  padding: 0.25rem;
+}
+#unit-history-close-button svg {
+  height: 2rem;
+  width: 2rem;
+  font-size: 2rem;
 }

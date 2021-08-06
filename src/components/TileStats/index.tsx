@@ -15,6 +15,9 @@ import CityTileCard from '../CityTileCard';
 export type TileStatsProps = Partial<FrameTileData> & {
   cities?: FrameCityData;
   empty?: boolean;
+  trackUnit: (id: string) => void;
+  untrackUnit: (id: string) => void;
+  trackedUnitID: string;
 };
 const TileStats = ({
   pos,
@@ -24,6 +27,10 @@ const TileStats = ({
   resources,
   empty,
   roadLevel,
+  turn,
+  trackedUnitID,
+  untrackUnit,
+  trackUnit,
 }: TileStatsProps) => {
   const renderResourceSVG = () => {
     let svg = ResourceWood;
@@ -67,27 +74,7 @@ const TileStats = ({
                 </p>
               </div>
             )}
-            {allunits.length > 0 && <div className="subtitle">Units:</div>}
-            <Grid container className="UnitStats" spacing={1}>
-              {cityTile.length > 0 && (
-                <Grid
-                  item
-                  className="CityTileData"
-                  xs={6}
-                  key={cityTile[0].cityid}
-                >
-                  <CityTileCard cityTiles={cityTile} pos={pos} />
-                </Grid>
-              )}
-              {allunits.map((v) => {
-                return (
-                  <Grid item className="UnitData" xs={6} key={v.id}>
-                    <UnitCard {...v} />
-                  </Grid>
-                );
-              })}
-            </Grid>
-            {cityTile.length > 0 && (
+            {cityTile.length > 0 && cities.get(cityTile[0].cityid) && (
               <>
                 <div className="subtitle">City Info</div>
                 <Grid container className="CityStats">
@@ -98,6 +85,55 @@ const TileStats = ({
                 </Grid>
               </>
             )}
+            {allunits.length > 0 && <div className="subtitle">Units:</div>}
+            <Grid container className="UnitStats" spacing={1}>
+              {allunits
+                .sort((a, b) => {
+                  if (a.id === trackedUnitID) {
+                    return -1;
+                  } else if (b.id === trackedUnitID) {
+                    return 1;
+                  }
+                  return 0;
+                })
+                .map((v) => {
+                  return (
+                    <Grid item className="UnitData" xs={6} key={v.id}>
+                      <div
+                        className={
+                          trackedUnitID === v.id ? 'tracked-unit-card' : ''
+                        }
+                        // onClick={}
+                      >
+                        <UnitCard
+                          {...v}
+                          turn={turn}
+                          onClick={() => {
+                            if (trackedUnitID === v.id) {
+                              untrackUnit(v.id);
+                            } else {
+                              trackUnit(v.id);
+                            }
+                          }}
+                        />
+                      </div>
+                    </Grid>
+                  );
+                })}
+            </Grid>
+            <Grid container>
+              <Grid item xs={2}></Grid>
+              {cityTile.length > 0 && (
+                <Grid
+                  item
+                  className="CityTileData"
+                  xs={8}
+                  key={cityTile[0].cityid}
+                >
+                  <CityTileCard cityTiles={cityTile} pos={pos} />
+                </Grid>
+              )}
+            </Grid>
           </>
         )}
       </LuxCard>

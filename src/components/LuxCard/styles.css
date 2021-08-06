@@ -9,16 +9,16 @@
   margin-top: 0.15rem;
   padding-top: 0.5rem;
   /* background: url('bg.svg'); */
-  background: linear-gradient(
+  /* background: linear-gradient(
     90deg,
     rgba(0, 175, 189, 0) 0%,
     rgba(0, 175, 189, 0.5) 40%,
     rgba(0, 175, 189, 0.5) 60%,
     rgba(0, 175, 189, 0) 100%
-  );
+  ); */
 }
 .LuxCard > .title {
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 700;
   color: #f9efe2;
   text-align: center;

@@ -1,5 +1,5 @@
 import 'phaser';
-import React, { useEffect, useState } from 'react';
+import React, { KeyboardEvent, useEffect, useState } from 'react';
 import MainScene, { Frame, FrameTileData } from '../scenes/MainScene';
 import { createGame } from '../game';
 import {
@@ -13,13 +13,18 @@ import {
 import './styles.css';
 import { LuxMatchConfigs, Game } from '@lux-ai/2021-challenge/lib/es6';
 import TileStats from './TileStats';
-import { hashToMapPosition, mapCoordsToIsometricPixels } from '../scenes/utils';
+import {
+  hashMapCoords,
+  hashToMapPosition,
+  mapCoordsToIsometricPixels,
+} from '../scenes/utils';
 import GlobalStats from './GlobalStats';
 import Controller from './Controller';
 import ZoomInOut from './ZoomInOut';
 import UploadSVG from '../icons/upload.svg';
 import { parseReplayData } from '../utils/replays';
 import clientConfigs from './configs.json';
+import WarningsPanel from './WarningsPanel';
 export type GameComponentProps = {
   // replayData?: any;
 };
@@ -43,7 +48,7 @@ export const GameComponent = () => {
   const [useKaggleReplay, setUseKaggleReplay] = useState(true);
   const [playbackSpeed, _setPlaybackSpeed] = useState(1);
   const setPlaybackSpeed = (speed: number) => {
-    if (speed >= 0.5 && speed <= 16) {
+    if (speed >= 0.5 && speed <= 32) {
       _setPlaybackSpeed(speed);
       main.speed = speed;
     }
@@ -66,7 +71,9 @@ export const GameComponent = () => {
     }
   };
   const [isReady, setReady] = useState(false);
+  const [warningsPanelOpen, setWarningsPanelOpen] = useState(false);
   const [selectedTileData, setTileData] = useState<FrameTileData>(null);
+  const [trackedUnitID, setTrackedUnitID] = useState<string>(null);
   const [game, setGame] = useState<Phaser.Game>(null);
   const [main, setMain] = useState<MainScene>(null);
   const [configs, setConfigs] = useState<LuxMatchConfigs>(null);
@@ -141,28 +148,51 @@ export const GameComponent = () => {
       // move to current turn to rerender all objects appropriately
       moveToTurn(turn);
       // TODO: do a on scale change instead inside main
-      main.floorImageTiles.forEach((tileImage, hash) => {
-        const pos = hashToMapPosition(hash);
-        const ps = mapCoordsToIsometricPixels(pos.x, pos.y, {
+      main.floorImageTiles.forEach((info, hash) => {
+        [info.source, info.overlay, info.roadOverlay].forEach(
+          (tileImage, i) => {
+            const pos = hashToMapPosition(hash);
+            const ps = mapCoordsToIsometricPixels(pos.x, pos.y, {
+              scale: main.overallScale,
+              width: main.mapWidth,
+              height: main.mapHeight,
+            });
+            tileImage.setScale(main.defaultScales.block * main.overallScale);
+            tileImage.setX(ps[0]);
+            tileImage.setY(ps[1]);
+            if (tileImage == main.activeImageTile) {
+              main.originalTileY = tileImage.y;
+            }
+            if (tileImage == main.hoverImageTile) {
+              main.originalHoverImageTileY = tileImage.y;
+            }
+          }
+        );
+      });
+      const ps = mapCoordsToIsometricPixels(
+        main.mapWidth / 2,
+        main.mapWidth / 2,
+        {
           scale: main.overallScale,
           width: main.mapWidth,
           height: main.mapHeight,
-        });
-        tileImage.setScale(main.defaultScales.block * main.overallScale);
+        }
+      );
+      [main.islandbaseImage, main.islandbaseNightImage].forEach((tileImage) => {
         tileImage.setX(ps[0]);
-        tileImage.setY(ps[1]);
-        if (tileImage == main.activeImageTile) {
-          main.originalTileY = tileImage.y;
-        }
-        if (tileImage == main.hoverImageTile) {
-          main.originalHoverImageTileY = tileImage.y;
-        }
+        let f = 32.3;
+        if (main.mapWidth <= 16) f = 31.7;
+        tileImage.setY(ps[1] + main.overallScale * main.mapWidth * f);
+        tileImage.setScale(
+          main.defaultScales.islandBase * main.overallScale * main.mapWidth
+        );
       });
     }
   }, [main, visualScale]);
 
   /** handle the change of the slider to move turns */
   const handleSliderChange = (_event: any, newValue: number) => {
+    setRunning(false);
     moveToTurn(newValue);
   };
 
@@ -170,7 +200,56 @@ export const GameComponent = () => {
   const moveToTurn = (turn: number) => {
     setTurn(turn);
     main.renderFrame(turn);
+
     setFrame(main.frames[turn]);
+    //render the right bg color
+    const colors = [
+      '00AFBD',
+      '438D91',
+      '846D68',
+      'A55D53',
+      '704A60',
+      '4D3D59',
+      '2C2E33',
+    ];
+    const canvasWrapper = document
+      .getElementById('content')
+      .getElementsByTagName('canvas')[0];
+    const dayLength = main.luxgame.configs.parameters.DAY_LENGTH;
+    const cycleLength =
+      dayLength + main.luxgame.configs.parameters.NIGHT_LENGTH;
+    let idx = 0;
+    if (
+      turn % cycleLength >= dayLength - 5 &&
+      turn % cycleLength < dayLength + 1
+    ) {
+      idx = (turn % cycleLength) - (dayLength - 5);
+    } else if (
+      turn % cycleLength >= dayLength + 1 &&
+      turn % cycleLength < cycleLength - 1
+    ) {
+      idx = 6;
+    } else if (turn % cycleLength >= cycleLength - 1) {
+      idx = 5;
+    } else if (turn % cycleLength < 5 && turn > 5) {
+      idx = 6 - ((turn % cycleLength) + 2);
+    }
+    console.log({ canvasWrapper });
+    canvasWrapper.style.transition = `background-color linear ${
+      1 / main.speed
+    }s`;
+    canvasWrapper.style.backgroundColor = `#${colors[idx]}`;
+  };
+
+  /** track a unit by id */
+  const trackUnit = (id: string) => {
+    setTrackedUnitID(id);
+    main.untrackUnit();
+    main.trackUnit(id);
+  };
+  const untrackUnit = (id: string) => {
+    setTrackedUnitID(null);
+    main.untrackUnit(true);
   };
 
   /** load game given json replay data */
@@ -181,21 +260,18 @@ export const GameComponent = () => {
         jsonReplayData.version !== clientConfigs.version
       ) {
         if (jsonReplayData.version === undefined) {
+          alert('No version associated with replay data, cannot load');
+          return;
+        }
+        const versionvals = jsonReplayData.version.split('.');
+        if (
+          versionvals[0] !== clientConfigs.version[0] ||
+          versionvals[1] !== clientConfigs.version[2]
+        ) {
           alert(
-            `Replay file works on version 1.0.x but client is on version ${clientConfigs.version}. Download an older visualizer here: https://github.com/Lux-AI-Challenge/LuxViewer2021/releases`
+            `Replay file works on version ${versionvals[0]}.${versionvals[1]}.x but client is on version ${clientConfigs.version}. The visualizer will most likely not work correctly. Download an older visualizer here to watch the replay: https://github.com/Lux-AI-Challenge/LuxViewer2021/releases`
           );
           return;
-        } else {
-          const versionvals = jsonReplayData.version.split('.');
-          if (
-            versionvals[0] !== clientConfigs.version[0] ||
-            versionvals[1] !== clientConfigs.version[2]
-          ) {
-            alert(
-              `Replay file works on version ${versionvals[0]}.${versionvals[1]}.x but client is on version ${clientConfigs.version}. Download an older visualizer here: https://github.com/Lux-AI-Challenge/LuxViewer2021/releases`
-            );
-            return;
-          }
         }
       }
     }
@@ -206,8 +282,8 @@ export const GameComponent = () => {
     setReplayData(jsonReplayData);
     const newgame = createGame({
       replayData: jsonReplayData,
-      handleUnitClicked,
       handleTileClicked,
+      handleUnitTracked,
       zoom,
     });
     setGame(newgame);
@@ -270,6 +346,13 @@ export const GameComponent = () => {
                 console.log(event.data);
                 replay = parseReplayData(replay);
                 loadGame(replay, true);
+                const el = document.getElementsByTagName('html');
+                if (window.innerWidth * 0.65 <= 768) {
+                  el[0].style.fontSize = '6pt';
+                }
+                if (window.innerWidth * 0.65 <= 1280) {
+                  el[0].style.fontSize = '8pt';
+                }
               }
             } catch (err) {
               console.error('Could not parse game');
@@ -280,27 +363,53 @@ export const GameComponent = () => {
         );
       }
     }
+    // change root font size depending on window size
+    const el = document.getElementsByTagName('html');
+    if (window.innerWidth <= 768) {
+      // set the font size of root html smaller since this is being viewed on the kaggle page
+      el[0].style.fontSize = '6pt';
+    } else if (window.innerWidth <= 1280) {
+      el[0].style.fontSize = '8pt';
+    }
     // loadGame(debug_replay);
   }, []);
+  useEffect(() => {
+    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
+      switch (event.key) {
+        case 'ArrowUp':
+          setPlaybackSpeed(playbackSpeed * 2);
+          break;
+        case 'ArrowDown':
+          setPlaybackSpeed(playbackSpeed / 2);
+          break;
+        case 'ArrowRight':
+          setRunning(false);
+          if (
+            turn < Math.min(configs.parameters.MAX_DAYS, main.frames.length - 1)
+          ) {
+            moveToTurn(turn + 1);
+          }
+          break;
+        case 'ArrowLeft':
+          setRunning(false);
+          if (turn > 0) {
+            moveToTurn(turn - 1);
+          }
+          break;
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [turn, playbackSpeed, main, configs]);
 
-  /** when replay data is changed, create new game */
-  // useEffect(() => {
-  //   if (replayData) {
-  //     const newgame = createGame({
-  //       replayData: replayData,
-  //       handleUnitClicked,
-  //       handleTileClicked,
-  //     });
-  //     setGame(newgame);
-  //     setUploading(false);
-  //   }
-  // }, [replayData]);
-
-  const handleUnitClicked = (data) => {
-    console.log(data);
-  };
-  const handleTileClicked = (data) => {
+  const handleTileClicked = (data: FrameTileData) => {
     setTileData(data);
+    // deal with unit tracking, which unfortunately has data fragmented between react and the phaser scene
+  };
+  const handleUnitTracked = (id: string) => {
+    setTrackedUnitID(id);
   };
 
   const [debugOn, _setDebug] = useState(true);
@@ -324,6 +433,15 @@ export const GameComponent = () => {
       </FormGroup>
     );
   };
+  let sidetextAnnotations = [];
+  if (currentFrame && currentFrame.annotations) {
+    sidetextAnnotations = currentFrame.annotations.filter((v) => {
+      return (
+        v.command.length > 2 &&
+        v.command.split(' ')[0] === Game.ACTIONS.DEBUG_ANNOTATE_SIDETEXT
+      );
+    });
+  }
   return (
     <div className="Game">
       <ThemeProvider theme={theme}>
@@ -373,17 +491,10 @@ export const GameComponent = () => {
               sliderConfigs={sliderConfigs}
               handleSliderChange={handleSliderChange}
             />
-            {debugOn && currentFrame.annotations.length > 0 && (
+            {debugOn && sidetextAnnotations.length > 0 && (
               <div className="debug-sidetext">
                 <h4>Debug Text</h4>
-                {currentFrame.annotations
-                  .filter((v) => {
-                    return (
-                      v.command.length > 2 &&
-                      v.command.split(' ')[0] ===
-                        Game.ACTIONS.DEBUG_ANNOTATE_SIDETEXT
-                    );
-                  })
+                {sidetextAnnotations
                   .sort((v) => v.agentID)
                   .map((v) => {
                     return (
@@ -394,14 +505,31 @@ export const GameComponent = () => {
                   })}
               </div>
             )}
+            <Button
+              className="warnings-button"
+              onClick={() => {
+                setWarningsPanelOpen(true);
+              }}
+            >
+              Warnings ({currentFrame.errors.length})
+            </Button>
+            <WarningsPanel
+              panelOpen={warningsPanelOpen}
+              closePanel={() => {
+                setWarningsPanelOpen(false);
+              }}
+              turn={turn}
+              warnings={currentFrame.errors}
+            />
             <div className="tile-stats-wrapper">
-              {selectedTileData ? (
+              {selectedTileData && (
                 <TileStats
                   {...selectedTileData}
                   cities={currentFrame.cityData}
+                  trackUnit={trackUnit}
+                  untrackUnit={untrackUnit}
+                  trackedUnitID={trackedUnitID}
                 />
-              ) : (
-                <TileStats empty />
               )}
             </div>
             <div className="global-stats-wrapper">

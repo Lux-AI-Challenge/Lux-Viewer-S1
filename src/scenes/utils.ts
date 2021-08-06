@@ -1,5 +1,6 @@
 import { GameMap } from '@lux-ai/2021-challenge/lib/es6/GameMap';
 import { Position } from '@lux-ai/2021-challenge/lib/es6/GameMap/position';
+import { GameObjects } from 'phaser';
 
 const angleFactor = 2.4;
 
@@ -26,16 +27,16 @@ export const mapIsometricPixelsToPosition = (
   py: number,
   map: { scale: number; width: number; height: number }
 ): Position => {
-  //TODO 450 and 150 are hardcoded, hard to make responsive
-  // px
-  // py -= (scale * 1280) / 2;
   const f = 35 * 2 * map.scale;
-
-  // TODO, why are these backward??
+  let g = 1.5;
+  if (map.width === 12) g = 0.5;
+  else if (map.width === 16) g = 1;
+  else if (map.width === 24) g = 1.5;
+  else if (map.width === 32) g = 2;
   let _y =
     (px - (angleFactor / (angleFactor - 1)) * py) / (-2 * f) +
     map.height / 2 -
-    1;
+    g;
   let _x = px / f + _y;
   return new Position(Math.round(_x), Math.round(_y));
 };
@@ -98,4 +99,19 @@ export const getRoadType = (adjacency: boolean[]): string => {
     bin += b ? '1' : '0';
   });
   return 'path' + bin;
+};
+
+export const getNightTransitionTween = (
+  sprite: GameObjects.Image,
+  speed: number,
+  alpha: number
+) => {
+  return {
+    targets: sprite,
+    alpha,
+    ease: 'Linear',
+    duration: 1000 / speed,
+    repeat: 0,
+    yoyo: false,
+  };
 };
