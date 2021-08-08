@@ -1228,7 +1228,7 @@ class MainScene extends Phaser.Scene {
         unitCounts: [
           game.state.teamStates[0].units.size,
           game.state.teamStates[1].units.size,
-        ]
+        ],
       };
       game.cities.forEach((city) => {
         stats.citiesOwned[city.team] += city.citycells.length;

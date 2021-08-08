@@ -120,8 +120,9 @@ export const GameComponent = () => {
           setRunning(false);
           return;
         }
-        moveToTurn(currTurn);
         currTurn += 1;
+        moveToTurn(currTurn);
+
         setTurn(currTurn);
       }, 1000 / playbackSpeed);
       return () => clearInterval(interval);
