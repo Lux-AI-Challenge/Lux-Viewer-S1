@@ -16,7 +16,7 @@ serve dist
 
 And you should be able to navigate to http://localhost:5000 to use the visualizer, upload replays, and watch them, and begin to analyze matches!
 
-![](./game_replay.gif)
+![](./daynightshift.gif)
 
 If you would like to view replays in higher quality, add "?scale=2" to the end of the visualizer url. For lower quality you can set as low as "?scale=1". Scale ranges from 1 to 3 with the default being 1.5.
 
