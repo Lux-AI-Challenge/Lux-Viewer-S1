@@ -28,7 +28,7 @@ e.g. http://localhost:5000/?scale=2 or https://2021vis.lux-ai.org/?scale=2
 - Zoom in or out of the map as necessary
 - Play back the movement of units smoothly
 - See statistics and graphs on your bots
-- Open the dev console on the browser to see any warnings/errors your agent encounters each turn
+- See match warnings live turn by turn
 - Toggle a debug mode that lets you visualize annotations your bot writes within the match
 
 ## Development
