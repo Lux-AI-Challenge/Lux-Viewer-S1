@@ -774,7 +774,6 @@ class MainScene extends Phaser.Scene {
     if (!f) {
       return;
     }
-    console.log(`Errors on turn ${turn}`, f.errors);
 
     const dayLength = this.luxgame.configs.parameters.DAY_LENGTH;
     const cycleLength =
@@ -1379,6 +1378,8 @@ class MainScene extends Phaser.Scene {
   lastPointerPosition = null;
 
   update(time: number, delta: number) {
+    // console.log('drawing stuff');
+    // console.log(1 / (delta * 1e-3));
     const panvelocity = 32 * Math.sqrt(this.overallScale);
     const wkey = this.input.keyboard.addKey('W');
     if (wkey.isDown) {
