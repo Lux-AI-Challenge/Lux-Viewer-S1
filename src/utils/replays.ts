@@ -19,6 +19,8 @@ export const parseReplayData = (rawReplayData: any) => {
     const replay = {
       allCommands: commands.slice(1), // slice 1 to remove empty first entry that represents the "observation"
       mapType: rawReplayData.configuration.mapType,
+      width: rawReplayData.configuration.width,
+      height: rawReplayData.configuration.height,
       seed: parseInt(rawReplayData.configuration.seed),
       teamDetails: [
         {
