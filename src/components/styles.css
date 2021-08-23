@@ -43,6 +43,10 @@
 .Game .upload-icon-no-replay {
   width: 3rem;
 }
+.Game .upload-no-replay-wrapper > p {
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
 .Game .upload-no-replay-wrapper > div > .upload-btn .upload-text {
   margin-right: 1rem;
 }
@@ -112,8 +116,8 @@
   background-color: rgba(50, 61, 52, 0.1);
   padding: 0.5rem;
   border-radius: 1rem;
-  height: 1.5rem;
-  line-height: 1.5rem;
+  /* height: 1.5rem; */
+  /* line-height: 1.5rem; */
 }
 
 .Game .debug-sidetext {
@@ -139,7 +143,7 @@
 .Game .warnings-button {
   position: absolute;
   top: 1rem;
-  right: 10rem;
+  right: 12rem;
   background-color: rgba(255, 255, 255, 0.25);
   border-radius: 1rem;
   color: white;

@@ -16,17 +16,21 @@ export const parseReplayData = (rawReplayData: any) => {
       );
       commands.push(turnCommands);
     });
+    let width = rawReplayData.configuration.width;
+    let height = rawReplayData.configuration.height;
     const replay = {
       allCommands: commands.slice(1), // slice 1 to remove empty first entry that represents the "observation"
       mapType: rawReplayData.configuration.mapType,
+      width: width === -1 ? undefined : width,
+      height: height === -1 ? undefined : height,
       seed: parseInt(rawReplayData.configuration.seed),
       teamDetails: [
         {
-          name: 'team-1',
+          name: 'team 0',
           tournamentID: '',
         },
         {
-          name: 'team-2',
+          name: 'team 1',
           tournamentID: '',
         },
       ],

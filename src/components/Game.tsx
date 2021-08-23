@@ -1,5 +1,5 @@
 import 'phaser';
-import React, { KeyboardEvent, useEffect, useState } from 'react';
+import React, { KeyboardEvent, useEffect, useState, version } from 'react';
 import MainScene, { Frame, FrameTileData } from '../scenes/MainScene';
 import { createGame } from '../game';
 import {
@@ -25,6 +25,7 @@ import UploadSVG from '../icons/upload.svg';
 import { parseReplayData } from '../utils/replays';
 import clientConfigs from './configs.json';
 import WarningsPanel from './WarningsPanel';
+// import debug_replay from './replay.json';
 export type GameComponentProps = {
   // replayData?: any;
 };
@@ -47,6 +48,8 @@ export const GameComponent = () => {
   const [running, setRunning] = useState(false);
   const [useKaggleReplay, setUseKaggleReplay] = useState(true);
   const [playbackSpeed, _setPlaybackSpeed] = useState(1);
+  const [replayVersion, setReplayVersion] = useState('');
+  const [warningMessage, setWarningMessage] = useState('');
   const setPlaybackSpeed = (speed: number) => {
     if (speed >= 0.5 && speed <= 32) {
       _setPlaybackSpeed(speed);
@@ -235,7 +238,6 @@ export const GameComponent = () => {
     } else if (turn % cycleLength < 5 && turn > 5) {
       idx = 6 - ((turn % cycleLength) + 2);
     }
-    console.log({ canvasWrapper });
     canvasWrapper.style.transition = `background-color linear ${
       1 / main.speed
     }s`;
@@ -254,27 +256,23 @@ export const GameComponent = () => {
   };
 
   /** load game given json replay data */
-  const loadGame = (jsonReplayData: any, skipVersionCheck = false) => {
-    if (!skipVersionCheck) {
+  const loadGame = (jsonReplayData: any) => {
+    let versionMisMatch = false;
+    let versionvals = ['x', 'x'];
+    setReplayVersion(jsonReplayData.version);
+    if (jsonReplayData.version !== undefined) {
+      versionvals = jsonReplayData.version.split('.');
       if (
-        jsonReplayData.version === undefined ||
-        jsonReplayData.version !== clientConfigs.version
+        versionvals[0] !== clientConfigs.version[0] ||
+        versionvals[1] !== clientConfigs.version[2]
       ) {
-        if (jsonReplayData.version === undefined) {
-          alert('No version associated with replay data, cannot load');
-          return;
-        }
-        const versionvals = jsonReplayData.version.split('.');
-        if (
-          versionvals[0] !== clientConfigs.version[0] ||
-          versionvals[1] !== clientConfigs.version[2]
-        ) {
-          alert(
-            `Replay file works on version ${versionvals[0]}.${versionvals[1]}.x but client is on version ${clientConfigs.version}. The visualizer will most likely not work correctly. Download an older visualizer here to watch the replay: https://github.com/Lux-AI-Challenge/LuxViewer2021/releases`
-          );
-          return;
-        }
+        versionMisMatch = true;
       }
+    }
+    if (versionMisMatch) {
+      let warningMessage = `Replay file works on version ${versionvals[0]}.${versionvals[1]}.x but client is on version ${clientConfigs.version}. The visualizer will not be able to parse this replay file. Download an older visualizer with version ${versionvals[0]}.${versionvals[1]}.x here to watch the replay: https://github.com/Lux-AI-Challenge/LuxViewer2021/releases`;
+      setWarningMessage(warningMessage);
+      return;
     }
     if (game) {
       game.destroy(true, false);
@@ -346,7 +344,7 @@ export const GameComponent = () => {
                 console.log('post message:');
                 console.log(event.data);
                 replay = parseReplayData(replay);
-                loadGame(replay, true);
+                loadGame(replay);
                 const el = document.getElementsByTagName('html');
                 if (window.innerWidth * 0.65 <= 768) {
                   el[0].style.fontSize = '6pt';
@@ -372,7 +370,7 @@ export const GameComponent = () => {
     } else if (window.innerWidth <= 1280) {
       el[0].style.fontSize = '8pt';
     }
-    // loadGame(debug_replay);
+    // loadGame(parseReplayData(debug_replay));
   }, []);
   useEffect(() => {
     const handleKeyDown = (event: globalThis.KeyboardEvent) => {
@@ -447,7 +445,7 @@ export const GameComponent = () => {
     <div className="Game">
       <ThemeProvider theme={theme}>
         <div id="content"></div>
-        {!isReady && (
+        {!isReady && warningMessage === '' && (
           <div className="upload-no-replay-wrapper">
             <p>Welcome to the Lux AI Season 1 Visualizer</p>
             <div>
@@ -473,8 +471,21 @@ export const GameComponent = () => {
             </div>
           </div>
         )}
+        {warningMessage !== '' && (
+          <div className="upload-no-replay-wrapper">
+            <p>{warningMessage}</p>
+          </div>
+        )}
+
         <div id="version-number">
-          <strong>Version: </strong>
+          {replayVersion && (
+            <>
+              <strong>Replay Version: </strong>
+              {replayVersion}
+              <br></br>
+            </>
+          )}
+          <strong>Client Version: </strong>
           {clientConfigs.version}
         </div>
         {isReady && (
