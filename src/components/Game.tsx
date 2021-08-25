@@ -182,15 +182,15 @@ export const GameComponent = () => {
           height: main.mapHeight,
         }
       );
-      [main.islandbaseImage, main.islandbaseNightImage].forEach((tileImage) => {
-        tileImage.setX(ps[0]);
-        let f = 32.3;
-        if (main.mapWidth <= 16) f = 31.7;
-        tileImage.setY(ps[1] + main.overallScale * main.mapWidth * f);
-        tileImage.setScale(
-          main.defaultScales.islandBase * main.overallScale * main.mapWidth
-        );
-      });
+      // [main.islandbaseImage, main.islandbaseNightImage].forEach((tileImage) => {
+      //   tileImage.setX(ps[0]);
+      //   let f = 32.3;
+      //   if (main.mapWidth <= 16) f = 31.7;
+      //   tileImage.setY(ps[1] + main.overallScale * main.mapWidth * f);
+      //   tileImage.setScale(
+      //     main.defaultScales.islandBase * main.overallScale * main.mapWidth
+      //   );
+      // });
     }
   }, [main, visualScale]);
 

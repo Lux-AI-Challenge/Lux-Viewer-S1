@@ -498,11 +498,11 @@ class MainScene extends Phaser.Scene {
     }
 
     // add island base
-    this.islandbaseImage = this.add.image(0, 0, 'islandbase').setDepth(9999999);
-    this.islandbaseNightImage = this.add
-      .image(0, 0, 'islandbase-night')
-      .setDepth(9999999)
-      .setAlpha(0);
+    // this.islandbaseImage = this.add.image(0, 0, 'islandbase').setDepth(9999999);
+    // this.islandbaseNightImage = this.add
+    //   .image(0, 0, 'islandbase-night')
+    //   .setDepth(9999999)
+    //   .setAlpha(0);
 
     // add handler for clicking tiles
     this.input.on(
@@ -802,9 +802,9 @@ class MainScene extends Phaser.Scene {
         getNightTransitionTween(value.overlay, this.speed, endAlpha)
       );
     });
-    this.tweens.add(
-      getNightTransitionTween(this.islandbaseNightImage, this.speed, endAlpha)
-    );
+    // this.tweens.add(
+    //   getNightTransitionTween(this.islandbaseNightImage, this.speed, endAlpha)
+    // );
 
     // render roads
     f.roadLevels.forEach((row, y) => {
