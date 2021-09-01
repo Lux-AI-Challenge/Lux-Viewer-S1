@@ -637,7 +637,6 @@ class MainScene extends Phaser.Scene {
         game.stats.teamStats[team].resourcesCollected.coal;
       teamStates[team].statistics.resourcesCollected.uranium =
         game.stats.teamStats[team].resourcesCollected.uranium;
-
       game.getTeamsUnits(team).forEach((unit) => {
         if (unit.type === LUnit.Type.WORKER) {
           teamStates[team].workers++;
